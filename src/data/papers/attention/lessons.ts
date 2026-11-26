@@ -20,6 +20,8 @@ export type LessonStep = {
   id: string
   title: string
   body: string
+  paperFact: string
+  teachingExplanation: string
   diffs?: string[]
   formula?: string
   highlight: ExplainableId[]
@@ -52,10 +54,12 @@ function node(id: ExplainableId, label: string, x: number, y: number, group: Sta
 }
 
 function step(id: string, primary: ExplainableId, figureIds: string[], related: ExplainableId[] = [], formula?: string) {
-  const { title, plain, paperFact, originalId, source } = explainables[primary]
+  const { title, plain, paperFact, teachingExplanation, originalId, source } = explainables[primary]
   const explainableIds = [primary, ...related]
   return {
-    id, title, body: plain + paperFact, diffs: explainables[primary].detail, formula, figureIds,
+    id, title, paperFact, teachingExplanation,
+    body: `${plain} ${paperFact} 教学解释：${teachingExplanation}`,
+    diffs: explainables[primary].detail, formula, figureIds,
     highlight: explainableIds, originalId, source, explainableIds,
   }
 }
