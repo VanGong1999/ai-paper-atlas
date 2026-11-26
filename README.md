@@ -72,6 +72,15 @@ node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.tes
 npm run build
 ```
 
+Browser acceptance replay uses only committed runners and suites. Start the dev server on port 5184, then run:
+
+```sh
+s=.superpowers/sdd/2026-11-26-attention-workbench
+bash "$s/task-5-run-browser.sh" "$s"/task-[2345]*browser.js
+```
+
+The glob is the committed Task 2/3/4/5 suite set, including their committed round scripts; the runner preserves Chrome PDF-viewer resources and stubs only external fonts/network.
+
 审计输出 JSON，记录 PDF 校验和、关键事实、公式、中英映射、原图裁剪、表格行以及未引用的解释项。原图像素核对使用 `pdfplumber` 0.11.9、`pypdfium2` 5.13.0 和 `Pillow` 13.0.0 复验。
 
 [Task 5 验收报告](.superpowers/sdd/2026-11-26-attention-workbench/task-5-report.md) 记录了 Chrome 浏览器矩阵与复跑命令。

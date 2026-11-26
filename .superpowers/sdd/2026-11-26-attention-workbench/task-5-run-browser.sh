@@ -16,7 +16,13 @@ for script in "$@"; do
     await page.context().route('**/*', route => {
       const url = new URL(route.request().url())
       if (url.origin === '$base') return route.continue()
-      if (url.hostname === 'fonts.googleapis.com') return route.fulfill({ contentType: 'text/css', body: '' })
+      // Chrome's local PDF viewer uses chrome-extension:// resources. Never
+      // turn those into an HTTP 204: that breaks the viewer MIME contract.
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return route.continue()
+      if (url.pathname.endsWith('.pdf')) return route.continue()
+      if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+        return route.fulfill({ contentType: 'text/css', body: '' })
+      }
       return route.fulfill({ status: 204, body: '' })
     })
     await page.goto('$base/papers/attention')

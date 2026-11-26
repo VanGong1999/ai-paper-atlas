@@ -114,6 +114,28 @@ async (page) => {
         await noOverflow('Figures')
         await page.unroute(preview, rejectPreview)
 
+        for (const [id, pageNumber, marker] of [['figure-3', 13, '图 3'], ['figure-4', 14, '第 5、6 个头'], ['figure-5', 15, '图 5']]) {
+          const appendixFigure = panel.locator(`[data-paper-figure="${id}"]`)
+          const appendixTitle = appendixFigure.locator('[data-explainable-kind="figure-title"]')
+          await appendixTitle.scrollIntoViewIfNeeded()
+          await page.mouse.move(2, 2)
+          await tip.waitFor({ state: 'hidden' })
+          await appendixTitle.hover()
+          await tip.waitFor({ state: 'visible' })
+          const hoverText = await tip.textContent()
+          assert(hoverText.includes(marker), id + ' appendix hover')
+          await page.keyboard.press('Escape')
+          await tip.waitFor({ state: 'hidden' })
+          await appendixTitle.focus()
+          await tip.waitFor({ state: 'visible' })
+          const tooltipText = await tip.textContent()
+          assert(tooltipText.includes(marker), id + ' appendix caption')
+          assert(tooltipText.includes('Attention Visualizations · PDF p. ' + pageNumber), id + ' appendix source')
+          assert(!tooltipText.includes('Q · 查询') && !tooltipText.includes('K · 键') && !tooltipText.includes('V · 值'), id + ' inherited Q/K/V fact')
+          await page.keyboard.press('Escape')
+          await tip.waitFor({ state: 'hidden' })
+        }
+
         await tab('全文中译').click()
         for (const selector of ['#paper-translation', '#paper-original .original-prose']) {
           assert(await panel.locator(selector).getAttribute('data-original-id') === 'sec3-2-1', 'bilingual handoff')

@@ -28,6 +28,27 @@ const appendixCaptionByFigureId: Record<string, string> = {
   'figure-5': appendix?.paragraphs.find(text => text.startsWith('图 5')) ?? '',
 }
 
+const appendixFigureDetails: Record<string, { plain: string; role: string; detail: string[]; teachingExplanation: string }> = {
+  'figure-3': {
+    plain: '附录图 3 展示编码器第 5 层的自注意力如何连接远处位置。',
+    role: '用于观察长程依赖的注意力图样。',
+    detail: ['图 3 的 caption 指向 making 这个位置及其远处关联。'],
+    teachingExplanation: '这是附录图注的观察对象，不是 §3.2.3 的 Q/K/V 定义。',
+  },
+  'figure-4': {
+    plain: '附录图 4 比较同一层中参与指代消解的两个头。',
+    role: '用于观察第 5 个头以及第 5、6 个头从 its 发出的注意力。',
+    detail: ['上图展示第 5 个头的完整注意力；下图展示第 5、6 个头从 its 发出的注意力。'],
+    teachingExplanation: '这是附录图注的头部对比，不是 §3.2.3 的 Q/K/V 定义。',
+  },
+  'figure-5': {
+    plain: '附录图 5 展示同一层中两个不同编码器自注意力头的句子结构关联。',
+    role: '用于比较注意力头在不同任务中的可解释模式。',
+    detail: ['图 5 的 caption 将这些模式与句子结构及不同任务联系起来。'],
+    teachingExplanation: '这是附录图注的任务观察，不是 §3.2.3 的 Q/K/V 定义。',
+  },
+}
+
 const tabs = ['原版', '重绘'] as const
 
 export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTranslation }: Props) {
@@ -39,13 +60,14 @@ export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTr
   const explanation = figureExplainables[figure.redrawType]
   const registered = explainables[explanation]
   const fact = figure.redrawType === 'attention-pattern' ? appendixCaptionByFigureId[figure.id] : registered.paperFact
-  const cardExplanation: ExplainableContent = {
-    ...registered,
+  const appendixDetails = appendixFigureDetails[figure.id]
+  const cardExplanation: ExplainableContent = appendixDetails ? {
     title: figure.title,
-    // Figure 2 illustrates the operation on p. 4. Its numerical head configuration is in §3.2.2 on p. 5.
-    ...(figure.redrawType === 'attention-pattern' ? { originalId: figure.originalId, source: figure.source } : {}),
-    paperFact: fact ?? figure.caption,
-  }
+    ...appendixDetails,
+    originalId: figure.originalId,
+    source: figure.source,
+    paperFact: fact || figure.caption,
+  } : { ...registered, title: figure.title }
 
   function onTabKey(event: KeyboardEvent<HTMLButtonElement>) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return

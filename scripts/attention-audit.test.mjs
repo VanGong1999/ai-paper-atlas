@@ -50,17 +50,21 @@ test('rejects misattributed BLEU, altered formulas, swapped table columns and un
   assert.match(issues, /Orphaned explainable: orphan/)
 })
 
-test('rejects altered label smoothing and optimizer schedule facts', () => {
+test('rejects exact training-field mutations in both explainables and Learn entries', () => {
   const { status, report } = run(['--input-type=module'], `
     import { audit } from './scripts/attention-audit.mjs'
     import { explainables } from './src/data/papers/attention/explainables.ts'
     import { lessons } from './src/data/papers/attention/lessons.ts'
     const smoothing = explainables.smoothing
-    smoothing.paperFact = smoothing.paperFact.replace('0.1', '0.2')
+    smoothing.paperFact = smoothing.paperFact.replace('0.1', '0.15')
     const optimizer = explainables.optimizer
-    optimizer.paperFact = optimizer.paperFact.replace('warmup^(-1.5)', 'warmup^(-1.4)')
-    lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'labels').paperFact = '训练采用 ε_ls=0.2。'
-    lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'opt').paperFact = '式 (3) 使用 4000 个预热步，warmup^(-1.4)。'
+    optimizer.paperFact = optimizer.paperFact.replace('warmup^(-1.5)', 'warmup^(-0.6)')
+    const labels = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'labels')
+    labels.paperFact = labels.paperFact.replace('0.1', '0.15')
+    labels.body = labels.body.replace('0.1', '0.15')
+    const opt = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'opt')
+    opt.paperFact = opt.paperFact.replace('warmup^(-1.5)', 'warmup^(-0.6)')
+    opt.body = opt.body.replace('warmup^(-1.5)', 'warmup^(-0.6)')
     const result = await audit()
     console.log(JSON.stringify(result))
     process.exitCode = result.issues.length ? 1 : 0
@@ -91,6 +95,21 @@ test('rejects missing or shifted Chinese appendix captions by stable figure ID',
     import { fulltextZh } from './src/data/papers/attention/fulltext-zh.ts'
     const appendix = fulltextZh.find(block => block.id === 'appendix')
     appendix.paragraphs = appendix.paragraphs.filter(paragraph => !paragraph.startsWith('图 4'))
+    const result = await audit()
+    console.log(JSON.stringify(result))
+    process.exitCode = result.issues.length ? 1 : 0
+  `)
+  assert.equal(status, 1)
+  assert.match(report.issues.join('\n'), /figure-4.*appendix caption/)
+})
+
+test('rejects appendix Figure 4 head metadata mutations', () => {
+  const { status, report } = run(['--input-type=module'], `
+    import { audit } from './scripts/attention-audit.mjs'
+    import { fulltextZh } from './src/data/papers/attention/fulltext-zh.ts'
+    const appendix = fulltextZh.find(block => block.id === 'appendix')
+    appendix.paragraphs = appendix.paragraphs.map(paragraph => paragraph.startsWith('图 4')
+      ? paragraph.replace('第 5、6 个头', '第 7、8 个头') : paragraph)
     const result = await audit()
     console.log(JSON.stringify(result))
     process.exitCode = result.issues.length ? 1 : 0

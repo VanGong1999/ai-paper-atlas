@@ -324,3 +324,86 @@ task-5-browser: Passed 1440x900, 1024x900, and 390x844 light/dark matrix with al
 ```
 
 The first replay attempt exited 1 because the runner aborted external requests and the existing Task 2 console-error assertion reported those synthetic failures. The committed runner was changed to fulfill those requests with empty responses. The final replay exited 0 with all 15 suites successful.
+
+# Task 5 fix round 2
+
+This round makes the source audit exact and stable at field level. Each training contract is bound to its explainable ID, generated Learn step ID, original section ID, and PDF page: batch `train/batch` / `sec5-1` p. 7; hardware `train/size` / `sec5-2` p. 7; optimizer `train/opt` / `sec5-3` p. 7; dropout `train/reg` and label smoothing `train/labels` / `sec5-4` p. 8. The optimizer contract checks Adam, β₁=.9, β₂=.98, ε=10⁻⁹, warmup 4000, `d_model^(-0.5)`, and `warmup^(-1.5)`; the other contracts check the exact displayed values including 25000/25000 tokens, 0.1 regularization values, 100000/300000 steps, and 12 hours/3.5 days.
+
+The supplied PDF says **8 NVIDIA P100 GPUs**, not V100. The audit therefore preserves and enforces P100 as the PDF-grounded value; no source or Task 1 data was changed to V100. Tests mutate label smoothing `0.1 → 0.15` and schedule exponent `-1.5 → -0.6` and require nonzero issues. Appendix Figure 3/4/5 checks use stable IDs, source page, `appendix` original ID, and caption metadata; Figure 4 explicitly requires heads 5/6. Tests cover both a missing Figure 4 caption and heads `5/6 → 7/8`.
+
+Figure 3–5 tooltips now use appendix-specific explanations and their own `Attention Visualizations` source pages 13/14/15. They do not reuse the §3.2.3 Q/K/V explanation. The committed browser suite checks both hover and keyboard focus, caption markers, source pages, and absence of Q/K/V text at 1440/1024/390 light and dark.
+
+The committed browser runner now continues non-HTTP Chrome PDF-viewer resources and local PDF paths. It stubs only external Google font requests and other external HTTP(S) requests; it no longer returns HTTP 204 for Chrome local viewer resources.
+
+## Exact fix-round 2 commands and results
+
+Audit/data suites:
+
+```sh
+PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.test.mjs scripts/attention-reader.test.mjs
+```
+
+```text
+1..12
+# tests 12
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+```
+
+Audit summary:
+
+```sh
+PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python node scripts/attention-audit.mjs | node -e 'let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s); console.log(JSON.stringify({issues:r.issues,coverage:r.coverage,missingPreviews:r.missingPreviews,orphanedExplainables:r.orphanedExplainables,offPaperContent:r.offPaperContent},null,2))})'
+```
+
+```json
+{
+  "issues": [],
+  "coverage": {"sections":27,"englishReaderBlocksMatchingPdf":27,"references":40,"appendixCaptions":3,"stableAppendixCaptions":3,"lessons":10,"steps":28,"explainables":34,"keyClaims":{"matched":13,"total":13},"formulas":{"matched":9,"total":9}},
+  "missingPreviews": [],
+  "orphanedExplainables": [],
+  "offPaperContent": []
+}
+```
+
+PDF inventory, preservation, and whitespace checks:
+
+```sh
+PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python node scripts/attention-pdf-inventory.mjs --validate
+git diff --check
+git diff --exit-code 1644eac -- public/article/1706.03762v7.pdf src/data/papers/attention/lessons.ts src/data/papers/attention/explainables.ts src/data/papers/attention/figures.ts src/data/papers/attention/originals-en.ts src/components/paper/attention-original-text.json
+```
+
+```json
+{"asset":"/article/1706.03762v7.pdf","sha256":"bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697","pageCount":15,"issues":[],"sections":27,"references":40}
+```
+
+Both Git checks exited 0 with empty output. The PDF and Task 1 registries were unchanged.
+
+Build:
+
+```sh
+npm run build
+```
+
+```text
+✓ 1211 modules transformed.
+✓ built in 1.30s
+(!) Some chunks are larger than 500 kB after minification.
+```
+
+Browser acceptance replay (all committed Task 2/3/4/5 scripts):
+
+```sh
+bash .superpowers/sdd/2026-11-26-attention-workbench/task-5-run-browser.sh .superpowers/sdd/2026-11-26-attention-workbench/task-[2345]*browser.js
+```
+
+```text
+15 successful suites; exit 0
+task-2-browser, task-2-round1-browser, task-2-round3-browser, task-2-round4-browser: passed
+task-3-browser, task-3-round1-browser, task-3-round2-browser, task-3-round3-browser, task-3-round4-browser: passed
+task-4-browser, task-4-round1-browser, task-4-round2-browser, task-4-round3-browser, task-4-round4-browser: passed
+task-5-browser: passed 1440x900, 1024x900, and 390x844 light/dark; all four modes; no overflow; hover/focus edges; pause/replay; reduced motion; both PDF fallbacks; Figure 3–5 appendix hover/focus source checks
+```

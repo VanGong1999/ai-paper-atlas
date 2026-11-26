@@ -78,18 +78,29 @@ const formulas = [
 ]
 const positionFormula = 'θ = pos / 10000^(2i/d_model)，PE(pos,2i) = sin θ，PE(pos,2i+1) = cos θ'
 
+// These are field-level contracts, not a bag of acceptable alternatives. Each
+// value is checked in the registered explainable and in its generated Learn
+// step, with the exact source section/page/originalId checked below.
 const trainingFacts = [
-  ['batch', 'sec5-1', 7, [/450 万句对/, /37000/, /3600 万句/, /32000/, /25000 个源词元/, /25000 个目标词元/], [/25000 个源词元/, /25000 个目标词元/]],
-  ['hardware', 'sec5-2', 7, [/8 块 P100/, /0\.4 秒/, /100000 步/, /12 小时/, /1\.0 秒/, /300000 步/, /3\.5 天/], [/12 小时/, /3\.5 天/]],
-  ['optimizer', 'sec5-3', 7, [/β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /warmup\^\(-1\.5\)/], [/4000 个预热步/, /warmup\^\(-1\.5\)/]],
-  ['dropout', 'sec5-4', 8, [/P_drop=0\.1/], [/P_drop=0\.1/]],
-  ['smoothing', 'sec5-4', 8, [/ε_ls=0\.1/], [/ε_ls=0\.1/]],
+  { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7,
+    entry: [/450 万句对/, /37000/, /3600 万句/, /32000/, /25000 个源词元/, /25000 个目标词元/],
+    lesson: [/25000 个源词元/, /25000 个目标词元/] },
+  { id: 'hardware', step: 'train/size', section: 'sec5-2', page: 7,
+    entry: [/8 块 P100/, /0\.4 秒\/步/, /100000 步/, /12 小时/, /1\.0 秒\/步/, /300000 步/, /3\.5 天/],
+    lesson: [/8 块 P100/, /100000 步/, /300000 步/, /12 小时/, /3\.5 天/] },
+  { id: 'optimizer', step: 'train/opt', section: 'sec5-3', page: 7,
+    entry: [/^Adam 与学习率/, /β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /d_model\^\(-0\.5\)/, /warmup\^\(-1\.5\)/],
+    lesson: [/^Adam 与学习率/, /β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /d_model\^\(-0\.5\)/, /warmup\^\(-1\.5\)/] },
+  { id: 'dropout', step: 'train/reg', section: 'sec5-4', page: 8,
+    entry: [/P_drop=0\.1(?![0-9])/], lesson: [/P_drop=0\.1(?![0-9])/] },
+  { id: 'smoothing', step: 'train/labels', section: 'sec5-4', page: 8,
+    entry: [/ε_ls=0\.1(?![0-9])/], lesson: [/ε_ls=0\.1(?![0-9])/] },
 ]
 
 const appendixFacts = {
-  'figure-3': { page: 13, pattern: /^图 3（第 13 页）展示了编码器 6 层中第 5 层的自注意力/ },
-  'figure-4': { page: 14, pattern: /^图 4（第 14 页）中，同一层的两个头似乎参与了指代消解/ },
-  'figure-5': { page: 15, pattern: /^图 5（第 15 页）展示了同一层中两个不同的编码器自注意力头/ },
+  'figure-3': { page: 13, patterns: [/^图 3（第 13 页）/, /编码器 6 层中第 5 层/, /making/] },
+  'figure-4': { page: 14, patterns: [/^图 4（第 14 页）/, /指代消解/, /第 5 个头/, /第 5、6 个头/, /its/] },
+  'figure-5': { page: 15, patterns: [/^图 5（第 15 页）/, /两个不同的编码器自注意力头/, /句子结构/, /不同的任务/] },
 }
 
 const tableColumns = {
@@ -134,16 +145,16 @@ export function audit() {
     ...lesson.steps.flatMap(step => step.explainableIds),
   ]))
 
-  for (const [id, section, page, patterns, lessonPatterns] of trainingFacts) {
+  for (const { id, step: stepId, section, page, entry: entryPatterns, lesson: lessonPatterns } of trainingFacts) {
     const entry = explainables[id]
-    const lessonStep = steps.get(`train/${id === 'smoothing' ? 'labels' : id === 'dropout' ? 'reg' : id === 'optimizer' ? 'opt' : id === 'hardware' ? 'size' : 'batch'}`)
+    const lessonStep = steps.get(stepId)
     const entryCopy = [entry?.title, entry?.plain, ...(entry?.detail ?? []), entry?.paperFact, entry?.teachingExplanation].filter(Boolean).join(' ')
-    const lessonCopy = [lessonStep?.title, lessonStep?.body, lessonStep?.paperFact, lessonStep?.teachingExplanation].filter(Boolean).join(' ')
+    const lessonCopy = [lessonStep?.title, lessonStep?.body, ...(lessonStep?.diffs ?? []), lessonStep?.paperFact, lessonStep?.teachingExplanation].filter(Boolean).join(' ')
     check(entry?.source?.section === originals[entry.originalId]?.source.section && entry.source.page === page && entry.originalId === section,
       `${id}: training fact source must be ${section} p. ${page}`)
     check(lessonStep?.source?.section === originals[lessonStep.originalId]?.source.section && lessonStep.source.page === page && lessonStep.originalId === section,
       `${id}: Learn entry source must be ${section} p. ${page}`)
-    check(patterns.every(pattern => pattern.test(entryCopy)), `${id}: training fact value or schedule differs from PDF-grounded expected values`)
+    check(entryPatterns.every(pattern => pattern.test(entryCopy)), `${id}: training fact value or schedule differs from PDF-grounded expected values`)
     check(lessonPatterns.every(pattern => pattern.test(lessonCopy)), `${id}: Learn training fact value or schedule differs from PDF-grounded expected values`)
   }
 
@@ -234,7 +245,7 @@ export function audit() {
     const paragraph = appendix?.paragraphs.find(text => text.startsWith(`图 ${figure?.number}`)) ?? ''
     check(figure?.originalId === 'appendix' && figure.source.page === expected.page,
       `${figureId}: appendix source mapping is incorrect`)
-    check(expected.pattern.test(paragraph), `${figureId}: appendix caption is missing or attached to the wrong stable figure ID`)
+    check(expected.patterns.every(pattern => pattern.test(paragraph)), `${figureId}: appendix caption is missing or attached to the wrong stable figure ID`)
   }
 
   const offPaperContent = []
