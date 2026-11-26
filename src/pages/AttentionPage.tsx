@@ -1,10 +1,13 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ExplainableScope } from '../components/paper/Explainable'
 import { LessonNav } from '../components/paper/LessonNav'
 import { OriginalDrawer } from '../components/paper/OriginalDrawer'
+import { PaperFormula } from '../components/paper/PaperFormula'
 import { PaperModeTabs, type PaperMode } from '../components/paper/PaperModeTabs'
 import { SourceBadge } from '../components/paper/SourceBadge'
 import { Stage } from '../components/paper/Stage'
 import { StepRail } from '../components/paper/StepRail'
+import { explainables, type Explainable, type ExplainableId } from '../data/papers/attention/explainables'
 import { figures } from '../data/papers/attention/figures'
 import { fulltextZh } from '../data/papers/attention/fulltext-zh'
 import { lessons } from '../data/papers/attention/lessons'
@@ -40,6 +43,8 @@ export function AttentionPage() {
   const [playing, setPlaying] = useState(false)
   const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
+  const [selection, setSelection] = useState<{ id: ExplainableId; example?: string } | null>(null)
+  const detailPanelRef = useRef<HTMLElement>(null)
   const translationNavRef = useRef<HTMLElement>(null)
   const translationItemRef = useRef<HTMLButtonElement>(null)
 
@@ -49,6 +54,13 @@ export function AttentionPage() {
   const stepFigures = figures.filter(figure => step.figureIds.includes(figure.id))
   const canPrev = lessonIndex > 0 || stepIndex > 0
   const canNext = lessonIndex < lessons.length - 1 || stepIndex < lesson.steps.length - 1
+
+  useEffect(() => setSelection(null), [step])
+
+  useLayoutEffect(() => {
+    const panel = detailPanelRef.current
+    if (selection && panel && !panel.contains(document.activeElement)) panel.scrollTo({ top: 0 })
+  }, [selection])
 
   useEffect(() => {
     if (!playing || mode !== 'learn') return
@@ -73,6 +85,10 @@ export function AttentionPage() {
     if (item.top < bounds.top) nav.scrollTop += item.top - bounds.top
     if (item.bottom > bounds.bottom) nav.scrollTop += item.bottom - bounds.bottom
   }, [mode, section.id])
+
+  const selectExplainable = useCallback((id: ExplainableId, example?: string) => {
+    setSelection({ id, example })
+  }, [])
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
@@ -118,64 +134,69 @@ export function AttentionPage() {
 
         {mode === 'learn' && (
           <div className="learn-layout">
-            <LessonNav
-              lessons={lessons}
-              sections={fulltextZh}
-              activeId={lesson.id}
-              visited={visited}
-              onSelect={index => selectStep(index, index === lessonIndex ? stepIndex : 0)}
-            />
+            <ExplainableScope onSelectExplainable={selectExplainable}>
+              <LessonNav
+                lessons={lessons}
+                sections={fulltextZh}
+                activeId={lesson.id}
+                visited={visited}
+                onSelect={index => selectStep(index, index === lessonIndex ? stepIndex : 0)}
+              />
 
-            <div className="stage-wrap">
-              <div className="stage-toolbar">
-                <strong>{lesson.title}</strong>
-                <div className="stage-zoom" role="group" aria-label="舞台缩放">
-                  <button type="button" aria-label="缩小" onClick={() => setZoom(value => Math.max(0.7, value - 0.1))}>−</button>
-                  <span>{Math.round(zoom * 100)}%</span>
-                  <button type="button" aria-label="放大" onClick={() => setZoom(value => Math.min(1.4, value + 0.1))}>+</button>
+              <div className="stage-wrap">
+                <div className="stage-toolbar">
+                  <strong>{lesson.title}</strong>
+                  <div className="stage-zoom" role="group" aria-label="舞台缩放">
+                    <button type="button" aria-label="缩小" onClick={() => setZoom(value => Math.max(0.7, value - 0.1))}>−</button>
+                    <span>{Math.round(zoom * 100)}%</span>
+                    <button type="button" aria-label="放大" onClick={() => setZoom(value => Math.min(1.4, value + 0.1))}>+</button>
+                  </div>
                 </div>
+                <Stage lesson={lesson} step={step} playing={playing} playbackKey={playbackKey} zoom={zoom} />
               </div>
-              <Stage lesson={lesson} step={step} playing={playing} zoom={zoom} />
-            </div>
 
-            <aside className="detail-panel" key={`${lesson.id}/${step.id}`}>
-              <div className="paper-label">本步解释</div>
-              <h2>{step.title}</h2>
-              <div className="source-row">
-                <SourceBadge source={step.source} />
-                {stepFigures.map(figure => (
-                  <SourceBadge key={figure.id} source={figure.source} reference={`${figure.kind} ${figure.number}`} href={figure.originalAsset} />
-                ))}
-              </div>
-              <section className="step-explanation">
-                <h3>论文原意</h3>
-                <p className="paper-fact">{step.paperFact}</p>
-                {step.formula && <div className="formula-box">{step.formula}</div>}
-              </section>
-              <section className="step-explanation">
-                <h3>教学解释</h3>
-                <p>{step.teachingExplanation}</p>
-                {step.diffs && <ul>{step.diffs.map(detail => <li key={detail}>{detail}</li>)}</ul>}
-              </section>
-              <button type="button" className="chip active" onClick={readStepTranslation}>查看本节中译 →</button>
-            </aside>
+              <aside className="detail-panel" ref={detailPanelRef} key={`${lesson.id}/${step.id}`}>
+                {selection && <SelectedExplanation content={explainables[selection.id]} example={selection.example}
+                  onClear={() => setSelection(null)} />}
 
-            <StepRail
-              steps={lesson.steps}
-              active={stepIndex}
-              playing={playing}
-              canPrev={canPrev}
-              canNext={canNext}
-              onPrev={goPrev}
-              onNext={goNext}
-              onSelect={index => selectStep(lessonIndex, index)}
-              onTogglePlayback={() => setPlaying(value => !value)}
-              onReplay={() => {
-                setPosition(current => visitStep(current, current.lessonIndex, 0))
-                setPlaybackKey(value => value + 1)
-                setPlaying(true)
-              }}
-            />
+                <div className="paper-label">本步解释</div>
+                <h2>{step.title}</h2>
+                <div className="source-row">
+                  <SourceBadge source={step.source} />
+                  {stepFigures.map(figure => (
+                    <SourceBadge key={figure.id} source={figure.source} reference={`${figure.kind} ${figure.number}`} href={figure.originalAsset} />
+                  ))}
+                </div>
+                <section className="step-explanation">
+                  <h3>论文原意</h3>
+                  <p className="paper-fact">{step.paperFact}</p>
+                  <PaperFormula step={step} />
+                </section>
+                <section className="step-explanation">
+                  <h3>教学解释</h3>
+                  <p>{step.teachingExplanation}</p>
+                  {step.diffs && <ul>{step.diffs.map(detail => <li key={detail}>{detail}</li>)}</ul>}
+                </section>
+                <button type="button" className="chip active" onClick={readStepTranslation}>查看本节中译 →</button>
+              </aside>
+
+              <StepRail
+                steps={lesson.steps}
+                active={stepIndex}
+                playing={playing}
+                canPrev={canPrev}
+                canNext={canNext}
+                onPrev={goPrev}
+                onNext={goNext}
+                onSelect={index => selectStep(lessonIndex, index)}
+                onTogglePlayback={() => setPlaying(value => !value)}
+                onReplay={() => {
+                  setPosition(current => visitStep(current, current.lessonIndex, 0))
+                  setPlaybackKey(value => value + 1)
+                  setPlaying(true)
+                }}
+              />
+            </ExplainableScope>
           </div>
         )}
 
@@ -234,5 +255,23 @@ export function AttentionPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function SelectedExplanation({ content, example, onClear }: { content: Explainable; example?: string; onClear: () => void }) {
+  return (
+    <section className="selected-explanation" aria-label="所选元素">
+      <div className="selection-header">
+        <span className="paper-label">所选元素</span>
+        <button type="button" aria-label="关闭元素解释" onClick={onClear}>×</button>
+      </div>
+      <h3 aria-live="polite">{content.title}{example && <small>{example}</small>}</h3>
+      <p>{content.plain} {content.role}</p>
+      <p className="paper-fact">{content.paperFact}</p>
+      <ul>{content.detail.map(line => <li key={line}>{line}</li>)}</ul>
+      <p><strong>教学解释 · </strong>{content.teachingExplanation}</p>
+      {content.misconception && <p>{content.misconception}</p>}
+      <SourceBadge source={content.source} />
+    </section>
   )
 }

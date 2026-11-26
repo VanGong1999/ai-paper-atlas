@@ -1,133 +1,65 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import type { Lesson, LessonStep } from '../../data/papers/attention/lessons'
-import { TooltipPop } from './TooltipPop'
+import { ArchitectureStage } from './ArchitectureStage'
+import { AttentionMatrixStage } from './AttentionMatrixStage'
+import { ComplexityStage } from './ComplexityStage'
+import { MultiHeadStage } from './MultiHeadStage'
+import { PositionEncodingStage } from './PositionEncodingStage'
+import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
 
 type Props = {
   lesson: Lesson
   step: LessonStep
   playing: boolean
+  playbackKey: number
   zoom: number
 }
 
-const words = ['The', 'animal', 'ate', 'food']
-const values = [
-  [0.65, 0.15, 0.1, 0.1],
-  [0.1, 0.55, 0.2, 0.15],
-  [0.05, 0.25, 0.4, 0.3],
-  [0.05, 0.15, 0.25, 0.55],
-]
-
-export function Stage({ lesson, step, playing, zoom }: Props) {
-  const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null)
-  const [heatMsg, setHeatMsg] = useState('点击格子，查看示意注意力权重。')
-  const highlight = new Set(step.highlight || [])
-
-  const nodeMap = useMemo(() => {
-    const m = new Map(lesson.nodes.map((n) => [n.id, n]))
-    return m
-  }, [lesson.nodes])
+export function Stage({ lesson, step, playing, playbackKey, zoom }: Props) {
+  const highlight = useMemo(() => new Set(step.highlight), [step.highlight])
 
   return (
-    <div className="stage-canvas">
-      <svg
-        className="stage-svg"
-        viewBox="0 0 700 340"
-        style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
-      >
-        {lesson.edges.map(([a, b], i) => {
-          const na = nodeMap.get(a)
-          const nb = nodeMap.get(b)
-          if (!na || !nb) return null
-          const x1 = na.x + na.w / 2
-          const y1 = na.y + na.h / 2
-          const x2 = nb.x + nb.w / 2
-          const y2 = nb.y + nb.h / 2
-          return (
-            <motion.line
-              key={`${a}-${b}-${i}`}
-              className="stage-edge"
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              initial={{ '--edge-pulse': 0.2 }}
-              animate={{
-                '--edge-pulse': playing ? [0.35, 0.9, 0.35] : 0.55,
-              }}
-              transition={{
-                '--edge-pulse': playing ? { duration: 1.8, repeat: Infinity } : { duration: 0.3 },
-                delay: i * 0.04,
-              }}
-            />
-          )
-        })}
-
-        {lesson.nodes.map((node, i) => {
-          const active = highlight.has(node.id)
-          const groupClass = node.group ? `group-${node.group}` : 'group-io'
-          return (
-            <g
-              key={node.id}
-              className={`stage-node ${active ? 'active' : ''}`}
-              onMouseMove={event => setTip({ text: node.tip, x: event.clientX, y: event.clientY })}
-              onMouseLeave={() => setTip(null)}
-            >
-              <motion.rect
-                className={groupClass}
-                x={node.x}
-                y={node.y}
-                width={node.w}
-                height={node.h}
-                rx={8}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.04 * i, duration: 0.35 }}
-              />
-              <text x={node.x + 12} y={node.y + node.h / 2 + 4}>
-                {node.label}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-
-      {lesson.id === 'sdp' && step.id === 'heat' && (
-        <div className="heatmap-panel">
-          <div className="heat-grid">
-            <span className="lab">Q↓/K→</span>
-            {words.map((w) => (
-              <span key={w} className="lab">
-                {w}
-              </span>
-            ))}
-            {words.flatMap((w, i) => [
-              <span key={`r-${w}`} className="lab">
-                {w}
-              </span>,
-              ...values[i].map((v, j) => (
-                <button
-                  key={`${i}-${j}`}
-                  type="button"
-                  data-level={Math.min(4, Math.ceil(v * 5))}
-                  onClick={() =>
-                    setHeatMsg(
-                      `示意：查询「${words[i]}」对键「${words[j]}」分配 ${v.toFixed(2)} 的注意力（行和为 1）。`,
-                    )
-                  }
-                >
-                  {v.toFixed(2)}
-                </button>
-              )),
-            ])}
-          </div>
-          <p style={{ textAlign: 'center', color: 'var(--accent-ink)', fontSize: 12 }}>{heatMsg}</p>
-        </div>
-      )}
-
-      <AnimatePresence>
-        {tip && <TooltipPop {...tip} />}
-      </AnimatePresence>
+    <div className="stage-canvas" data-stage={lesson.stage} data-playing={playing} data-replay={playbackKey % 2}>
+      <div className="stage-scene" style={{ '--stage-zoom': zoom } as CSSProperties}>
+        <LessonScene key={lesson.id} lesson={lesson} step={step} highlight={highlight} />
+      </div>
     </div>
+  )
+}
+
+function LessonScene({ lesson, step, highlight }: StageProps & Pick<Props, 'lesson' | 'step'>) {
+  switch (lesson.stage) {
+    case 'architecture': return <ArchitectureStage highlight={highlight} />
+    case 'attention': return <AttentionMatrixStage highlight={highlight} showHeatmap={step.id === 'heat'} />
+    case 'multi-head': return <MultiHeadStage highlight={highlight} showApplications={step.id === 'types'} />
+    case 'position': return <PositionEncodingStage />
+    case 'complexity': return <ComplexityStage key={step.id} highlight={highlight} />
+    default: return <LessonDiagram lesson={lesson} highlight={highlight} />
+  }
+}
+
+function LessonDiagram({ lesson, highlight }: StageProps & Pick<Props, 'lesson'>) {
+  // Adjust the Task 1 node geometry together so its layout also fits the 640-unit stages.
+  const scale = 640 / 700
+  const nodes = new Map(lesson.nodes.map(node => [node.id, node]))
+  return (
+    <StageSvg label={lesson.title} height={310}>
+      {lesson.edges.map(([from, to]) => {
+        const a = nodes.get(from)
+        const b = nodes.get(to)
+        if (!a || !b) return null
+        const start = (a.x + 160) * scale
+        const end = b.x * scale
+        const y1 = a.y * scale + 20
+        const y2 = b.y * scale + 20
+        return <StageFlow key={from + '/' + to} d={`M${start} ${y1}L${end} ${y2}`}
+          active={highlight.has(from) || highlight.has(to)} />
+      })}
+      {lesson.nodes.map(node => (
+        <StageBlock key={node.id} id={node.explainableId} text={node.label}
+          x={node.x * scale} y={node.y * scale} w={160 * scale} h={40}
+          tone={node.group} active={highlight.has(node.id)} />
+      ))}
+    </StageSvg>
   )
 }
