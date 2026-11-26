@@ -155,3 +155,102 @@ ok 2 - identifies omitted author credits and numbered references in the Chinese 
 
 - The existing Vite chunk-size advisory remains. The main bundle is 532.69 kB before gzip.
 - Browser verification used Chrome. Original Figure/Table previews remain in Task 4, with PDF source links available in Figures.
+
+## Fix round 1
+
+Review findings addressed
+
+- Meaningful architecture paths now use accessible `data-flow` targets with source-bound `encoder`, `decoder`, `cross`, and `residual` explainables. Decorative paths retain their presentation-only behavior. Flow targets support hover, focus, Enter, and selection into the detail panel.
+- Tooltip sizing now uses the trigger bounds for compact edge triggers, choosing a side with enough space and reducing the card width or height before placement. Larger SVG flow targets preserve cursor-near placement. The card remains viewport-safe and separated from compact triggers at 320 px.
+- The Softmax operation uses the existing source-bound `softmax` explainable in the attention pipeline and inline formula. Matrix cells continue to use the distinct `weights` explainable.
+
+Focused fix-round browser check
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round1 open http://127.0.0.1:5178/papers/attention --browser=chrome
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round1 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-round1-browser.js)"
+```
+
+Output (exit 0)
+
+```text
+Result "Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
+```
+
+The check verified eight architecture flow targets, no `aria-hidden` on those targets, hover and keyboard focus on the encoder-to-decoder flow, distinct Softmax identities in the pipeline and formula, and viewport-safe non-overlap at all four 320 px corners.
+
+Full Task 3 browser check
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round1-final open http://127.0.0.1:5178/papers/attention --browser=chrome
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round1-final run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-browser.js)" | sed -n '1,2p'
+```
+
+Output (exit 0)
+
+```text
+Result "Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+```
+
+Task 2 regression checks
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-round1-final open http://127.0.0.1:5178/papers/attention --browser=chrome
+for test in task-2-round1-browser task-2-round3-browser task-2-round4-browser task-2-browser; do
+  /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-round1-final run-code "$(cat ".superpowers/sdd/2026-11-26-attention-workbench/${test}.js")" | sed -n '1,2p' || exit
+done
+```
+
+Output (exit 0)
+
+```text
+Result "Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
+Result "Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
+Result {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+Result "Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
+```
+
+Build and source-integrity check
+
+Command
+
+```sh
+npm run build && git diff --check && git diff --exit-code -- src/data/papers/attention public/article/1706.03762v7.pdf
+```
+
+Output (exit 0)
+
+```text
+✓ 1204 modules transformed.
+✓ built in 2.42s
+The existing Vite advisory reported a 534.06 kB main bundle before gzip.
+The diff check and Task 1 data/PDF diff completed silently.
+```
+
+PDF inventory check
+
+Command
+
+```sh
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -6
+```
+
+Output (exit 0)
+
+```text
+1..2
+# tests 2
+# pass 2
+# fail 0
+"explainables": 34,
+"lessons": 10,
+"steps": 28,
+"issues": []
+```

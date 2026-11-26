@@ -13,14 +13,6 @@ type Props = {
 const gap = 8
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
 
-function place(point: number, size: number, low: number, high: number) {
-  if (point + gap + size <= high) return point + gap
-  if (point - gap - size >= low) return point - gap - size
-  // Use the side with more room and align to the available edge.
-  const start = high - point >= point - low ? point + gap : point - gap - size
-  return clamp(start, low, high - size)
-}
-
 export function TooltipPop({ id, content, example, element, pointer }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
@@ -54,15 +46,29 @@ export function TooltipPop({ id, content, example, element, pointer }: Props) {
       const withinStageX = right - left >= 220
       const minX = withinStageX ? left : viewport.left
       const maxX = withinStageX ? right : viewport.right
-      tip.style.maxWidth = `${Math.min(288, maxX - minX)}px`
-      const { width, height } = tip.getBoundingClientRect()
-      const withinStageY = height <= bottom - top
+      const withinStageY = bottom - top >= 160
       const minY = withinStageY ? top : viewport.top
       const maxY = withinStageY ? bottom : viewport.bottom
       const x = pointer?.x ?? clamp(anchor.left + anchor.width / 2, minX, maxX)
       const y = pointer?.y ?? clamp(anchor.top + anchor.height / 2, minY, maxY)
-      tip.style.left = `${place(x, width, minX, maxX)}px`
-      tip.style.top = `${place(y, height, minY, maxY)}px`
+      const compactTrigger = anchor.width <= 80 && anchor.height <= 80
+      const rightSpace = Math.max(1, (compactTrigger ? maxX - anchor.right : maxX - x) - gap)
+      const leftSpace = Math.max(1, (compactTrigger ? anchor.left - minX : x - minX) - gap)
+      const lowerSpace = Math.max(1, (compactTrigger ? maxY - anchor.bottom : maxY - y) - gap)
+      const upperSpace = Math.max(1, (compactTrigger ? anchor.top - minY : y - minY) - gap)
+      const preferredWidth = Math.min(288, Math.max(rightSpace, leftSpace))
+      const preferredHeight = Math.min(360, Math.max(lowerSpace, upperSpace))
+      tip.style.maxWidth = `${preferredWidth}px`
+      tip.style.maxHeight = `${preferredHeight}px`
+      const { width, height } = tip.getBoundingClientRect()
+      const xRight = compactTrigger ? Math.max(x + gap, anchor.right + gap) : x + gap
+      const xLeft = compactTrigger ? Math.min(x - gap - width, anchor.left - gap - width) : x - gap - width
+      const yBelow = compactTrigger ? Math.max(y + gap, anchor.bottom + gap) : y + gap
+      const yAbove = compactTrigger ? Math.min(y - gap - height, anchor.top - gap - height) : y - gap - height
+      const xPosition = rightSpace >= width ? xRight : leftSpace >= width ? xLeft : rightSpace >= leftSpace ? xRight : xLeft
+      const yPosition = lowerSpace >= height ? yBelow : upperSpace >= height ? yAbove : lowerSpace >= upperSpace ? yBelow : yAbove
+      tip.style.left = `${clamp(xPosition, minX, maxX - width)}px`
+      tip.style.top = `${clamp(yPosition, minY, maxY - height)}px`
       tip.style.visibility = 'visible'
     }
 

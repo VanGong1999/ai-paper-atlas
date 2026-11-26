@@ -28,16 +28,24 @@ export function ArchitectureStage({ highlight }: StageProps) {
         <text className="stage-annotation" x={548} y={70} textAnchor="middle">下一词元概率</text>
 
         <StageFlow d="M120 414V405M120 366V356M120 330V322M120 287V279M120 244V236M120 201V193M120 158V119"
-          active={encoderActive} />
+          active={encoderActive} explanation="encoder" label="编码器数据流"
+          example="教学示意 · 沿箭头观察源序列表示经过编码器子层的方向。" />
         <StageFlow d="M339 414V405M339 366V356M339 330V322M339 287V279M339 244V236M339 201V193M339 158V150M339 115V107M339 72V58"
-          active={decoderActive} />
-        <StageFlow d="M207 97H230V218H253" active={highlight.has('cross')} branch />
+          active={decoderActive} explanation="decoder" label="解码器数据流"
+          example="教学示意 · 沿箭头观察右移目标序列到下一词元概率的方向。" />
+        <StageFlow d="M207 97H230V218H253" active={highlight.has('cross')} branch
+          explanation="cross" label="编码器到解码器的跨序列连接"
+          example="教学示意 · 解码器查询编码器输出中的源序列表示。" />
         <StageFlow d="M424 44H453V164H478M548 148V122" active={highlight.has('linear') || highlight.has('softmax')} />
         {[287, 201].map(y => (
-          <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch />
+          <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch
+            explanation="residual" label="编码器残差旁路"
+            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
         ))}
         {[287, 201, 115].map(y => (
-          <StageFlow key={y} d={`M339 ${y + 39}H254V${y - 26}H256`} active={decoderActive} branch />
+          <StageFlow key={y} d={`M339 ${y + 39}H254V${y - 26}H256`} active={decoderActive} branch
+            explanation="residual" label="解码器残差旁路"
+            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
         ))}
 
         <StageBlock id="embedding" kind="architecture-node" text="输入嵌入" x={37} y={367} w={166} h={38} active={encoderActive} />

@@ -12,7 +12,7 @@ const weights = [
 ]
 
 const variables: { id: ExplainableId; text: string; x: number; w: number; label?: string }[] = [
-  { id: 'weights', text: 'softmax', x: 109, w: 115 },
+  { id: 'softmax', text: 'softmax', x: 109, w: 115 },
   { id: 'query', text: 'Q', x: 258, w: 42 },
   { id: 'key', text: 'Kᵀ', x: 303, w: 43, label: 'Kᵀ · 键矩阵转置' },
   { id: 'scale', text: '√dₖ', x: 380, w: 64, label: '√dₖ · 缩放因子' },
@@ -34,7 +34,7 @@ export function AttentionMatrixStage({ highlight, showHeatmap }: StageProps & { 
         <StageBlock id="key" kind="qkv" text="K · 键" x={24} y={101} w={102} tone="encoder" active={highlight.has('key')} />
         <StageBlock id="value" kind="qkv" text="V · 值" x={24} y={155} w={102} tone="decoder" active={highlight.has('value')} />
         <StageBlock id="scale" text="QKᵀ / √dₖ" caption="缩放分数" x={158} y={63} w={148} h={50} tone="attn" active={highlight.has('scale')} />
-        <StageBlock id="weights" text="Softmax" caption="权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn" active={highlight.has('weights')} />
+        <StageBlock id="softmax" text="Softmax" caption="权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn" active={highlight.has('softmax')} />
         <StageBlock id="value" text="加权求和" caption="输出表示" x={497} y={63} w={119} h={50} tone="decoder" active={highlight.has('weights')} />
         <rect className="stage-lane" x={24} y={202} width={592} height={44} rx={7} />
         <text className="stage-annotation" x={39} y={230}>式 (1)</text>

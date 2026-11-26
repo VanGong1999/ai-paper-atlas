@@ -294,9 +294,30 @@
 }
 
 .stage-edge,
-.stage-flow {
+.stage-flow,
+.stage-flow-hit {
   fill: none;
   pointer-events: none;
+}
+
+.stage-flow-target {
+  cursor: pointer;
+}
+
+.stage-flow-target:focus-visible .stage-edge,
+.stage-flow-target:hover .stage-edge {
+  stroke: var(--focus-ring);
+  stroke-width: 3;
+}
+
+.stage-flow-hit {
+  pointer-events: stroke;
+  stroke: transparent;
+  stroke-width: 16;
+}
+
+.stage-flow-target .stage-flow-hit {
+  pointer-events: stroke;
 }
 
 .stage-edge {

@@ -17,11 +17,22 @@ export function StageSvg({ label, height, children }: { label: string; height: n
   )
 }
 
-export function StageFlow({ d, active, arrow = true, branch = false }: {
+export function StageFlow({ d, active, arrow = true, branch = false, explanation, label, example, kind = 'data-flow' }: {
   d: string; active?: boolean; arrow?: boolean; branch?: boolean
+  explanation?: ExplainableId; label?: string; example?: string; kind?: string
 }) {
   const state = active ? ' flow-active' : ''
   const style = branch ? ' flow-branch' : ''
+  if (explanation) {
+    return (
+      <Explainable as="g" explanation={explanation} kind={kind} label={label} example={example}
+        className={`stage-flow-target${state}${style}`}>
+        <path d={d} className="stage-edge" markerEnd={arrow ? 'url(#stage-arrow)' : undefined} />
+        <path d={d} className="stage-flow-hit" />
+        <path d={d} className="stage-flow" />
+      </Explainable>
+    )
+  }
   return (
     <g aria-hidden="true" className={state + style}>
       <path d={d} className="stage-edge" markerEnd={arrow ? 'url(#stage-arrow)' : undefined} />
