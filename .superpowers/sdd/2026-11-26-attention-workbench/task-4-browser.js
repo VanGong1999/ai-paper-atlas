@@ -6,7 +6,10 @@ async (page) => {
   }
   const mode = name => page.locator('#paper-mode-' + name)
   const card = id => page.locator('[data-paper-figure="' + id + '"]')
-  const switchCard = (entry, name) => entry.getByRole('tab', { name, exact: true }).click({ timeout: 1800 })
+  const switchCard = async (entry, name) => {
+    await entry.scrollIntoViewIfNeeded()
+    await entry.getByRole('tab', { name, exact: true }).click({ timeout: 5000 })
+  }
   const nav = page.getByRole('navigation', { name: '中文章节' })
   const english = page.locator('.original-drawer')
   const entries = {
@@ -111,6 +114,8 @@ async (page) => {
       await page.setViewportSize({ width, height: 760 })
       await page.evaluate(theme => { document.documentElement.dataset.theme = theme }, theme)
       await mode('figures').click()
+      await page.getByLabel('图表章节').selectOption('all')
+      await page.evaluate(() => window.scrollTo(0, 0))
       await switchCard(card('table-3'), '重绘')
       const scroller = card('table-3').getByRole('region', { name: /Table 3/ })
       const traveled = await scroller.evaluate(node => { node.scrollLeft = node.scrollWidth; return node.scrollLeft })

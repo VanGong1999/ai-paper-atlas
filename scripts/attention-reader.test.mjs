@@ -4,6 +4,7 @@ import test from 'node:test'
 import { figures } from '../src/data/papers/attention/figures.ts'
 import { fulltextZh } from '../src/data/papers/attention/fulltext-zh.ts'
 import { bibliography, originals, pdfAsset } from '../src/data/papers/attention/originals-en.ts'
+import { paperTables, table3Context } from '../src/components/paper/paperTables.ts'
 
 const assetPages = {
   'figure-1': 3, 'figure-2': 4, 'figure-3': 13, 'figure-4': 14, 'figure-5': 15,
@@ -51,4 +52,16 @@ test('every section has a full English reading, including non-excerpt paragraphs
     assert.ok(normalize(reading[id].join(' ')).includes(normalize(passage.en)), id)
   }
   assert.equal(reading.appendix.length, 3)
+})
+
+test('Table 3 columns carry distinct source-grounded parameter explanations', () => {
+  const columns = paperTables.variants.columns
+  const byLabel = Object.fromEntries(columns.map(column => [column.label, column.content]))
+  assert.match(byLabel.h.title, /头数/)
+  assert.match(byLabel.ϵ_ls.title, /标签平滑/)
+  assert.match(byLabel.P_drop.title, /Dropout/)
+  assert.match(byLabel['train steps'].paperFact, /100K|300K/)
+  assert.match(table3Context.learningRate.paperFact, /warmup_steps=4000/)
+  assert.match(table3Context.batchTokens.paperFact, /25000/)
+  assert.notEqual(byLabel.h.title, byLabel.ϵ_ls.title)
 })

@@ -1,6 +1,6 @@
 import type { PaperFigure } from '../../data/papers/attention/figures'
 import { Explainable } from './Explainable'
-import { paperTables, type TableRedraw } from './paperTables'
+import { paperTables, table3Context, type TableRedraw } from './paperTables'
 
 export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: TableRedraw }) {
   const table = paperTables[redraw]
@@ -36,7 +36,7 @@ export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: Ta
                       <td key={index} colSpan={span} className={best ? 'paper-table-best' : undefined}>
                         {text && (
                           <Explainable as="button" explanation={column.explanation} kind="paper-table-cell"
-                            label={context} example={`${reference} · ${context}`}>
+                            content={column.content} label={context} example={`${reference} · ${context}`}>
                             {text}
                           </Explainable>
                         )}
@@ -49,6 +49,13 @@ export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: Ta
           </tbody>
         </table>
       </div>
+      {redraw === 'variants' && (
+        <div className="figure-table-context" aria-label="Table 3 nearby training context">
+          <span>表旁训练设置</span>
+          <Explainable as="button" explanation="optimizer" kind="paper-table-context" content={table3Context.learningRate}>学习率与 warmup</Explainable>
+          <Explainable as="button" explanation="batch" kind="paper-table-context" content={table3Context.batchTokens}>批次 token 数</Explainable>
+        </div>
+      )}
     </>
   )
 }

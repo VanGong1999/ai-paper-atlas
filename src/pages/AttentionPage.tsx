@@ -94,6 +94,7 @@ export function AttentionPage() {
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
+    if (nextMode === 'figures' && translationId) setFigureChapter(translationId)
     setMode(nextMode)
   }
 

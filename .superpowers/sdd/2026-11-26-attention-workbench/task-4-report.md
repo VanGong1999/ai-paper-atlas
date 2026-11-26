@@ -130,3 +130,133 @@ Both passed, exit 0. The nine regression results, using the two successful rerun
 - Chrome was the browser exercised. The Vite chunk-size advisory and intermittent external font availability remain.
 - Appendix redraws show selected connections at a uniform visual weight. The original tab and PDF link retain each full visualization.
 - The reader regularization lead-in says three types, followed by two named paragraphs in this PDF. Section 6.1 reports 41.0 for English–French and Table 2 reports 41.8. The corresponding PDF readings are preserved.
+
+## Task 4 fix round 1
+
+Reviewer finding 1 was caused by `figureChapter` being independent state. The main mode-tab transition retained the selected bilingual `translationId` without copying it into the Figures filter. The fix copies that chapter when the main Figures tab is selected. Direct card links continue to set the explicit chapter themselves.
+
+Reviewer finding 2 was caused by every Table 3 configuration column using the shared `variants` explanation. The fix keeps Task 1 data unchanged and supplies component-local, PDF-grounded explainables for N, d_model, d_ff, h, d_k, d_v, P_drop, ε_ls, train steps, PPL, BLEU and params. The redraw also exposes the nearby §5.1 batch-token and §5.3 learning-rate context. Table 3 h now cites the §3.2.2 head configuration and A-group behavior. ε_ls cites §5.4 and the D-group variation. P_drop cites §5.4 and the §6.2 over-fitting observation.
+
+Focused regression command
+
+```sh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+"$PW" -s=t4-round1-final5 open http://127.0.0.1:5184/papers/attention --browser=chrome
+result=$("$PW" -s=t4-round1-final5 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-4-round1-browser.js)")
+print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+"$PW" -s=t4-round1-final5 close
+```
+
+Output and exit 0
+
+```text
+### Result
+"Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations."
+```
+
+The data check was extended with a fourth assertion.
+
+```sh
+node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs
+```
+
+Output and exit 0
+
+```text
+1..4
+# tests 4
+# pass 4
+# fail 0
+```
+
+The focused check initially selected a D-group P_drop cell while intending ε_ls, then the selector was narrowed to the printed `ϵ_ls` column. A second inspection confirmed the final tooltip contents. The final focused run checks the Chinese chapter handoff, direct chapter links, `标签平滑` for ε_ls, and `注意力头数` for h.
+
+Full Task 4 command
+
+```sh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+"$PW" -s=t4-pty-task4b open http://127.0.0.1:5184/papers/attention --browser=chrome
+result=$("$PW" -s=t4-pty-task4b run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-4-browser.js)")
+print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+"$PW" -s=t4-pty-task4b close
+```
+
+Output and exit 0
+
+```text
+### Result
+"Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark."
+```
+
+The narrow check now resets the gallery filter to `all` before measuring Table 3's local scroll area. This makes the existing full-gallery check independent of the preceding bilingual chapter selection.
+
+Task 2 and Task 3 regression commands
+
+```zsh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+suite=.superpowers/sdd/2026-11-26-attention-workbench
+run_suite() {
+  local name="$1" session="t4-reg-$1"
+  "$PW" -s="$session" open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null || return 1
+  local source result
+  source=$(sed -e 's/127\.0\.0\.1:5178/127.0.0.1:5184/g' -e "s/page.getByRole('tabpanel')/page.locator('#paper-mode-panel')/g" "$suite/$name.js")
+  result=$("$PW" -s="$session" run-code "$source")
+  print -r -- "$name"
+  print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+  "$PW" -s="$session" close >/dev/null
+  [[ "$result" == '### Result'* ]]
+}
+run_suite task-2-browser
+run_suite task-2-round1-browser
+run_suite task-2-round3-browser
+run_suite task-2-round4-browser
+run_suite task-3-browser
+run_suite task-3-round1-browser
+run_suite task-3-round2-browser
+run_suite task-3-round3-browser
+run_suite task-3-round4-browser
+```
+
+All commands exited 0. Results
+
+```text
+task-2-browser: Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes.
+task-2-round1-browser: Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal.
+task-2-round3-browser: Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks.
+task-2-round4-browser: {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+task-3-browser: Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion.
+task-3-round1-browser: Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation.
+task-3-round2-browser: Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement.
+task-3-round3-browser: Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering.
+task-3-round4-browser: Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal.
+```
+
+Final build and integrity command
+
+```sh
+npm run build
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --check
+git diff --exit-code b9a5857 -- src/data/papers/attention public/article/1706.03762v7.pdf
+```
+
+Output and exit 0
+
+```text
+✓ 1211 modules transformed.
+✓ built in 1.50s
+dist/assets/index-DUtfHxVc.js 587.94 kB | gzip: 198.65 kB
+```
+
+Vite retained its existing 500 kB advisory. The Task 1 data/PDF diff, PDF byte comparison and whitespace checks completed silently.
+
+Final data and PDF inventory command
+
+```sh
+node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+set -o pipefail
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -10
+```
+
+Both exited 0. The reader check reported 4 passed and 0 failed. The inventory check reported 2 passed and validation ended with `"sections": 27`, `"explainables": 34`, `"lessons": 10`, `"steps": 28` and `"issues": []`.
