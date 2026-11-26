@@ -270,7 +270,8 @@
 .tip-pop {
   position: absolute;
   z-index: 6;
-  max-width: 260px;
+  width: max-content;
+  max-width: min(260px, calc(100% - 16px));
   padding: 10px 12px;
   border-radius: 8px;
   background: var(--surface);
@@ -658,7 +659,11 @@
 
   .stage-canvas:has(.heatmap-panel) .stage-svg {
     min-height: 220px;
-    transform-origin: left top !important;
+    pointer-events: none;
+  }
+
+  .stage-canvas:has(.heatmap-panel) .stage-node {
+    pointer-events: visiblePainted;
   }
 
   .fulltext-main,

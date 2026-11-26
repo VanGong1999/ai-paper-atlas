@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Lesson, LessonStep } from '../../data/papers/attention/lessons'
 import { TooltipPop } from './TooltipPop'
 
@@ -19,7 +19,6 @@ const values = [
 ]
 
 export function Stage({ lesson, step, playing, zoom }: Props) {
-  const wrapRef = useRef<HTMLDivElement>(null)
   const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null)
   const [heatMsg, setHeatMsg] = useState('点击格子，查看示意注意力权重。')
   const highlight = new Set(step.highlight || [])
@@ -30,7 +29,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
   }, [lesson.nodes])
 
   return (
-    <div className="stage-canvas" ref={wrapRef}>
+    <div className="stage-canvas">
       <svg
         className="stage-svg"
         viewBox="0 0 700 340"
@@ -71,23 +70,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
             <g
               key={node.id}
               className={`stage-node ${active ? 'active' : ''}`}
-              onMouseEnter={() => {
-                const wrapElement = wrapRef.current
-                const wrap = wrapElement?.getBoundingClientRect()
-                const svg = wrapElement?.querySelector('svg')?.getBoundingClientRect()
-                if (!wrapElement || !wrap || !svg) return
-                const contentX = wrapElement.scrollLeft + svg.left - wrap.left + ((node.x + node.w / 2) / 700) * svg.width
-                const contentY = wrapElement.scrollTop + svg.top - wrap.top + (node.y / 340) * svg.height
-                const minX = wrapElement.scrollLeft + 8
-                const maxX = Math.max(minX, wrapElement.scrollLeft + wrapElement.clientWidth - 270)
-                const minY = wrapElement.scrollTop + 8
-                const maxY = Math.max(minY, wrapElement.scrollTop + wrapElement.clientHeight - 120)
-                setTip({
-                  text: node.tip,
-                  x: Math.min(Math.max(minX, contentX - 20), maxX),
-                  y: Math.min(Math.max(minY, contentY - 12), maxY),
-                })
-              }}
+              onMouseMove={event => setTip({ text: node.tip, x: event.clientX, y: event.clientY })}
               onMouseLeave={() => setTip(null)}
             >
               <motion.rect
@@ -143,11 +126,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
       )}
 
       <AnimatePresence>
-        {tip && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <TooltipPop text={tip.text} x={tip.x} y={tip.y} />
-          </motion.div>
-        )}
+        {tip && <TooltipPop {...tip} />}
       </AnimatePresence>
     </div>
   )
