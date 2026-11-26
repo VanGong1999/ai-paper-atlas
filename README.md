@@ -1,6 +1,6 @@
 # ORBIT / AI 研究图谱
 
-高密度交互式研究图谱：力导向网络首页（可切弯曲时间线）+ Transformer 论文驾驶舱（教学导读 / 全文中译 / 原文对照）。
+高密度交互式研究图谱，包含力导向网络、弯曲时间线和《Attention Is All You Need》论文工作台。
 
 技术栈：Vite + React + TypeScript + Framer Motion + react-force-graph-2d。
 
@@ -49,15 +49,40 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 | `/` | 力导向研究网络（主）/ 弯曲时间线（可切换）；顶部筛选、侧栏动态卡片、底部事件列表 |
 | `/library` | 已收录论文库；点击进入详情或可视化 |
 | `/library/:id` | 单篇摘要详情（无可视化时） |
-| `/papers/:slug` | 单篇论文可视化（如 `/papers/attention`）。在 `src/data/papers/registry.ts` 注册新 slug 即可扩展 |
+| `/papers/attention` | 《Attention Is All You Need》工作台 |
+
+## Attention 论文工作台
+
+| 模式 | 内容 |
+|------|------|
+| Learn | 按章节与步骤学习，含交互式舞台、公式、来源链接，以及播放、暂停和重放。可用鼠标悬停或键盘聚焦查看说明。 |
+| Figures | 浏览 Figure 1–5 和 Table 1–4，切换 PDF 截图与重绘，按章节筛选并跳转至相关译文、步骤或 PDF 页。 |
+| 全文中译 | 27 个中英对照阅读块，涵盖正文、作者贡献说明、致谢、40 条参考文献和附录图注。 |
+| PDF | 在当前步骤所引页打开内嵌 PDF，也可在新标签页打开完整文件。 |
+
+工作台的论文事实以仓库内的 [`1706.03762v7.pdf`](public/article/1706.03762v7.pdf) 为唯一来源。英译法大模型的 BLEU 按原文标注，摘要和表 2 为 **41.8**，§6.1 正文为 **41.0**。热力图中的手设权重和曲线代入值有教学示意标签。
+
+### 本地验证
+
+需要 Node.js 22.18+ 和包含 `pdfplumber`、`pypdfium2`、`Pillow` 的 Python 环境。若 `python3` 不是该环境，请将 `PDF_PYTHON` 设为相应解释器路径。
+
+```sh
+node scripts/attention-audit.mjs
+node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.test.mjs scripts/attention-reader.test.mjs
+npm run build
+```
+
+审计输出 JSON，记录 PDF 校验和、关键事实、公式、中英映射、原图裁剪、表格行以及未引用的解释项。原图像素核对使用 `pdfplumber` 0.11.9、`pypdfium2` 5.13.0 和 `Pillow` 13.0.0 复验。
+
+[Task 5 验收报告](.superpowers/sdd/2026-11-26-attention-workbench/task-5-report.md) 记录了 Chrome 浏览器矩阵与复跑命令。
 
 ## 数据维护
 
 - 首页事件：`src/data/timeline.ts`
 - 论文课程：`src/data/papers/attention/lessons.ts`
 - 中译正文：`src/data/papers/attention/fulltext-zh.ts`
-- 英文对照：`src/data/papers/attention/originals-en.ts`
+- 英文对照：`src/data/papers/attention/originals-en.ts` 管理来源映射，`scripts/attention-reader-assets.py` 从 PDF 生成正文和原图预览。
 
 ## 说明
 
-时间线为精选教学图谱，不是完整发布史；日期尽量采用公开论文/公告首次时间。Attention 页中译与英文摘录服务于对照阅读，完整表述以 PDF / arXiv 为准。示意热力图等交互数据为教学用途，并非论文真实权重。
+时间线收录精选研究事件，日期优先采用论文或公告首次公开的时间。

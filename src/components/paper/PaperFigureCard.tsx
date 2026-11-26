@@ -36,8 +36,8 @@ export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTr
   const cardExplanation: ExplainableContent = {
     ...registered,
     title: figure.title,
-    originalId: figure.originalId,
-    source: figure.source,
+    // Figure 2 illustrates the operation on p. 4. Its numerical head configuration is in §3.2.2 on p. 5.
+    ...(figure.redrawType === 'attention' ? {} : { originalId: figure.originalId, source: figure.source }),
     paperFact: fact ?? figure.caption,
   }
 

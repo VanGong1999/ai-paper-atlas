@@ -5,11 +5,14 @@ The line spans and preview boxes below are specific to this PDF version.
 """
 
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import re
+import sys
 
 import pdfplumber
+from PIL import Image, ImageChops
 
 PDF = Path("public/article/1706.03762v7.pdf")
 SHA256 = "bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697"
@@ -185,12 +188,100 @@ def english_reading(pages):
     }
 
 
+def printed_table_rows(page, box, data_top, starts):
+    """Read printed columns by x position so PDF text flow cannot hide a swapped blank."""
+    for line in page.crop(box).extract_text_lines(x_tolerance=1):
+        if line["top"] < data_top:
+            continue
+        boundaries = [box[0], *starts, box[2]]
+        yield [
+            pdfplumber.utils.extract_text(
+                [char for char in line["chars"] if left <= char["x0"] < right],
+                x_tolerance=1,
+            ) or None
+            for left, right in zip(boundaries, boundaries[1:])
+        ]
+
+
+def source_audit(pages, reading):
+    # Boundaries are in PDF points for this edition. The table crops are shared
+    # with the original previews, so parsing stops before the surrounding prose.
+    layouts = {
+        "table-1-p6": (135, [250, 335, 407]),
+        "table-2-p8": (120, [282, 324, 372, 428]),
+        "table-3-p9": (152, [140, 160, 192, 225, 250, 278, 304, 335, 360, 396, 431, 470]),
+        "table-4-p10": (101, [298, 424]),
+    }
+    tables = {}
+    for preview, (top, starts) in layouts.items():
+        page, box = PREVIEWS[preview]
+        tables[preview.split("-p")[0]] = list(printed_table_rows(pages[page - 1], box, top, starts))
+
+    # Table 1 puts the log base below its row in extracted text.
+    complexity = tables["table-1"]
+    subscript = complexity.pop(3)
+    if subscript != [None, None, None, "k"]:
+        raise ValueError("Table 1: expected the printed log base k")
+    complexity[2][-1] = complexity[2][-1].replace("log", "logₖ")
+
+    # Table 2 centers each Transformer's FLOPs across both language columns.
+    # Re-extract with the internal boundary removed for these two printed rows.
+    page, box = PREVIEWS["table-2-p8"]
+    tables["table-2"][-2:] = [
+        [*row[:-1], {"text": row[-1], "span": 2}]
+        for row in printed_table_rows(pages[page - 1], box, 214, [282, 324, 372])
+    ]
+
+    # Table 3 prints A–D once, centered on their row groups. The redraw
+    # repeats those labels. E spans the nine configuration columns.
+    variants = tables["table-3"]
+    group_sizes = {"(A)": 4, "(B)": 2, "(C)": 7, "(D)": 4}
+    printed_groups = [row[0] for row in variants if row[0] in group_sizes]
+    if printed_groups != list(group_sizes):
+        raise ValueError("Table 3: unexpected model variant group labels")
+    variants[:] = [row for row in variants if any(row[1:])]
+    base, *groups, e_row, big = variants
+    labels = [group for group, size in group_sizes.items() for _ in range(size)]
+    if len(labels) != len(groups) or e_row[0] != "(E)":
+        raise ValueError("Table 3: unexpected group row counts")
+    page, box = PREVIEWS["table-3-p9"]
+    e_text = next(printed_table_rows(pages[page - 1], box, 358, [140, 396, 431, 470]))[1]
+    merged = {"text": e_text, "span": 9}
+    tables["table-3"] = [base, *[[label, *row[1:]] for label, row in zip(labels, groups)],
+                         [e_row[0], merged, *e_row[-3:]], big]
+
+    previews = {}
+    for name, (page, box) in PREVIEWS.items():
+        path = PDF.parent / "attention" / (name + ".png")
+        if not path.is_file():
+            previews[name] = "missing"
+            continue
+        buffer = BytesIO()
+        pages[page - 1].crop(box).to_image(resolution=192, antialias=True).save(buffer, colors=256)
+        buffer.seek(0)
+        with Image.open(buffer) as regenerated, Image.open(path) as existing:
+            matches = regenerated.size == existing.size and not ImageChops.difference(
+                regenerated.convert("RGB"), existing.convert("RGB")
+            ).getbbox()
+        previews[name] = "matches PDF crop" if matches else "differs from PDF crop"
+
+    return {
+        "reading": reading,
+        "pages": [page.extract_text(x_tolerance=1.5) for page in pages],
+        "tables": tables,
+        "previews": previews,
+    }
+
+
 if __name__ == "__main__":
     if hashlib.sha256(PDF.read_bytes()).hexdigest() != SHA256:
         raise SystemExit("Unexpected PDF version")
     with pdfplumber.open(PDF) as pdf:
         reading = english_reading(pdf.pages)
         assert len(reading["references"]) == 40
+        if sys.argv[1:] == ["--audit"]:
+            print(json.dumps(source_audit(pdf.pages, reading)))
+            sys.exit(0)
         Path("src/components/paper/attention-original-text.json").write_text(
             json.dumps(reading, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
