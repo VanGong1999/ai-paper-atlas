@@ -72,15 +72,20 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
               key={node.id}
               className={`stage-node ${active ? 'active' : ''}`}
               onMouseEnter={() => {
-                const wrap = wrapRef.current?.getBoundingClientRect()
-                const svg = wrapRef.current?.querySelector('svg')?.getBoundingClientRect()
-                if (!wrap || !svg) return
-                const x = svg.left - wrap.left + ((node.x + node.w / 2) / 700) * svg.width
-                const y = svg.top - wrap.top + (node.y / 340) * svg.height
+                const wrapElement = wrapRef.current
+                const wrap = wrapElement?.getBoundingClientRect()
+                const svg = wrapElement?.querySelector('svg')?.getBoundingClientRect()
+                if (!wrapElement || !wrap || !svg) return
+                const contentX = wrapElement.scrollLeft + svg.left - wrap.left + ((node.x + node.w / 2) / 700) * svg.width
+                const contentY = wrapElement.scrollTop + svg.top - wrap.top + (node.y / 340) * svg.height
+                const minX = wrapElement.scrollLeft + 8
+                const maxX = Math.max(minX, wrapElement.scrollLeft + wrapElement.clientWidth - 270)
+                const minY = wrapElement.scrollTop + 8
+                const maxY = Math.max(minY, wrapElement.scrollTop + wrapElement.clientHeight - 120)
                 setTip({
                   text: node.tip,
-                  x: Math.min(Math.max(8, x - 20), wrap.width - 270),
-                  y: Math.max(8, y - 12),
+                  x: Math.min(Math.max(minX, contentX - 20), maxX),
+                  y: Math.min(Math.max(minY, contentY - 12), maxY),
                 })
               }}
               onMouseLeave={() => setTip(null)}

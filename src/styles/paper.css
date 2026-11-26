@@ -637,7 +637,7 @@
   }
 
   .stage-svg {
-    transform-origin: left center !important;
+    transform-origin: left top !important;
   }
 
   .stage-canvas {
@@ -658,6 +658,7 @@
 
   .stage-canvas:has(.heatmap-panel) .stage-svg {
     min-height: 220px;
+    transform-origin: left top !important;
   }
 
   .fulltext-main,
