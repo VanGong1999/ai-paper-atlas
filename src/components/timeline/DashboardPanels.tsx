@@ -4,8 +4,9 @@ import { orgStats, topicStats } from '../../data/graph'
 import type { TimelineEvent } from '../../data/timeline'
 import { hasInteractivePage } from '../../data/papers/catalog'
 import { AnimatedNumber } from './AnimatedNumber'
+import { FilterChips, type FilterChipsProps } from './FilterChips'
 
-type Props = {
+type Props = FilterChipsProps & {
   events: TimelineEvent[]
   allCount: number
   infraCount: number
@@ -13,7 +14,22 @@ type Props = {
   hover: TimelineEvent | null
 }
 
-export function DashboardPanels({ events, allCount, infraCount, agentCount, hover }: Props) {
+export function DashboardPanels({
+  events,
+  allCount,
+  infraCount,
+  agentCount,
+  hover,
+  org,
+  topic,
+  kind,
+  query,
+  onOrg,
+  onTopic,
+  onKind,
+  onQuery,
+  onReset,
+}: Props) {
   const topics = topicStats(events).slice(0, 5)
   const orgs = orgStats(events)
   const maxTopic = Math.max(1, ...topics.map((t) => t.count))
@@ -22,6 +38,20 @@ export function DashboardPanels({ events, allCount, infraCount, agentCount, hove
 
   return (
     <aside className="dash-panels">
+      <div className="dash-card dash-filter-card">
+        <div className="eyebrow">FILTER GRAPH</div>
+        <FilterChips
+          org={org}
+          topic={topic}
+          kind={kind}
+          query={query}
+          onOrg={onOrg}
+          onTopic={onTopic}
+          onKind={onKind}
+          onQuery={onQuery}
+          onReset={onReset}
+        />
+      </div>
       <motion.div className="dash-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="eyebrow">SYSTEM STATUS</div>
         <div className="status-row">
@@ -97,18 +127,8 @@ export function DashboardPanels({ events, allCount, infraCount, agentCount, hove
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
             >
-              <div className="focus-meta">
-                {hover.date} · {hover.org}
-              </div>
-              <h3>{hover.title}</h3>
-              <p>{hover.blurb}</p>
-              <p className="why">{hover.why}</p>
-              <Link
-                className="entry-link"
-                to={hasInteractivePage(hover) && hover.visual ? hover.visual : `/library/${hover.id}`}
-              >
-                {hasInteractivePage(hover) ? '进入可视化 →' : '查看详情 →'}
-              </Link>
+              <div className="focus-meta">NODE ACTIVE · {hover.date} · {hover.org}</div>
+              <p className="dash-note">完整摘要已在节点旁展开；点击节点可进入详情或可视化。</p>
             </motion.div>
           ) : (
             <motion.p

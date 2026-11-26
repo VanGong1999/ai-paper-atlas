@@ -6,6 +6,7 @@ import { DashboardPanels } from '../components/timeline/DashboardPanels'
 import { EventList } from '../components/timeline/EventList'
 import { FilterChips } from '../components/timeline/FilterChips'
 import { LiveTicker } from '../components/timeline/LiveTicker'
+import { HoverCard } from '../components/timeline/HoverCard'
 import '../styles/home.css'
 
 const ForceOrbit = lazy(() =>
@@ -21,6 +22,7 @@ export function HomePage() {
   const [query, setQuery] = useState('')
   const [view, setView] = useState<ViewMode>('graph')
   const [hover, setHover] = useState<TimelineEvent | null>(null)
+  const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null)
 
   const events = useMemo(
     () => filterTimeline(timeline, { org, topic, kind, q: query }),
@@ -29,6 +31,23 @@ export function HomePage() {
 
   const infraCount = events.filter((e) => e.topics.includes('AI Infra')).length
   const agentCount = events.filter((e) => e.topics.includes('AI Agent')).length
+
+  const filterProps = {
+    org,
+    topic,
+    kind,
+    query,
+    onOrg: setOrg,
+    onTopic: setTopic,
+    onKind: setKind,
+    onQuery: setQuery,
+    onReset: () => {
+      setOrg('全部')
+      setTopic('全部')
+      setKind('全部')
+      setQuery('')
+    },
+  }
 
   return (
     <div className="home">
@@ -68,23 +87,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <FilterChips
-        org={org}
-        topic={topic}
-        kind={kind}
-        query={query}
-        onOrg={setOrg}
-        onTopic={setTopic}
-        onKind={setKind}
-        onQuery={setQuery}
-        onReset={() => {
-          setOrg('全部')
-          setTopic('全部')
-          setKind('全部')
-          setQuery('')
-        }}
-      />
-
       <LiveTicker events={events} />
 
       <div className={`home-body ${view === 'graph' ? 'is-graph' : 'is-curve'}`}>
@@ -92,10 +94,20 @@ export function HomePage() {
           <>
             <div className="graph-stage panel">
               <Suspense fallback={<div className="empty-hint">加载力导向图谱…</div>}>
-                <ForceOrbit events={events} onHoverEvent={setHover} />
+                <ForceOrbit
+                  events={events}
+                  onHoverEvent={(event, position) => {
+                    setHover(event)
+                    setHoverPosition(position ?? null)
+                  }}
+                />
+                {hover && hoverPosition && (
+                  <HoverCard event={hover} x={hoverPosition.x} y={hoverPosition.y} />
+                )}
               </Suspense>
             </div>
             <DashboardPanels
+              {...filterProps}
               events={events}
               allCount={timeline.length}
               infraCount={infraCount}
@@ -104,7 +116,12 @@ export function HomePage() {
             />
           </>
         ) : (
-          <CurvedTimeline events={events} />
+          <>
+            <div className="curve-filters panel">
+              <FilterChips {...filterProps} />
+            </div>
+            <CurvedTimeline events={events} />
+          </>
         )}
       </div>
 

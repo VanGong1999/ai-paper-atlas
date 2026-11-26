@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent as ReactMouseEvent } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
 import type { ForceGraphMethods, NodeObject } from 'react-force-graph-2d'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +9,7 @@ import type { TimelineEvent } from '../../data/timeline'
 
 type Props = {
   events: TimelineEvent[]
-  onHoverEvent?: (event: TimelineEvent | null) => void
+  onHoverEvent?: (event: TimelineEvent | null, position?: { x: number; y: number }) => void
 }
 
 type FGNode = NodeObject<OrbitNode>
@@ -27,6 +28,8 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
   const [size, setSize] = useState({ w: 800, h: 520 })
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [palette, setPalette] = useState<OrbitPalette>()
+  const pointerRef = useRef({ x: 24, y: 24 })
+  const hoverEventRef = useRef<TimelineEvent | null>(null)
 
   const graph = useMemo(() => buildOrbitGraph(events), [events])
 
@@ -129,8 +132,36 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
     else navigate(`/library/${n.event.id}`)
   }
 
+  const hoverPosition = () => {
+    const width = wrapRef.current?.clientWidth ?? size.w
+    const height = wrapRef.current?.clientHeight ?? size.h
+    const cardWidth = Math.min(320, Math.max(220, width - 24))
+    const cardHeight = 238
+    return {
+      x: Math.max(12, Math.min(pointerRef.current.x + 18, width - cardWidth - 12)),
+      y: Math.max(12, Math.min(pointerRef.current.y + 18, height - cardHeight - 12)),
+    }
+  }
+
+  const handlePointerMove = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    pointerRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    if (hoverEventRef.current) onHoverEvent?.(hoverEventRef.current, hoverPosition())
+  }
+
+  const clearHover = () => {
+    hoverEventRef.current = null
+    setHoverId(null)
+    onHoverEvent?.(null)
+  }
+
   return (
-    <div className="force-orbit" ref={wrapRef}>
+    <div
+      className="force-orbit"
+      ref={wrapRef}
+      onMouseMove={handlePointerMove}
+      onMouseLeave={clearHover}
+    >
       <div className="force-orbit-badge">
         <span className="pulse" />
         LIVE GRAPH · {graph.nodes.length} NODES · {graph.links.length} LINKS
@@ -164,13 +195,11 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
         onNodeHover={(node) => {
           const n = (node as OrbitNode | null) ?? null
           setHoverId(n?.id ?? null)
-          onHoverEvent?.(n?.kind === 'event' ? n.event ?? null : null)
+          hoverEventRef.current = n?.kind === 'event' ? n.event ?? null : null
+          onHoverEvent?.(hoverEventRef.current, hoverEventRef.current ? hoverPosition() : undefined)
         }}
         onNodeClick={(node) => openNode(node)}
-        onBackgroundClick={() => {
-          setHoverId(null)
-          onHoverEvent?.(null)
-        }}
+        onBackgroundClick={clearHover}
       />
     </div>
   )

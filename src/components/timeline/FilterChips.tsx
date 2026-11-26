@@ -1,7 +1,7 @@
 import type { Kind, Org, Topic } from '../../data/timeline'
 import { KINDS, ORGS, TOPICS } from '../../data/timeline'
 
-type Props = {
+export type FilterChipsProps = {
   org: Org | '全部'
   topic: Topic | '全部'
   kind: Kind | '全部'
@@ -23,7 +23,7 @@ export function FilterChips({
   onKind,
   onQuery,
   onReset,
-}: Props) {
+}: FilterChipsProps) {
   return (
     <div className="home-filters">
       <div className="filter-toolbar">
