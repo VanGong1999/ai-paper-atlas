@@ -6,18 +6,28 @@
   flex-direction: column;
 }
 
-.topbar {
+.app-header {
   height: var(--header-h);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 12px;
   padding: 0 18px;
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
+  box-shadow: var(--header-shadow);
+}
+
+.topbar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 28px;
 }
 
 .brand {
@@ -31,7 +41,7 @@
 }
 
 .brandmark {
-  color: var(--lime);
+  color: var(--accent-ink);
   font-size: 26px;
   line-height: 1;
 }
@@ -64,7 +74,9 @@
 }
 
 .topnav a.active,
-.topnav button.active {
+.topnav button.active,
+.topnav a:hover,
+.topnav button:hover {
   color: var(--text);
 }
 
@@ -76,7 +88,7 @@
   right: 0;
   bottom: 0;
   height: 2px;
-  background: var(--lime);
+  background: var(--accent-outline);
 }
 
 .toplink {
@@ -85,8 +97,23 @@
   color: var(--muted);
 }
 
-.toplink:hover {
-  color: var(--lime);
+a.toplink:hover {
+  color: var(--accent-ink);
+}
+
+.theme-toggle {
+  flex: none;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.app-shell :focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.topnav :focus-visible {
+  outline-offset: -2px;
 }
 
 .app-main {
@@ -107,28 +134,30 @@
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 11px;
-  transition: 0.15s ease;
+  transition: background-color var(--theme-transition), border-color var(--theme-transition), color var(--theme-transition);
 }
 
-.chip:hover {
-  border-color: var(--lime-dim);
+.chip:hover:where(:not(:disabled)) {
+  background: var(--control-hover);
+  border-color: var(--hover-border);
   color: var(--text);
 }
 
-.chip.active {
-  background: color-mix(in srgb, var(--lime) 18%, transparent);
-  border-color: var(--lime);
-  color: var(--lime);
+.chip.active,
+.theme-toggle[aria-pressed='true'] {
+  background: var(--accent-fill);
+  border-color: var(--accent-outline);
+  color: var(--accent-ink);
 }
 
 .chip.accent-infra.active {
-  background: color-mix(in srgb, var(--blue) 22%, transparent);
+  background: var(--info-fill);
   border-color: var(--blue);
   color: var(--blue);
 }
 
 .chip.accent-agent.active {
-  background: color-mix(in srgb, var(--violet) 22%, transparent);
+  background: var(--agent-fill);
   border-color: var(--violet);
   color: var(--violet);
 }
@@ -137,6 +166,12 @@
   background: var(--surface);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+}
+
+.app-header,
+.panel {
+  transition: background-color var(--theme-transition), border-color var(--theme-transition), box-shadow var(--theme-transition);
 }
 
 .eyebrow {
@@ -151,18 +186,47 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--lime);
+  background: var(--accent-ink);
   margin-right: 8px;
-  box-shadow: 0 0 12px var(--lime);
+  box-shadow: var(--status-shadow);
 }
 
 @media (max-width: 900px) {
+  .app-header {
+    padding: 0 12px;
+  }
+
   .topbar {
     gap: 12px;
-    padding: 0 12px;
   }
 
   .brand small {
     display: none;
+  }
+}
+
+@media (max-width: 580px) {
+  .topbar {
+    display: grid;
+    grid-template-areas: 'brand link' 'nav nav';
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 0 8px;
+  }
+
+  .brand {
+    grid-area: brand;
+    justify-self: start;
+  }
+
+  .topnav {
+    grid-area: nav;
+    gap: 8px;
+  }
+
+  .toplink {
+    grid-area: link;
+    margin-left: 0;
+    line-height: 1.2;
   }
 }
