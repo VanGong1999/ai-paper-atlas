@@ -7,7 +7,8 @@ import { explainables } from '../src/data/papers/attention/explainables.ts'
 import { figures } from '../src/data/papers/attention/figures.ts'
 import { fulltextZh } from '../src/data/papers/attention/fulltext-zh.ts'
 import { furtherReading, lessons } from '../src/data/papers/attention/lessons.ts'
-import { originals } from '../src/data/papers/attention/originals-en.ts'
+import { originals, pdfAsset } from '../src/data/papers/attention/originals-en.ts'
+import { appendixCaptionFor, appendixCaptionsById } from '../src/components/paper/appendixCaptions.ts'
 import { paperTables, table3Context } from '../src/components/paper/paperTables.ts'
 
 const root = new URL('../', import.meta.url)
@@ -82,26 +83,28 @@ const positionFormula = 'θ = pos / 10000^(2i/d_model)，PE(pos,2i) = sin θ，P
 // value is checked in the registered explainable and in its generated Learn
 // step, with the exact source section/page/originalId checked below.
 const trainingFacts = [
-  { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7, fields: [
-    ['corpus.en-de', /英德约 450 万句对.*37000/], ['corpus.en-fr', /英法为 3600 万句.*32000/],
-    ['batch.source_tokens', /25000 个源词元/], ['batch.target_tokens', /25000 个目标词元/],
+  { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7, locator: '5.1 Training Data', fields: [
+    ['corpus.en-de', 'detail', /英德约 450 万句对.*37000/], ['corpus.en-fr', 'detail', /英法为 3600 万句.*32000/],
+    ['batch.source_tokens', 'paperFact', /25000 个源词元/], ['batch.target_tokens', 'paperFact', /25000 个目标词元/],
   ] },
-  { id: 'hardware', step: 'train/size', section: 'sec5-2', page: 7, fields: [
-    ['hardware.gpus', /8 块 P100/], ['hardware.base.step_time', /基础模型约 0\.4 秒\/步/],
-    ['hardware.base.steps', /基础模型约[^。]*100000 步/], ['hardware.base.duration', /基础模型训练 12 小时/],
-    ['hardware.big.step_time', /大模型 1\.0 秒\/步/], ['hardware.big.steps', /大模型[^。]*300000 步/],
-    ['hardware.big.duration', /大模型训练 3\.5 天/],
+  { id: 'hardware', step: 'train/size', section: 'sec5-2', page: 7, locator: '5.2 Hardware and Schedule', fields: [
+    ['hardware.gpus', 'plain', /8 块 P100/], ['hardware.base.step_time', 'detail', /基础模型约 0\.4 秒\/步/],
+    ['hardware.base.steps', 'detail', /基础模型约[^。]*100000 步/], ['hardware.base.duration', 'paperFact', /^论文报告基础模型训练 12 小时，/],
+    ['hardware.big.step_time', 'detail', /大模型 1\.0 秒\/步/], ['hardware.big.steps', 'detail', /大模型[^。]*300000 步/],
+    ['hardware.big.duration', 'paperFact', /，大模型训练 3\.5 天。$/],
   ] },
-  { id: 'optimizer', step: 'train/opt', section: 'sec5-3', page: 7, fields: [
-    ['optimizer.name', /^Adam 与学习率/], ['optimizer.beta1', /β₁=0\.9/], ['optimizer.beta2', /β₂=0\.98/],
-    ['optimizer.epsilon', /ε=10⁻⁹/], ['optimizer.warmup_steps', /4000 个预热步/],
-    ['equation3.model_width_exponent', /d_model\^\(-0\.5\)/], ['equation3.schedule_exponent', /warmup\^\(-1\.5\)/],
+  { id: 'optimizer', step: 'train/opt', section: 'sec5-3', page: 7, locator: '5.3 Optimizer', fields: [
+    ['optimizer.name', 'title', /^Adam 与学习率/], ['optimizer.beta1', 'detail', /β₁=0\.9/], ['optimizer.beta2', 'detail', /β₂=0\.98/],
+    ['optimizer.epsilon', 'detail', /ε=10⁻⁹/], ['optimizer.warmup_steps', 'paperFact', /4000 个预热步/],
+    ['equation3.model_width_exponent', 'paperFact', /学习率为 d_model\^\(-0\.5\)·min\(/],
+    ['equation3.step_number_exponent', 'paperFact', /min\(step\^\(-0\.5\),/],
+    ['equation3.warmup_exponent', 'paperFact', /warmup\^\(-1\.5\)/],
   ] },
-  { id: 'dropout', step: 'train/reg', section: 'sec5-4', page: 8, fields: [
-    ['regularization.dropout', /P_drop=0\.1(?![0-9])/],
+  { id: 'dropout', step: 'train/reg', section: 'sec5-4', page: 8, locator: 'Residual Dropout', fields: [
+    ['regularization.dropout', 'paperFact', /P_drop=0\.1(?![0-9])/],
   ] },
-  { id: 'smoothing', step: 'train/labels', section: 'sec5-4', page: 8, fields: [
-    ['regularization.label_smoothing', /ε_ls=0\.1(?![0-9])/],
+  { id: 'smoothing', step: 'train/labels', section: 'sec5-4', page: 8, locator: 'Label Smoothing', fields: [
+    ['regularization.label_smoothing', 'paperFact', /ε_ls=0\.1(?![0-9])/],
   ] },
 ]
 
@@ -153,18 +156,27 @@ export function audit() {
     ...lesson.steps.flatMap(step => step.explainableIds),
   ]))
 
-  for (const { id, step: stepId, section, page, fields } of trainingFacts) {
+  for (const { id, step: stepId, section, page, locator, fields } of trainingFacts) {
     const entry = explainables[id]
-    const lessonStep = steps.get(stepId)
-    const entryCopy = [entry?.title, entry?.plain, ...(entry?.detail ?? []), entry?.paperFact, entry?.teachingExplanation].filter(Boolean).join(' ')
-    const lessonCopy = [lessonStep?.title, lessonStep?.body, ...(lessonStep?.diffs ?? []), lessonStep?.paperFact, lessonStep?.teachingExplanation].filter(Boolean).join(' ')
-    check(entry?.source?.section === originals[entry.originalId]?.source.section && entry.source.page === page && entry.originalId === section,
-      `${id}: training fact source must be ${section} p. ${page}`)
-    check(lessonStep?.source?.section === originals[lessonStep.originalId]?.source.section && lessonStep.source.page === page && lessonStep.originalId === section,
-      `${id}: Learn entry source must be ${section} p. ${page}`)
-    for (const [field, pattern] of fields) {
-      check(pattern.test(entryCopy), `${id}.${field}: explainable value differs from PDF-grounded expected value`)
-      check(pattern.test(lessonCopy), `${id}.${field}: Learn value differs from PDF-grounded expected value`)
+    const step = steps.get(stepId)
+    const source = { section: originals[section].source.section, page, locator }
+    for (const [label, item] of [['explainable', entry], ['Learn', step]]) {
+      check(item?.originalId === section && isDeepStrictEqual(item.source, source),
+        `${id}: ${label} training fact source must be ${section} p. ${page} (${locator})`)
+    }
+    // Learn stores its introductory sentence in the generated body. All
+    // paperFact checks read the same property that the Learn panel renders.
+    const learnDisplay = {
+      title: step?.title, paperFact: step?.paperFact, detail: step?.diffs,
+      plain: step?.body.split(' 教学解释：')[0].split(step.paperFact)[0],
+    }
+    for (const [field, property, pattern] of fields) {
+      for (const [label, item] of [['explainable', entry], ['Learn', learnDisplay]]) {
+        const value = item?.[property]
+        const lines = Array.isArray(value) ? value : [value]
+        check(lines.some(line => pattern.test(line ?? '')),
+          `${field}: ${label} ${id}.${property} differs from ${section} p. ${page}`)
+      }
     }
   }
 
@@ -249,16 +261,27 @@ export function audit() {
   }
   for (const [id, entry] of Object.entries(table3Context)) checkExplainable(entry, `table-3 context/${id}`)
 
-  const appendix = fulltextZh.find(block => block.id === 'appendix')
+  const captions = appendixCaptionsById()
+  const appendixBlocks = fulltextZh.filter(block => block.id === 'appendix')
+  const appendixSource = { section: 'Attention Visualizations', page: 13, endPage: 15, locator: 'Attention Visualizations' }
+  check(appendixBlocks.length === 1 && appendixBlocks[0].originalId === 'appendix' &&
+    isDeepStrictEqual(appendixBlocks[0].source, appendixSource), 'appendix: incorrect translated caption source')
   const figureIds = figures.map(figure => figure.id)
   const duplicateFigureIds = figureIds.filter((id, index) => figureIds.indexOf(id) !== index)
   check(duplicateFigureIds.length === 0, `Figures: duplicate stable IDs (${[...new Set(duplicateFigureIds)].join(', ')})`)
+  let stableAppendixCaptions = 0
   for (const [figureId, expected] of Object.entries(appendixFacts)) {
     const figure = figures.find(item => item.id === figureId)
-    const paragraphs = appendix?.paragraphs.filter(text => text.startsWith(`图 ${figure?.number}（第 ${expected.page} 页）`)) ?? []
-    check(figure?.originalId === 'appendix' && figure.source.section === originals.appendix.source.section && figure.source.page === expected.page,
-      `${figureId}: appendix source mapping is incorrect`)
-    check(paragraphs.length === 1 && paragraphs[0] === expected.caption, `${figureId}: appendix caption is missing, duplicated, conflicting, or attached to the wrong stable figure ID`)
+    const number = Number(figureId.slice('figure-'.length))
+    const locator = `Figure ${number}:`
+    const source = { section: appendixSource.section, page: expected.page, locator }
+    const sourceMatches = figure?.kind === 'Figure' && figure.number === number && figure.originalId === 'appendix' &&
+      isDeepStrictEqual(figure.source, source) && figure.originalAsset === `${pdfAsset}#page=${expected.page}`
+    check(sourceMatches, `${figureId}: appendix source mapping is incorrect`)
+    const captionMatches = figure && appendixCaptionFor(figure, captions) === expected.caption &&
+      reading.appendix.includes(`${locator} ${figure.caption}`)
+    check(captionMatches, `${figureId}: appendix caption is missing, duplicated, conflicting, or attached to the wrong stable figure ID`)
+    if (sourceMatches && captionMatches) stableAppendixCaptions++
   }
 
   const offPaperContent = []
@@ -297,7 +320,7 @@ export function audit() {
       englishReaderBlocksMatchingPdf: Object.entries(reading).filter(([id, blocks]) => isDeepStrictEqual(actualReading[id], blocks)).length,
       references: inventory.references.length,
       appendixCaptions: reading.appendix.length,
-      stableAppendixCaptions: Object.keys(appendixFacts).length,
+      stableAppendixCaptions,
       lessons: lessons.length,
       steps: steps.size,
       explainables: Object.keys(explainables).length,

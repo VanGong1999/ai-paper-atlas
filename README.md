@@ -68,11 +68,16 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 
 ```sh
 node scripts/attention-audit.mjs
+node scripts/attention-pdf-inventory.mjs --validate
 node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.test.mjs scripts/attention-reader.test.mjs
 npm run build
 ```
 
-Browser acceptance replay in a clean checkout uses the 10 committed Task 3/4/5 suites. Start the dev server on port 5184, then run:
+浏览器验收使用仓库提交的 10 个套件（Task 3 四个、Task 4 五个、Task 5 一个）。运行器需要 Chrome、ripgrep 和已缓存 Playwright CLI 的 Codex Playwright 包装脚本。用下面的命令启动开发服务器，在另一个终端运行套件。
+
+```sh
+npm run dev -- --host 127.0.0.1 --port 5184 --strictPort
+```
 
 ```sh
 s=.superpowers/sdd/2026-11-26-attention-workbench
@@ -82,7 +87,7 @@ bash "$s/task-5-run-browser.sh" \
   "$s/task-5-browser.js"
 ```
 
-The runner preserves Chrome PDF-viewer resources and stubs only external fonts/network. `task-5-browser.js` itself generates the six 1440/1024/390 light/dark matrix checks.
+`task-5-browser.js` 在 1440、1024、390 三种宽度下分别检查浅色和深色主题，共六种组合。每种组合都通过鼠标悬停和键盘聚焦检查图 4 提示卡摘要中的“似乎参与”。
 
 审计输出 JSON，记录 PDF 校验和、关键事实、公式、中英映射、原图裁剪、表格行以及未引用的解释项。原图像素核对使用 `pdfplumber` 0.11.9、`pypdfium2` 5.13.0 和 `Pillow` 13.0.0 复验。
 

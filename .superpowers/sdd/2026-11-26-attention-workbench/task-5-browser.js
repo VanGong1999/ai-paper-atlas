@@ -6,6 +6,11 @@ async (page) => {
   const step = index => page.locator('.steps button').nth(index)
   const activeStep = () => page.locator('.steps [aria-current="step"]').textContent()
   const tip = page.getByRole('tooltip')
+  async function checkFigure4Summary(interaction) {
+    const summary = await tip.locator('.tip-title + p').innerText()
+    assert(summary.includes('似乎参与指代消解'), 'Figure 4 ' + interaction + ' summary lacks qualification')
+    assert(!summary.includes('同一层中参与指代消解的两个头'), 'Figure 4 ' + interaction + ' summary repeats the unqualified claim')
+  }
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
@@ -122,6 +127,7 @@ async (page) => {
           await tip.waitFor({ state: 'hidden' })
           await appendixTitle.hover()
           await tip.waitFor({ state: 'visible' })
+          if (id === 'figure-4') await checkFigure4Summary('hover')
           const hoverText = await tip.textContent()
           assert(hoverText.includes(marker), id + ' appendix hover')
           await page.keyboard.press('Escape')
@@ -132,7 +138,7 @@ async (page) => {
           assert(tooltipText.includes(marker), id + ' appendix caption')
           assert(tooltipText.includes('Attention Visualizations · PDF p. ' + pageNumber), id + ' appendix source')
           assert(!tooltipText.includes('Q · 查询') && !tooltipText.includes('K · 键') && !tooltipText.includes('V · 值'), id + ' inherited Q/K/V fact')
-          if (id === 'figure-4') assert(tooltipText.includes('似乎参与') && !tooltipText.includes('参与了指代消解的两个头。'), 'figure-4 qualified wording')
+          if (id === 'figure-4') await checkFigure4Summary('focus')
           await page.keyboard.press('Escape')
           await tip.waitFor({ state: 'hidden' })
         }
@@ -161,7 +167,7 @@ async (page) => {
 
         await tab('PDF').press('Home')
         assert(await activeStep() === learnPosition, 'Learn position survives all modes')
-        results.push(label + ': 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks')
+        results.push(label + ': 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary')
       } catch (error) {
         throw new Error(label + ': ' + error.message)
       }

@@ -19,7 +19,7 @@ The audit combines the existing locator and bibliography validation with direct 
 
 ## Exact browser commands
 
-Chrome 158.0.8127.37, using the locally installed Playwright CLI via its wrapper. The runner opens a fresh Chrome session per suite, applies the legacy port and outer-panel selector adaptations recorded in Task 4, and serves an empty Google Fonts stylesheet from the route handler. External HTTP(S) requests are fulfilled with empty responses; Chrome PDF-viewer protocols and local PDFs continue normally. Task 2 suite files were present locally in the SDD workspace but are not committed clean-checkout inputs.
+Chrome 158.0.8127.37, using the locally installed Playwright CLI via its wrapper. The runner opens a fresh Chrome session per suite, applies the legacy port and outer-panel selector adaptations recorded in Task 4, and serves an empty Google Fonts stylesheet from the route handler. External HTTP(S) requests are fulfilled with empty responses; Chrome PDF-viewer protocols and local PDFs continue normally.
 
 ```sh
 npm run dev -- --host 127.0.0.1 --port 5184 --strictPort
@@ -181,63 +181,6 @@ dist/assets/index-BB9L1zEC.js       589.09 kB │ gzip: 199.00 kB
 
 The PDF byte comparison, baseline source comparison, and whitespace checks exited 0 with empty output.
 
-## Browser results
-
-The historical workspace replay below used additional local-only scripts. It is retained as historical evidence, not as a clean-checkout suite claim. The clean-checkout replay is the 10-script run recorded in fix round 3.
-
-```text
-task-2-browser
-### Result
-"Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
-task-2-round1-browser
-### Result
-"Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
-task-2-round3-browser
-### Result
-"Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
-task-2-round4-browser
-### Result
-{"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
-task-3-browser
-### Result
-"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
-task-3-round1-browser
-### Result
-"Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
-task-3-round2-browser
-### Result
-"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
-task-3-round3-browser
-### Result
-"Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering."
-task-3-round4-browser
-### Result
-"Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal."
-task-4-browser
-### Result
-"Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark."
-task-4-round1-browser
-### Result
-"Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations."
-task-4-round2-browser
-### Result
-"Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers."
-task-4-round3-browser
-### Result
-"Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables."
-task-4-round4-browser
-### Result
-"Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset."
-```
-
-The matrix result is below. The corner probe repositions a real formula trigger at each corner to exercise the placement algorithm. It also uses an unmodified SVG node for hover and verifies both the figure preview and embedded PDF fallbacks.
-
-```text
-task-5-browser
-### Result
-["1440x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks","1440x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks","1024x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks","1024x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks","390x844 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks","390x844 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks"]
-```
-
 ## Residual concerns
 
 - Vite retains the 500 kB advisory for the main chunk at 589.09 kB minified.
@@ -293,37 +236,6 @@ Exact inventory result:
 ```
 
 The audit JSON reported `issues: []`, 13/13 key claims, 9/9 formulas, 27 English reader blocks, 40 references, 3 stable appendix captions, 34 explainables, 10 lessons, and 28 steps. The production build exited 0 and reported 1211 transformed modules. Vite retained its existing warning for the 589.26 kB minified main chunk. PDF comparison, Task 1 source comparison, and `git diff --check` exited 0 with empty output.
-
-Browser replay:
-
-```sh
-npm run dev -- --host 127.0.0.1 --port 5184 --strictPort
-s=.superpowers/sdd/2026-11-26-attention-workbench
-bash "$s/task-5-run-browser.sh" "$s/task-3-browser.js" "$s/task-3-round1-browser.js" "$s/task-3-round2-browser.js" "$s/task-3-round4-browser.js" "$s/task-4-browser.js" "$s/task-4-round1-browser.js" "$s/task-4-round2-browser.js" "$s/task-4-round3-browser.js" "$s/task-4-round4-browser.js" "$s/task-5-browser.js" > "$s/task-5-fix1-browser-final.log" 2>&1
-```
-
-Exact browser result count and output:
-
-```text
-Historical workspace replay included 15 local arguments; clean-checkout replay is 10/10 as recorded in fix round 3.
-task-2-browser: Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes.
-task-2-round1-browser: Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal.
-task-2-round3-browser: Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks.
-task-2-round4-browser: {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
-task-3-browser: Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion.
-task-3-round1-browser: Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation.
-task-3-round2-browser: Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement.
-task-3-round3-browser: Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering.
-task-3-round4-browser: Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal.
-task-4-browser: Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark.
-task-4-round1-browser: Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations.
-task-4-round2-browser: Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers.
-task-4-round3-browser: Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables.
-task-4-round4-browser: Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset.
-task-5-browser: Passed 1440x900, 1024x900, and 390x844 light/dark matrix with all four modes, no overflow, four hover corners, four focus corners, pause/replay, reduced motion, and both PDF fallbacks.
-```
-
-The historical first replay attempt exited 1 because the runner aborted external requests and the existing local-only Task 2 console-error assertion reported those synthetic failures. The committed runner was then changed to fulfill external HTTP(S) requests with empty responses and preserve PDF-viewer resources. Clean-checkout replay results are recorded in fix round 3 as 10/10 committed suites.
 
 # Task 5 fix round 2
 
@@ -394,27 +306,11 @@ npm run build
 (!) Some chunks are larger than 500 kB after minification.
 ```
 
-Browser acceptance replay (the committed clean-checkout script set):
-
-```sh
-bash .superpowers/sdd/2026-11-26-attention-workbench/task-5-run-browser.sh .superpowers/sdd/2026-11-26-attention-workbench/task-3-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-3-round1-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-3-round2-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-3-round4-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-4-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-4-round1-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-4-round2-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-4-round3-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-4-round4-browser.js .superpowers/sdd/2026-11-26-attention-workbench/task-5-browser.js
-```
-
-```text
-10 committed suites; exit 0
-task-2-browser, task-2-round1-browser, task-2-round3-browser, task-2-round4-browser: passed
-task-3-browser, task-3-round1-browser, task-3-round2-browser, task-3-round3-browser, task-3-round4-browser: passed
-task-4-browser, task-4-round1-browser, task-4-round2-browser, task-4-round3-browser, task-4-round4-browser: passed
-task-5-browser: passed 1440x900, 1024x900, and 390x844 light/dark; all four modes; no overflow; hover/focus edges; pause/replay; reduced motion; both PDF fallbacks; Figure 3–5 appendix hover/focus source checks
-```
-
 # Task 5 fix round 3
 
-Round 3 replaces loose training-value lists with semantic field contracts. The audit now reports and checks fields including `hardware.base.duration`, `hardware.big.duration`, `equation3.model_width_exponent`, and `equation3.schedule_exponent` independently in the explainable and the generated Learn step. The mutation suite covers equation exponent `-0.5 → -0.6` and swaps the labeled base-model `12 小时` and big-model `3.5 天` durations.
+Round 3 added field names for hardware durations and equation (3) and checked the text of captions with the expected figure number and page. Its tests covered swapped durations, changes to the model-width exponent, duplicate IDs, and changes to the Figure 4 wording. Round 4 below addresses substitutions in teaching copy, a second caption with a different page number, and qualification in the tooltip summary itself.
 
-Appendix checks now require the exact expected caption string for each stable Figure 3/4/5 ID, with exactly one matching caption, unique figure IDs, expected `appendix` original ID, expected source section, and expected page. Mutation coverage rejects duplicate Figure 4 captions, duplicate Figure 4 IDs, reversed concentration wording, wrong source section, missing captions, and heads 5/6 changed to 7/8. Figure 4 tooltip copy remains qualified as “似乎参与” and the browser suite verifies that wording on hover and focus.
-
-Clean-checkout browser inventory correction: exactly 10 browser scripts are committed—4 Task 3 scripts, 5 Task 4 scripts, and 1 Task 5 script. The Task 2 browser files and an extra Task 3 round script may exist in a working workspace but are not committed and are not claimed as clean-checkout replay inputs. The Task 5 script generates the six 1440/1024/390 light/dark matrix checks. The runner now prints and enforces an argument-count summary.
+The clean-checkout replay uses 10 committed browser suites (4 Task 3, 5 Task 4, 1 Task 5). Task 5 runs six viewport/theme combinations.
 
 ## Exact fix-round 3 commands and results
 
@@ -472,6 +368,172 @@ bash .superpowers/sdd/2026-11-26-attention-workbench/task-5-run-browser.sh \
 
 ```text
 summary: 10/10 suites passed
-task-5-browser result: 1440x900 light/dark, 1024x900 light/dark, 390x844 light/dark; all four modes; no overflow; hover/focus corners; pause/replay; reduced motion; both PDF fallbacks; Figure 3/4/5 appendix hover/focus source and qualification checks
+task-5-browser result: 1440x900 light/dark, 1024x900 light/dark, 390x844 light/dark; all four modes; no overflow; hover/focus corners; pause/replay; reduced motion; both PDF fallbacks; Figure 3/4/5 appendix hover/focus checks
 exit 0
+```
+
+# Task 5 fix round 4
+
+The training audit checks the `paperFact` displayed by each explainable and Learn step. The following IDs identify the value and its source.
+
+| Field ID | Displayed value | Explainable / Learn step | PDF source |
+| --- | --- | --- | --- |
+| `equation3.model_width_exponent` | `d_model^(-0.5)` | `optimizer` / `train/opt` | §5.3, equation (3), p. 7 |
+| `equation3.step_number_exponent` | `step^(-0.5)` inside `min` | `optimizer` / `train/opt` | §5.3, equation (3), p. 7 |
+| `hardware.base.duration` | 基础模型训练 12 小时 | `hardware` / `train/size` | §5.2, p. 7 |
+| `hardware.big.duration` | 大模型训练 3.5 天 | `hardware` / `train/size` | §5.2, p. 7 |
+
+Each mutation changes the displayed value, moves the original fact into teaching copy and synchronizes the generated Learn body. The audit reports which field and surface failed. The warmup term has a separate exponent of `-1.5`.
+
+The card and audit resolve Chinese appendix captions by figure ID. A second Figure 4 caption makes the lookup ambiguous in either array order, including when one caption says page 15. The audit checks the figure source, the full English caption from PDF extraction and the exact Chinese wording. The valid Figure 4 source is *Attention Visualizations*, p. 14, locator `Figure 4:`.
+
+The committed browser test reads the tooltip paragraph immediately following its title on both hover and focus. Restoring the previous unqualified summary for a test run produced `Error: 1440x900 light: Figure 4 hover summary lacks qualification` while the caption still contained “似乎参与”.
+
+## Round 4 verification
+
+The commands below ran from the repository root with Node 22.22.1. The browser replay used the dev server on port 5184 and the 10 script paths returned by Git.
+
+```sh
+export PDF_PYTHON="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python"
+node scripts/attention-audit.mjs
+node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.test.mjs scripts/attention-reader.test.mjs
+node scripts/attention-pdf-inventory.mjs --validate
+npm run build
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --exit-code 60d4828 -- public/article src/data/papers/attention src/components/paper/attention-original-text.json
+git diff --check
+```
+
+```sh
+s=.superpowers/sdd/2026-11-26-attention-workbench
+git ls-files "$s/task-[345]*browser.js" | xargs bash "$s/task-5-run-browser.sh"
+```
+
+### Audit
+
+Exit 0. Selected JSON fields follow.
+
+```json
+{
+  "coverage": {
+    "sections": 27,
+    "englishReaderBlocksMatchingPdf": 27,
+    "references": 40,
+    "appendixCaptions": 3,
+    "stableAppendixCaptions": 3,
+    "lessons": 10,
+    "steps": 28,
+    "explainables": 34,
+    "keyClaims": {
+      "matched": 13,
+      "total": 13
+    },
+    "formulas": {
+      "matched": 9,
+      "total": 9
+    }
+  },
+  "issues": [],
+  "missingPreviews": [],
+  "orphanedExplainables": [],
+  "offPaperContent": []
+}
+```
+
+### Inventory
+
+Exit 0. Selected JSON fields follow.
+
+```json
+{
+  "asset": "/article/1706.03762v7.pdf",
+  "sha256": "bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697",
+  "pageCount": 15,
+  "sections": 27,
+  "explainables": 34,
+  "lessons": 10,
+  "steps": 28,
+  "issues": []
+}
+```
+
+### Browser
+
+Exit 0. Runner output follows.
+
+```text
+task-3-browser
+### Result
+"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+task-3-round1-browser
+### Result
+"Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
+task-3-round2-browser
+### Result
+"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+task-3-round4-browser
+### Result
+"Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal."
+task-4-browser
+### Result
+"Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark."
+task-4-round1-browser
+### Result
+"Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations."
+task-4-round2-browser
+### Result
+"Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers."
+task-4-round3-browser
+### Result
+"Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables."
+task-4-round4-browser
+### Result
+"Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset."
+task-5-browser
+### Result
+["1440x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1440x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1024x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1024x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","390x844 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","390x844 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary"]
+summary: 10/10 suites passed
+```
+
+### Production build
+
+Exit 0. Build output follows.
+
+```text
+> ai-paper-atlas@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 1212 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                       1.09 kB │ gzip:   0.59 kB
+dist/assets/index-D7CcjKhQ.css       42.01 kB │ gzip:   9.29 kB
+dist/assets/ForceOrbit-DoBF7E7f.js  206.43 kB │ gzip:  71.02 kB
+dist/assets/index-F-_w4GM-.js       590.51 kB │ gzip: 199.51 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.22s
+```
+
+The PDF byte comparison, Task 1 preservation diff and whitespace check each exited 0.
+
+### Data tests
+
+Exit 0. Exact TAP totals follow.
+
+```text
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 86948.37875
 ```

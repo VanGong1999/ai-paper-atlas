@@ -1,7 +1,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react'
 import { explainables, type Explainable as ExplainableContent, type ExplainableId } from '../../data/papers/attention/explainables'
 import type { PaperFigure } from '../../data/papers/attention/figures'
-import { fulltextZh } from '../../data/papers/attention/fulltext-zh'
+import { appendixCaptionFor, appendixCaptionsById } from './appendixCaptions'
 import { Explainable } from './Explainable'
 import { FigureRedraw } from './FigureRedraw'
 import { SourceBadge } from './SourceBadge'
@@ -21,12 +21,7 @@ const figureExplainables: Record<PaperFigure['redrawType'], ExplainableId> = {
   variants: 'variants', parsing: 'parsing', 'attention-pattern': 'self',
 }
 
-const appendix = fulltextZh.find(block => block.originalId === 'appendix')
-const appendixCaptionByFigureId: Record<string, string> = {
-  'figure-3': appendix?.paragraphs.find(text => text.startsWith('图 3')) ?? '',
-  'figure-4': appendix?.paragraphs.find(text => text.startsWith('图 4')) ?? '',
-  'figure-5': appendix?.paragraphs.find(text => text.startsWith('图 5')) ?? '',
-}
+const appendixCaptions = appendixCaptionsById()
 
 const appendixFigureDetails: Record<string, { plain: string; role: string; detail: string[]; teachingExplanation: string }> = {
   'figure-3': {
@@ -59,7 +54,7 @@ export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTr
   const reference = `${figure.kind} ${figure.number}`
   const explanation = figureExplainables[figure.redrawType]
   const registered = explainables[explanation]
-  const fact = figure.redrawType === 'attention-pattern' ? appendixCaptionByFigureId[figure.id] : registered.paperFact
+  const fact = figure.redrawType === 'attention-pattern' ? appendixCaptionFor(figure, appendixCaptions) : registered.paperFact
   const appendixDetails = appendixFigureDetails[figure.id]
   const cardExplanation: ExplainableContent = appendixDetails ? {
     title: figure.title,

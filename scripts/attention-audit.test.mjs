@@ -71,8 +71,8 @@ test('rejects exact training-field mutations in both explainables and Learn entr
   `)
   assert.equal(status, 1)
   const issues = report.issues.join('\n')
-  assert.match(issues, /smoothing\.regularization\.label_smoothing/)
-  assert.match(issues, /optimizer\.equation3\.model_width_exponent/)
+  assert.match(issues, /regularization\.label_smoothing/)
+  assert.match(issues, /equation3\.model_width_exponent/)
 })
 
 test('rejects scientific notation with a flattened exponent', () => {
@@ -118,28 +118,87 @@ test('rejects appendix Figure 4 head metadata mutations', () => {
   assert.match(report.issues.join('\n'), /figure-4.*appendix caption/)
 })
 
-test('rejects duplicate, reversed, and wrong-section appendix Figure 4 evidence', () => {
-  const mutations = [
-    `appendix.paragraphs.push(appendix.paragraphs.find(paragraph => paragraph.startsWith('图 4')))`,
-    `appendix.paragraphs = appendix.paragraphs.map(paragraph => paragraph.startsWith('图 4') ? paragraph.replace('非常集中', '非常分散') : paragraph)`,
-    `figures.find(figure => figure.id === 'figure-4').source.section = 'sec3-2-3'`,
-    `figures.push({ ...figures.find(figure => figure.id === 'figure-4') })`,
-    `const hardware = explainables.hardware; const swapped = '基础模型训练 3.5 天，大模型训练 12 小时'; hardware.paperFact = hardware.paperFact.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped); const hardwareStep = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'size'); hardwareStep.paperFact = hardwareStep.paperFact.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped); hardwareStep.body = hardwareStep.body.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped)`,
-  ]
-  for (const mutation of mutations) {
-    const { status, report } = run(['--input-type=module'], `
-      import { audit } from './scripts/attention-audit.mjs'
-      import { fulltextZh } from './src/data/papers/attention/fulltext-zh.ts'
-      import { figures } from './src/data/papers/attention/figures.ts'
-      import { explainables } from './src/data/papers/attention/explainables.ts'
-      import { lessons } from './src/data/papers/attention/lessons.ts'
-      const appendix = fulltextZh.find(block => block.id === 'appendix')
-      ${mutation}
-      const result = await audit()
-      console.log(JSON.stringify(result))
-      process.exitCode = result.issues.length ? 1 : 0
+function auditMutation(mutation) {
+  return run(['--input-type=module'], `
+    import { audit } from './scripts/attention-audit.mjs'
+    import { fulltextZh } from './src/data/papers/attention/fulltext-zh.ts'
+    import { figures } from './src/data/papers/attention/figures.ts'
+    import { explainables } from './src/data/papers/attention/explainables.ts'
+    import { lessons } from './src/data/papers/attention/lessons.ts'
+    const appendix = fulltextZh.find(block => block.id === 'appendix')
+    const figure = figures.find(item => item.id === 'figure-4')
+    const captionIndex = appendix.paragraphs.findIndex(text => text.startsWith('图 4'))
+    const caption = appendix.paragraphs[captionIndex]
+    ${mutation}
+    const result = audit()
+    console.log(JSON.stringify(result))
+    process.exitCode = result.issues.length ? 1 : 0
+  `)
+}
+
+for (const [field, entryId, stepId, correct, wrong] of [
+  ['equation3.model_width_exponent', 'optimizer', 'opt', 'd_model^(-0.5)', 'd_model^(-0.6)'],
+  ['equation3.step_number_exponent', 'optimizer', 'opt', 'step^(-0.5)', 'step^(-0.6)'],
+  ['hardware.base.duration', 'hardware', 'size', '基础模型训练 12 小时', '基础模型训练 3.5 天'],
+  ['hardware.big.duration', 'hardware', 'size', '大模型训练 3.5 天', '大模型训练 12 小时'],
+]) {
+  test(`rejects a wrong ${field} even with its correct value in teaching copy`, () => {
+    const { status, report } = auditMutation(`
+      const entry = explainables[${JSON.stringify(entryId)}]
+      const step = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === ${JSON.stringify(stepId)})
+      entry.teachingExplanation += ' ' + entry.paperFact
+      entry.paperFact = entry.paperFact.replace(${JSON.stringify(correct)}, ${JSON.stringify(wrong)})
+      step.teachingExplanation = entry.teachingExplanation
+      step.paperFact = entry.paperFact
+      step.body = entry.plain + ' ' + step.paperFact + ' 教学解释：' + step.teachingExplanation
     `)
     assert.equal(status, 1)
-    assert.ok(report.issues.length > 0)
-  }
+    const issues = report.issues.filter(issue => issue.includes(field))
+    assert.ok(issues.some(issue => issue.includes('explainable')), issues)
+    assert.ok(issues.some(issue => issue.includes('Learn')), issues)
+  })
+}
+
+for (const [description, mutation, expectedIssue] of [
+  ['prepended conflicting page', `appendix.paragraphs.unshift(caption.replace('第 14 页', '第 15 页').replace('似乎参与', '参与'))`, /figure-4: appendix caption/],
+  ['appended conflicting page', `appendix.paragraphs.push(caption.replace('第 14 页', '第 15 页'))`, /figure-4: appendix caption/],
+  ['duplicate caption', `appendix.paragraphs.push(caption)`, /figure-4: appendix caption/],
+  ['reversed wording', `appendix.paragraphs[captionIndex] = caption.replace('非常集中', '非常分散')`, /figure-4: appendix caption/],
+  ['unqualified claim', `appendix.paragraphs[captionIndex] = caption.replace('似乎参与', '参与')`, /figure-4: appendix caption/],
+  ['wrong source section', `figure.source.section = '3.2.3 Applications of Attention in our Model'`, /figure-4: appendix source/],
+  ['wrong source locator', `figure.source.locator = 'Figure 5:'`, /figure-4: appendix source/],
+  ['duplicate figure ID', `figures.unshift({ ...figure })`, /duplicate stable IDs.*figure-4/],
+]) {
+  test(`rejects Figure 4 ${description}`, () => {
+    const { status, report } = auditMutation(mutation)
+    assert.equal(status, 1)
+    assert.match(report.issues.join('\n'), expectedIssue)
+  })
+}
+
+test('resolves reordered appendix captions and figures by ID', () => {
+  const { status, report } = auditMutation(`
+    appendix.paragraphs.reverse()
+    figures.reverse()
+  `)
+  assert.deepEqual(report.issues, [])
+  assert.equal(status, 0)
+  assert.equal(report.coverage.stableAppendixCaptions, 3)
+})
+
+test('reports each equation exponent on the surface where it changed', () => {
+  const { status, report } = auditMutation(`
+    const entry = explainables.optimizer
+    const step = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'opt')
+    entry.teachingExplanation += ' ' + entry.paperFact
+    step.teachingExplanation = entry.teachingExplanation
+    entry.paperFact = entry.paperFact.replace('d_model^(-0.5)', 'd_model^(-0.6)')
+    step.paperFact = step.paperFact.replace('step^(-0.5)', 'step^(-0.7)')
+    step.body = entry.plain + ' ' + step.paperFact + ' 教学解释：' + step.teachingExplanation
+  `)
+  assert.equal(status, 1)
+  assert.deepEqual(report.issues.filter(issue => issue.startsWith('equation3.')), [
+    'equation3.model_width_exponent: explainable optimizer.paperFact differs from sec5-3 p. 7',
+    'equation3.step_number_exponent: Learn optimizer.paperFact differs from sec5-3 p. 7',
+  ])
 })
