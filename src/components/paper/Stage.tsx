@@ -52,12 +52,12 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
               y1={y1}
               x2={x2}
               y2={y2}
-              initial={{ opacity: 0.2 }}
+              initial={{ '--edge-pulse': 0.2 }}
               animate={{
-                opacity: playing ? [0.35, 0.9, 0.35] : 0.55,
+                '--edge-pulse': playing ? [0.35, 0.9, 0.35] : 0.55,
               }}
               transition={{
-                opacity: playing ? { duration: 1.8, repeat: Infinity } : { duration: 0.3 },
+                '--edge-pulse': playing ? { duration: 1.8, repeat: Infinity } : { duration: 0.3 },
                 delay: i * 0.04,
               }}
             />

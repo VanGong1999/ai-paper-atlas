@@ -8,24 +8,16 @@ import { PaperRouter } from './pages/PaperRouter'
 
 type Theme = 'light' | 'dark'
 
-const themeStorageKey = 'orbit-theme'
-
-function readTheme(): Theme {
-  try {
-    return window.localStorage.getItem(themeStorageKey) === 'light' ? 'light' : 'dark'
-  } catch {
-    return 'dark'
-  }
-}
-
 export default function App() {
-  const [theme, setTheme] = useState(readTheme)
+  const [theme, setTheme] = useState<Theme>(() =>
+    document.documentElement.dataset.theme === 'light' ? 'light' : 'dark',
+  )
 
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme
 
     try {
-      window.localStorage.setItem(themeStorageKey, theme)
+      window.localStorage.setItem('orbit-theme', theme)
     } catch {
       // The current theme still applies when browser storage is unavailable.
     }
