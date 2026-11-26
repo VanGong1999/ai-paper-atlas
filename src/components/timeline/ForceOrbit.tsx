@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
 import type { ForceGraphMethods, NodeObject } from 'react-force-graph-2d'
 import { useNavigate } from 'react-router-dom'
 import { hasInteractivePage } from '../../data/papers/catalog'
-import { buildOrbitGraph, type OrbitNode } from '../../data/graph'
+import { buildOrbitGraph, type OrbitLink, type OrbitNode } from '../../data/graph'
 import type { TimelineEvent } from '../../data/timeline'
 
 type Props = {
@@ -12,6 +12,13 @@ type Props = {
 }
 
 type FGNode = NodeObject<OrbitNode>
+type OrbitPalette = {
+  light: boolean
+  links: Record<OrbitLink['kind'], string>
+  particle: string
+  label: string
+  activeLabel: string
+}
 
 export function ForceOrbit({ events, onHoverEvent }: Props) {
   const navigate = useNavigate()
@@ -19,8 +26,34 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
   const fgRef = useRef<ForceGraphMethods<FGNode> | undefined>(undefined)
   const [size, setSize] = useState({ w: 800, h: 520 })
   const [hoverId, setHoverId] = useState<string | null>(null)
+  const [palette, setPalette] = useState<OrbitPalette>()
 
   const graph = useMemo(() => buildOrbitGraph(events), [events])
+
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const root = document.documentElement
+    const updatePalette = () => {
+      const style = getComputedStyle(wrap)
+      const read = (token: string) => style.getPropertyValue(token).trim()
+      setPalette({
+        light: root.dataset.theme === 'light',
+        links: {
+          org: read('--orbit-link-org'),
+          topic: read('--orbit-link-topic'),
+          related: read('--orbit-link-related'),
+        },
+        particle: read('--orbit-particle'),
+        label: read('--orbit-label'),
+        activeLabel: read('--orbit-label-active'),
+      })
+    }
+    updatePalette()
+    const observer = new MutationObserver(updatePalette)
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const el = wrapRef.current
@@ -53,18 +86,20 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
       const active = hoverId === n.id
       const r = Math.sqrt(n.val || 4) * (n.kind === 'event' ? 2.1 : 2.6) * (active ? 1.25 : 1)
       const label = n.kind === 'event' && n.name.length > 18 ? `${n.name.slice(0, 16)}…` : n.name
+      const light = palette?.light
+      const color = light ? `color-mix(in srgb, ${n.color} 38%, black)` : n.color
 
       if (active) {
         ctx.beginPath()
         ctx.arc(n.x, n.y, r + 6, 0, Math.PI * 2)
-        ctx.fillStyle = `${n.color}33`
+        ctx.fillStyle = light ? `color-mix(in srgb, ${color} 20%, transparent)` : `${color}33`
         ctx.fill()
       }
 
       ctx.beginPath()
       ctx.arc(n.x, n.y, r, 0, Math.PI * 2)
-      ctx.fillStyle = n.color
-      ctx.shadowColor = n.color
+      ctx.fillStyle = color
+      ctx.shadowColor = color
       ctx.shadowBlur = active ? 18 : 8
       ctx.fill()
       ctx.shadowBlur = 0
@@ -72,7 +107,7 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
       if (n.kind !== 'event') {
         ctx.beginPath()
         ctx.arc(n.x, n.y, r + 2.5, 0, Math.PI * 2)
-        ctx.strokeStyle = `${n.color}88`
+        ctx.strokeStyle = light ? `color-mix(in srgb, ${color} 53%, transparent)` : `${color}88`
         ctx.lineWidth = 1 / globalScale
         ctx.stroke()
       }
@@ -81,10 +116,10 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
       ctx.font = `${n.kind === 'event' ? 500 : 700} ${fontSize}px IBM Plex Mono, sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
-      ctx.fillStyle = active ? '#f4f8ea' : 'rgba(238,238,222,0.82)'
+      ctx.fillStyle = (active ? palette?.activeLabel : palette?.label) ?? color
       ctx.fillText(label, n.x, n.y + r + 2)
     },
-    [hoverId],
+    [hoverId, palette],
   )
 
   const openNode = (node: FGNode) => {
@@ -107,17 +142,12 @@ export function ForceOrbit({ events, onHoverEvent }: Props) {
         graphData={graph}
         backgroundColor="rgba(0,0,0,0)"
         nodeRelSize={5}
-        linkColor={(l) => {
-          const kind = (l as { kind?: string }).kind
-          if (kind === 'related') return 'rgba(211,250,114,0.35)'
-          if (kind === 'topic') return 'rgba(126,184,212,0.28)'
-          return 'rgba(154,170,142,0.22)'
-        }}
+        linkColor={(l) => palette?.links[(l as OrbitLink).kind] ?? ''}
         linkWidth={(l) => ((l as { kind?: string }).kind === 'related' ? 1.6 : 1)}
         linkDirectionalParticles={1}
         linkDirectionalParticleWidth={1.4}
         linkDirectionalParticleSpeed={0.004}
-        linkDirectionalParticleColor={() => 'rgba(211,250,114,0.7)'}
+        linkDirectionalParticleColor={() => palette?.particle ?? ''}
         cooldownTicks={90}
         d3AlphaDecay={0.04}
         d3VelocityDecay={0.3}
