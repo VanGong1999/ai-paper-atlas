@@ -21,7 +21,13 @@ const figureExplainables: Record<PaperFigure['redrawType'], ExplainableId> = {
   variants: 'variants', parsing: 'parsing', 'attention-pattern': 'self',
 }
 
-const appendixZh = fulltextZh.find(block => block.originalId === 'appendix')?.paragraphs
+const appendix = fulltextZh.find(block => block.originalId === 'appendix')
+const appendixCaptionByFigureId: Record<string, string> = {
+  'figure-3': appendix?.paragraphs.find(text => text.startsWith('图 3')) ?? '',
+  'figure-4': appendix?.paragraphs.find(text => text.startsWith('图 4')) ?? '',
+  'figure-5': appendix?.paragraphs.find(text => text.startsWith('图 5')) ?? '',
+}
+
 const tabs = ['原版', '重绘'] as const
 
 export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTranslation }: Props) {
@@ -32,12 +38,12 @@ export function PaperFigureCard({ figure, related, steps, onSelectStep, onReadTr
   const reference = `${figure.kind} ${figure.number}`
   const explanation = figureExplainables[figure.redrawType]
   const registered = explainables[explanation]
-  const fact = figure.redrawType === 'attention-pattern' ? appendixZh?.[figure.number - 3] : registered.paperFact
+  const fact = figure.redrawType === 'attention-pattern' ? appendixCaptionByFigureId[figure.id] : registered.paperFact
   const cardExplanation: ExplainableContent = {
     ...registered,
     title: figure.title,
     // Figure 2 illustrates the operation on p. 4. Its numerical head configuration is in §3.2.2 on p. 5.
-    ...(figure.redrawType === 'attention' ? {} : { originalId: figure.originalId, source: figure.source }),
+    ...(figure.redrawType === 'attention-pattern' ? { originalId: figure.originalId, source: figure.source } : {}),
     paperFact: fact ?? figure.caption,
   }
 

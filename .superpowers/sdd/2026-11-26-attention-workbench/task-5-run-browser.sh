@@ -17,7 +17,7 @@ for script in "$@"; do
       const url = new URL(route.request().url())
       if (url.origin === '$base') return route.continue()
       if (url.hostname === 'fonts.googleapis.com') return route.fulfill({ contentType: 'text/css', body: '' })
-      return route.abort()
+      return route.fulfill({ status: 204, body: '' })
     })
     await page.goto('$base/papers/attention')
     return await ($code)(page)

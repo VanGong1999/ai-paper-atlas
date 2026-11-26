@@ -245,3 +245,82 @@ task-5-browser
 - The figures in the appendix redraw selected connections at uniform visual weight. Figure links retain the original plots. The previously reported 1024×184 tooltip case falls outside this browser matrix.
 - The automated claims list covers explicit facts and formulas. Translation and redraw interpretation also received manual source review. Preview pixel comparison depends on the renderer versions noted above.
 - Final review was a self-review. This session had no code-review subagent tool.
+
+# Task 5 fix round 1
+
+The audit and tests now cover the three reproduced mutation failures.
+
+- Training entries have explicit expected values and PDF locations for batch data, hardware and schedule, optimizer parameters and warmup exponent, residual dropout, and label smoothing. Both the explainable record and the generated Learn step are checked.
+- Table cells preserve superscript exponent semantics. The PDF extraction helper restores scientific-notation superscripts, and the audit reports an exponent-structure issue when a value such as `2.3 · 10¹⁹` becomes `2.3 · 1019`.
+- Appendix captions are checked by stable `figure-3`, `figure-4`, and `figure-5` mappings, each with its source page and `appendix` original ID. Figure cards use those IDs for Chinese tooltip facts and cite the matching appendix page.
+
+No supplied PDF bytes or Task 1 registries changed in this fix round. The browser runner now fulfills blocked external requests with empty responses so the offline replay does not manufacture console network errors.
+
+## Exact fix-round verification commands
+
+Data, audit, inventory, and build:
+
+```sh
+export PDF_PYTHON="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python"
+node --test scripts/attention-audit.test.mjs scripts/attention-reader.test.mjs scripts/attention-pdf-inventory.test.mjs
+node scripts/attention-audit.mjs > .superpowers/sdd/2026-11-26-attention-workbench/task-5-fix1-audit.json
+node scripts/attention-pdf-inventory.mjs --validate | tail -10
+npm run build
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --check
+git diff --exit-code c2e6057 -- public/article/1706.03762v7.pdf src/data/papers/attention/{lessons,explainables,figures,originals-en}.ts src/components/paper/attention-original-text.json
+```
+
+Exact test output:
+
+```text
+1..11
+# tests 11
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+```
+
+Exact inventory result:
+
+```text
+"sections": 27,
+"explainables": 34,
+"lessons": 10,
+"steps": 28,
+"issues": []
+```
+
+The audit JSON reported `issues: []`, 13/13 key claims, 9/9 formulas, 27 English reader blocks, 40 references, 3 stable appendix captions, 34 explainables, 10 lessons, and 28 steps. The production build exited 0 and reported 1211 transformed modules. Vite retained its existing warning for the 589.26 kB minified main chunk. PDF comparison, Task 1 source comparison, and `git diff --check` exited 0 with empty output.
+
+Browser replay:
+
+```sh
+npm run dev -- --host 127.0.0.1 --port 5184 --strictPort
+s=.superpowers/sdd/2026-11-26-attention-workbench
+bash "$s/task-5-run-browser.sh" "$s"/task-[2345]*browser.js > "$s/task-5-fix1-browser-final.log" 2>&1
+```
+
+Exact browser result count and output:
+
+```text
+15 successful suites
+task-2-browser: Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes.
+task-2-round1-browser: Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal.
+task-2-round3-browser: Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks.
+task-2-round4-browser: {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+task-3-browser: Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion.
+task-3-round1-browser: Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation.
+task-3-round2-browser: Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement.
+task-3-round3-browser: Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering.
+task-3-round4-browser: Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal.
+task-4-browser: Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark.
+task-4-round1-browser: Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations.
+task-4-round2-browser: Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers.
+task-4-round3-browser: Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables.
+task-4-round4-browser: Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset.
+task-5-browser: Passed 1440x900, 1024x900, and 390x844 light/dark matrix with all four modes, no overflow, four hover corners, four focus corners, pause/replay, reduced motion, and both PDF fallbacks.
+```
+
+The first replay attempt exited 1 because the runner aborted external requests and the existing Task 2 console-error assertion reported those synthetic failures. The committed runner was changed to fulfill those requests with empty responses. The final replay exited 0 with all 15 suites successful.

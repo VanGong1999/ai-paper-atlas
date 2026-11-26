@@ -28,6 +28,8 @@ PREVIEWS = {
     "figure-5-p15": (15, (105, 116, 508, 596)),
 }
 
+SUPERSCRIPT = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
+
 
 def join(lines):
     return re.sub(r"\s+", " ", " ".join(lines)).strip()
@@ -194,13 +196,18 @@ def printed_table_rows(page, box, data_top, starts):
         if line["top"] < data_top:
             continue
         boundaries = [box[0], *starts, box[2]]
-        yield [
-            pdfplumber.utils.extract_text(
+        cells = []
+        for left, right in zip(boundaries, boundaries[1:]):
+            text = pdfplumber.utils.extract_text(
                 [char for char in line["chars"] if left <= char["x0"] < right],
                 x_tolerance=1,
-            ) or None
-            for left, right in zip(boundaries, boundaries[1:])
-        ]
+            )
+            cells.append(re.sub(
+                r"(\d+(?:\.\d+)?)\s*·\s*10(\d{2,3})",
+                lambda match: f"{match.group(1)} · 10{match.group(2).translate(SUPERSCRIPT)}",
+                text,
+            ) if text else None)
+        yield cells
 
 
 def source_audit(pages, reading):

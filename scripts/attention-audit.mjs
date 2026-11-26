@@ -78,6 +78,20 @@ const formulas = [
 ]
 const positionFormula = 'θ = pos / 10000^(2i/d_model)，PE(pos,2i) = sin θ，PE(pos,2i+1) = cos θ'
 
+const trainingFacts = [
+  ['batch', 'sec5-1', 7, [/450 万句对/, /37000/, /3600 万句/, /32000/, /25000 个源词元/, /25000 个目标词元/], [/25000 个源词元/, /25000 个目标词元/]],
+  ['hardware', 'sec5-2', 7, [/8 块 P100/, /0\.4 秒/, /100000 步/, /12 小时/, /1\.0 秒/, /300000 步/, /3\.5 天/], [/12 小时/, /3\.5 天/]],
+  ['optimizer', 'sec5-3', 7, [/β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /warmup\^\(-1\.5\)/], [/4000 个预热步/, /warmup\^\(-1\.5\)/]],
+  ['dropout', 'sec5-4', 8, [/P_drop=0\.1/], [/P_drop=0\.1/]],
+  ['smoothing', 'sec5-4', 8, [/ε_ls=0\.1/], [/ε_ls=0\.1/]],
+]
+
+const appendixFacts = {
+  'figure-3': { page: 13, pattern: /^图 3（第 13 页）展示了编码器 6 层中第 5 层的自注意力/ },
+  'figure-4': { page: 14, pattern: /^图 4（第 14 页）中，同一层的两个头似乎参与了指代消解/ },
+  'figure-5': { page: 15, pattern: /^图 5（第 15 页）展示了同一层中两个不同的编码器自注意力头/ },
+}
+
 const tableColumns = {
   complexity: ['Layer Type', 'Complexity per Layer', 'Sequential Operations', 'Maximum Path Length'],
   translation: ['Model', 'BLEU · EN-DE', 'BLEU · EN-FR', 'FLOPs · EN-DE', 'FLOPs · EN-FR'],
@@ -95,7 +109,14 @@ function runJson(command, args) {
 function normalizeCell(cell) {
   if (cell === null) return null
   if (typeof cell === 'object') return { text: normalizeCell(cell.text), span: cell.span }
-  return compact(cell.normalize('NFKC'))
+  // Preserve superscript exponents. NFKC would turn 10¹⁹ into 1019.
+  return compact(cell)
+    .replace(/10([⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+)/g, (_, exponent) => `10^${exponent
+      .replaceAll('⁰', '0').replaceAll('¹', '1').replaceAll('²', '2').replaceAll('³', '3')
+      .replaceAll('⁴', '4').replaceAll('⁵', '5').replaceAll('⁶', '6').replaceAll('⁷', '7')
+      .replaceAll('⁸', '8').replaceAll('⁹', '9').replaceAll('⁻', '-')}`)
+    .replace(/([a-z])([¹²³⁴⁵⁶⁷⁸⁹])/g, (_, base, exponent) => `${base}${
+      { '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }[exponent]}`)
 }
 
 export function audit() {
@@ -112,6 +133,19 @@ export function audit() {
     ...lesson.explainableIds, ...lesson.nodes.map(node => node.explainableId),
     ...lesson.steps.flatMap(step => step.explainableIds),
   ]))
+
+  for (const [id, section, page, patterns, lessonPatterns] of trainingFacts) {
+    const entry = explainables[id]
+    const lessonStep = steps.get(`train/${id === 'smoothing' ? 'labels' : id === 'dropout' ? 'reg' : id === 'optimizer' ? 'opt' : id === 'hardware' ? 'size' : 'batch'}`)
+    const entryCopy = [entry?.title, entry?.plain, ...(entry?.detail ?? []), entry?.paperFact, entry?.teachingExplanation].filter(Boolean).join(' ')
+    const lessonCopy = [lessonStep?.title, lessonStep?.body, lessonStep?.paperFact, lessonStep?.teachingExplanation].filter(Boolean).join(' ')
+    check(entry?.source?.section === originals[entry.originalId]?.source.section && entry.source.page === page && entry.originalId === section,
+      `${id}: training fact source must be ${section} p. ${page}`)
+    check(lessonStep?.source?.section === originals[lessonStep.originalId]?.source.section && lessonStep.source.page === page && lessonStep.originalId === section,
+      `${id}: Learn entry source must be ${section} p. ${page}`)
+    check(patterns.every(pattern => pattern.test(entryCopy)), `${id}: training fact value or schedule differs from PDF-grounded expected values`)
+    check(lessonPatterns.every(pattern => pattern.test(lessonCopy)), `${id}: Learn training fact value or schedule differs from PDF-grounded expected values`)
+  }
 
   check(isDeepStrictEqual(Object.keys(actualReading), Object.keys(reading)), 'English reader: missing or out-of-order PDF blocks')
   for (const [id, paragraphs] of Object.entries(reading)) {
@@ -174,7 +208,12 @@ export function audit() {
       const actual = [row.label, ...row.cells].map(normalizeCell)
       const printed = expected[index]?.map(normalizeCell)
       if (isDeepStrictEqual(actual, printed)) matchedRows++
-      else issues.push(`${kind} ${figure.number} (p. ${page}) row ${index + 1} (${row.label}): expected ${JSON.stringify(printed)}, got ${JSON.stringify(actual)}`)
+      else {
+        const message = `${kind} ${figure.number} (p. ${page}) row ${index + 1} (${row.label}): expected ${JSON.stringify(printed)}, got ${JSON.stringify(actual)}`
+        issues.push(/10\^\d+/.test(JSON.stringify(printed)) || /10\^\d+/.test(JSON.stringify(actual))
+          ? `${message} · scientific notation exponent structure differs`
+          : message)
+      }
       if (row.content) checkExplainable(row.content, `${id} row ${index + 1}`)
       for (const cell of row.cells) {
         if (cell?.content) checkExplainable(cell.content, `${id} row ${index + 1} cell`)
@@ -188,6 +227,15 @@ export function audit() {
     tableResults.push({ id, page, rows: expected.length, matchedRows, preview })
   }
   for (const [id, entry] of Object.entries(table3Context)) checkExplainable(entry, `table-3 context/${id}`)
+
+  const appendix = fulltextZh.find(block => block.id === 'appendix')
+  for (const [figureId, expected] of Object.entries(appendixFacts)) {
+    const figure = figures.find(item => item.id === figureId)
+    const paragraph = appendix?.paragraphs.find(text => text.startsWith(`图 ${figure?.number}`)) ?? ''
+    check(figure?.originalId === 'appendix' && figure.source.page === expected.page,
+      `${figureId}: appendix source mapping is incorrect`)
+    check(expected.pattern.test(paragraph), `${figureId}: appendix caption is missing or attached to the wrong stable figure ID`)
+  }
 
   const offPaperContent = []
   const checkMainCopy = (label, text) => {
@@ -225,6 +273,7 @@ export function audit() {
       englishReaderBlocksMatchingPdf: Object.entries(reading).filter(([id, blocks]) => isDeepStrictEqual(actualReading[id], blocks)).length,
       references: inventory.references.length,
       appendixCaptions: reading.appendix.length,
+      stableAppendixCaptions: Object.keys(appendixFacts).length,
       lessons: lessons.length,
       steps: steps.size,
       explainables: Object.keys(explainables).length,
