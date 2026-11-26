@@ -1,0 +1,149 @@
+// Node >=22.18 and Python with pdfplumber. Set PDF_PYTHON if it is outside PATH.
+// Use --scan to inspect the PDF independently of the TypeScript registries.
+import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
+const asset = '/article/1706.03762v7.pdf'
+const path = fileURLToPath(new URL('../public' + asset, import.meta.url))
+
+function scan() {
+  const pages = JSON.parse(execFileSync(process.env.PDF_PYTHON || 'python3', ['-c', `
+import json, sys, pdfplumber
+with pdfplumber.open(sys.argv[1]) as pdf:
+    print(json.dumps([p.extract_text(x_tolerance=1.5) or '' for p in pdf.pages]))
+  `, path], { encoding: 'utf8' }))
+
+  const headings = []
+  const captions = []
+  const ranges = pages.map((text, index) => {
+    const lines = text.split('\n')
+    lines.forEach((line, i) => {
+      const location = { page: index + 1, line: i + 1, text: line }
+      if (/^(Abstract|References|Attention Visualizations|Acknowledgements)\b|^\d+(?:\.\d+)* [A-Z][a-zA-Z -]+$/.test(line)) headings.push(location)
+      if (/^(Figure|Table) \d+:/.test(line)) captions.push(location)
+    })
+    return { page: index + 1, lines: lines.length, characters: text.length, first: lines[0], last: lines.at(-1) }
+  })
+  const inventory = {
+    asset, sha256: createHash('sha256').update(readFileSync(path)).digest('hex'),
+    pageCount: pages.length, ranges, headings, captions,
+  }
+  return { pages, inventory }
+}
+
+function normalized(text) {
+  return text.replace(/-\s*\n/g, '-').replace(/\s+/g, ' ').trim()
+}
+
+async function validate(pages, inventory) {
+  const { originals, pdfAsset } = await import('../src/data/papers/attention/originals-en.ts')
+  const { fulltextZh } = await import('../src/data/papers/attention/fulltext-zh.ts')
+  const { figures } = await import('../src/data/papers/attention/figures.ts')
+  const { explainables } = await import('../src/data/papers/attention/explainables.ts')
+  const { lessons } = await import('../src/data/papers/attention/lessons.ts')
+  const issues = []
+
+  function check(test, message) {
+    if (!test) issues.push(message)
+  }
+
+  function checkSource(label, source, originalId) {
+    const original = originals[originalId]
+    check(original, `${label}: missing original ${originalId}`)
+    if (!source?.section || !source.locator || !Number.isInteger(source.page)) {
+      issues.push(`${label}: missing section, page or locator`)
+      return
+    }
+    const end = source.endPage ?? source.page
+    check(end >= source.page && end <= pages.length, `${label}: invalid page range ${source.page}–${end}`)
+    check(normalized(pages[source.page - 1] ?? '').includes(source.locator),
+      `${label}: missing "${source.locator}" on PDF page ${source.page}`)
+    if (original) {
+      const range = original.source
+      check(source.section === range.section && source.page >= range.page && end <= (range.endPage ?? range.page),
+        `${label}: outside cited section ${original.section}`)
+    }
+  }
+
+  check(pdfAsset === asset, 'Original passages reference a different PDF asset')
+  check(inventory.sha256 === 'bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697',
+    'Supplied PDF differs from the edition used to verify the data')
+  inventory.ranges.forEach(p => check(p.characters > 0, `No extractable text on page ${p.page}`))
+
+  const sectionIds = Object.keys(originals)
+  check(sectionIds.length === fulltextZh.length, 'English and Chinese section counts differ')
+  check(sectionIds.length === inventory.headings.length, 'Section count differs from PDF heading count')
+  for (const [i, heading] of inventory.headings.entries()) {
+    const section = fulltextZh[i]
+    check(section?.source?.page === heading.page && heading.text.startsWith(section.source.locator),
+      `Missing or out-of-order translation for "${heading.text}" (PDF p. ${heading.page})`)
+  }
+  for (const [i, section] of fulltextZh.entries()) {
+    const label = `Section ${section.id}`
+    check(section.originalId === sectionIds[i] && section.id === section.originalId, `${label}: bilingual order/ID mismatch`)
+    check(section.paragraphs.length && section.paragraphs.every(p => p.trim()), `${label}: missing Chinese text`)
+    checkSource(label, section.source, section.originalId)
+    const en = originals[section.originalId]
+    if (en?.source && section.source) {
+      check(en.id === section.originalId && en.source.locator === section.source.locator &&
+        en.source.page === section.source.page && en.source.endPage === section.source.endPage,
+      `${label}: source differs between languages`)
+      const range = pages.slice(en.source.page - 1, en.source.endPage ?? en.source.page).join('\n')
+      const pageReference = `${en.section} · ${en.pdfNote}`
+      check(en.en && (en.en === pageReference || normalized(range).includes(en.en)),
+        `${label}: English excerpt missing from cited PDF pages ${en.pdfNote}`)
+    }
+  }
+
+  const assets = figures.map(f => ({ id: f.id, originalAsset: f.originalAsset, source: f.source, redrawType: f.redrawType }))
+  const assetIds = new Set(assets.map(a => a.id))
+  check(assetIds.size === figures.length, 'Duplicate figure/table ID')
+  for (const { page, text } of inventory.captions) {
+    const locator = text.split(':')[0] + ':'
+    check(figures.some(f => f.source.page === page && f.source.locator === locator),
+      `Missing asset for ${locator} on page ${page}`)
+  }
+  for (const f of figures) {
+    checkSource(f.id, f.source, f.originalId)
+    const locator = `${f.kind} ${f.number}:`
+    check(normalized(pages[f.source.page - 1] ?? '').includes(`${locator} ${f.caption}`),
+      `${f.id}: caption missing from PDF page ${f.source.page}`)
+    check(f.originalAsset === `${asset}#page=${f.source.page}`, `${f.id}: invalid original asset link`)
+  }
+  for (const [id, item] of Object.entries(explainables)) {
+    checkSource(id, item.source, item.originalId)
+    check(item.title && item.plain && item.role && item.detail.length && item.teachingExplanation && item.paperFact,
+      `${id}: incomplete explainable`)
+  }
+  for (const lesson of lessons) {
+    const nodes = new Set(lesson.nodes.map(n => n.id))
+    for (const n of lesson.nodes) check(explainables[n.explainableId], `${lesson.id}/${n.id}: missing node explanation`)
+    for (const edge of lesson.edges) check(edge.every(id => nodes.has(id)), `${lesson.id}: missing node for edge ${edge}`)
+    for (const item of [lesson, ...lesson.steps]) {
+      const label = `${lesson.id}/${item.id}`
+      checkSource(label, item.source, item.originalId)
+      check(item.stage && item.explainableIds.length, `${label}: missing stage or explanation`)
+      for (const id of item.figureIds) check(assetIds.has(id), `${label}: missing asset ${id}`)
+      for (const id of item.explainableIds) check(explainables[id], `${label}: missing explanation ${id}`)
+      for (const id of item.highlight ?? []) check(nodes.has(id), `${label}: missing highlighted node ${id}`)
+    }
+  }
+  return {
+    assets, sections: sectionIds.length, explainables: Object.keys(explainables).length,
+    lessons: lessons.length, steps: lessons.reduce((sum, lesson) => sum + lesson.steps.length, 0), issues,
+  }
+}
+
+try {
+  const { pages, inventory } = scan()
+  if (!process.argv.includes('--scan')) {
+    inventory.validation = await validate(pages, inventory)
+    if (inventory.validation.issues.length) process.exitCode = 1
+  }
+  console.log(JSON.stringify(inventory, null, 2))
+} catch (error) {
+  console.error(JSON.stringify({ asset, error: error.message }))
+  process.exitCode = 1
+}

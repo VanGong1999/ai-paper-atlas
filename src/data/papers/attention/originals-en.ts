@@ -1,124 +1,89 @@
+export type PaperSource = {
+  section: string
+  page: number
+  endPage?: number
+  /** Searchable English text on the first cited PDF page. */
+  locator: string
+}
+
 export type OriginalPassage = {
   id: string
   section: string
+  source: PaperSource
+  pdfNote: string
   en: string
-  pdfNote?: string
 }
 
-/** Key English excerpts aligned to Chinese fulltext blocks (not the entire PDF verbatim dump). */
-export const originals: Record<string, OriginalPassage> = {
-  abstract: {
-    id: 'abstract',
-    section: 'Abstract',
-    pdfNote: 'p.1 Abstract',
-    en: 'The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. … Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train.',
-  },
-  sec1: {
-    id: 'sec1',
-    section: '1 Introduction',
-    pdfNote: '§1',
-    en: 'Recurrent neural networks, long short-term memory and gated recurrent neural networks in particular, have been firmly established as state of the art approaches in sequence modeling and transduction problems such as language modeling and machine translation. … Attention mechanisms have become an integral part of compelling sequence modeling and transduction models in various tasks, allowing modeling of dependencies without regard to their distance in the input or output sequences. … Self-attention, sometimes called intra-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence.',
-  },
-  sec2: {
-    id: 'sec2',
-    section: '2 Background',
-    pdfNote: '§2',
-    en: 'The goal of reducing sequential computation also forms the foundation of the Extended Neural GPU, ByteNet and ConvS2S, all of which use convolutional neural networks as basic building block, computing hidden representations in parallel for all input and output positions. In these models, the number of operations required to relate signals from two arbitrary input or output positions grows in the distance between positions. In the Transformer this is reduced to a constant number of operations, albeit at the cost of reduced effective resolution due to averaging attention-weighted positions, an effect we counteract with Multi-Head Attention.',
-  },
-  'sec3-1': {
-    id: 'sec3-1',
-    section: '3.1 Encoder and Decoder Stacks',
-    pdfNote: '§3.1',
-    en: 'Encoder: The encoder is composed of a stack of N = 6 identical layers. Each layer has two sub-layers. The first is a multi-head self-attention mechanism, and the second is a simple, position-wise fully connected feed-forward network. We employ a residual connection around each of the two sub-layers, followed by layer normalization. … Decoder: The decoder is also composed of a stack of N = 6 identical layers. In addition to the two sub-layers in each encoder layer, the decoder inserts a third sub-layer, which performs multi-head attention over the output of the encoder stack. … We also modify the self-attention sub-layer in the decoder stack to prevent positions from attending to subsequent positions.',
-  },
-  'sec3-2-1': {
-    id: 'sec3-2-1',
-    section: '3.2.1 Scaled Dot-Product Attention',
-    pdfNote: '§3.2.1',
-    en: 'We call our particular attention "Scaled Dot-Product Attention". The input consists of queries and keys of dimension d_k, and values of dimension d_v. We compute the dot products of the query with all keys, divide each by √d_k, and apply a softmax function to obtain the weights on the values. … While for small values of d_k the two mechanisms perform similarly, additive attention outperforms dot product attention without scaling for larger values of d_k. We suspect that for large values of d_k, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by 1/√d_k.',
-  },
-  'sec3-2-2': {
-    id: 'sec3-2-2',
-    section: '3.2.2 Multi-Head Attention',
-    pdfNote: '§3.2.2',
-    en: 'Instead of performing a single attention function with d_model-dimensional keys, values and queries, we found it beneficial to linearly project the queries, keys and values h times with different, learned linear projections to d_k, d_k and d_v dimensions, respectively. … Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions. With a single attention head, averaging inhibits this.',
-  },
-  'sec3-2-3': {
-    id: 'sec3-2-3',
-    section: '3.2.3 Applications of Attention',
-    pdfNote: '§3.2.3',
-    en: 'The Transformer uses multi-head attention in three different ways: (1) In "encoder-decoder attention" layers … (2) The encoder contains self-attention layers … (3) Similarly, self-attention layers in the decoder allow each position in the decoder to attend to all positions in the decoder up to and including that position. We need to prevent leftward information flow in the decoder to preserve the auto-regressive property.',
-  },
-  'sec3-3': {
-    id: 'sec3-3',
-    section: '3.3 Position-wise FFN',
-    pdfNote: '§3.3',
-    en: 'In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network, which is applied to each position separately and identically. This consists of two linear transformations with a ReLU activation in between. … While the linear transformations are the same across different positions, they use different parameters from layer to layer.',
-  },
-  'sec3-4': {
-    id: 'sec3-4',
-    section: '3.4 Embeddings and Softmax',
-    pdfNote: '§3.4',
-    en: 'Similarly to other sequence transduction models, we use learned embeddings to convert the input tokens and output tokens to vectors of dimension d_model. We also use the usual learned linear transformation and softmax function to convert the decoder output to predicted next-token probabilities. In our model, we share the same weight matrix between the two embedding layers and the pre-softmax linear transformation.',
-  },
-  'sec3-5': {
-    id: 'sec3-5',
-    section: '3.5 Positional Encoding',
-    pdfNote: '§3.5',
-    en: 'Since our model contains no recurrence and no convolution, in order for the model to make use of the order of the sequence, we must inject some information about the relative or absolute position of the tokens in the sequence. To this end, we add "positional encodings" to the input embeddings at the bottoms of the encoder and decoder stacks. … In this work, we use sine and cosine functions of different frequencies. … We also experimented with using learned positional embeddings instead, and found that the two versions produced nearly identical results.',
-  },
-  sec4: {
-    id: 'sec4',
-    section: '4 Why Self-Attention',
-    pdfNote: '§4',
-    en: 'In this section we compare various aspects of self-attention layers to the recurrent and convolutional layers commonly used for mapping one variable-length sequence of symbol representations (x_1,…,x_n) to another sequence of equal length (z_1,…,z_n). … One is the total computational complexity per layer. Another is the amount of computation that can be parallelized. … The third is the path length between long-range dependencies in the network. … As side benefit, self-attention could yield more interpretable models.',
-  },
-  'sec5-1': {
-    id: 'sec5-1',
-    section: '5.1 Training Data and Batching',
-    pdfNote: '§5.1',
-    en: 'We trained on the standard WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs. Sentences were encoded using byte-pair encoding. … For English-French, we used the significantly larger WMT 2014 English-French dataset consisting of 36M sentences.',
-  },
-  'sec5-2': {
-    id: 'sec5-2',
-    section: '5.2 Hardware and Schedule',
-    pdfNote: '§5.2',
-    en: 'We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models, each training step took about 0.4 seconds. We trained the base models for a total of 100,000 steps or 12 hours. For our big models, step time was 1.0 seconds. The big models were trained for 300,000 steps (3.5 days).',
-  },
-  'sec5-3': {
-    id: 'sec5-3',
-    section: '5.3 Optimizer',
-    pdfNote: '§5.3',
-    en: 'We used the Adam optimizer with β1 = 0.9, β2 = 0.98 and ε = 10^{-9}. We varied the learning rate over the course of training, according to the formula: lrate = d_model^{-0.5} · min(step_num^{-0.5}, step_num · warmup_steps^{-1.5}). This corresponds to increasing the learning rate linearly for the first warmup_steps training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used warmup_steps = 4000.',
-  },
-  'sec5-4': {
-    id: 'sec5-4',
-    section: '5.4 Regularization',
-    pdfNote: '§5.4',
-    en: 'We employ three types of regularization during training: Residual Dropout … we apply dropout to the output of each sub-layer, before it is added to the sub-layer input and normalized. … We also apply dropout to the sums of the embeddings and the positional encodings. … Label Smoothing: during training, we employed label smoothing of value ε_ls = 0.1. This hurts perplexity, as the model learns to be more unsure, but improves accuracy and BLEU score.',
-  },
-  'sec6-1': {
-    id: 'sec6-1',
-    section: '6.1 Machine Translation',
-    pdfNote: '§6.1',
-    en: 'On the WMT 2014 English-to-German translation task, the big transformer model (Transformer (big)) outperforms the best previously reported models (including ensembles) by more than 2.0 BLEU, establishing a new state-of-the-art BLEU score of 28.4. The configuration of this model is listed in the bottom line of Table 3. Training took 3.5 days on 8 P100 GPUs. Even our base model surpasses all previously published models and ensembles, at a fraction of the training cost of any of the competitive models. On the WMT 2014 English-to-French translation task, our big model achieves a BLEU score of 41.0 / 41.8.',
-  },
-  'sec6-2': {
-    id: 'sec6-2',
-    section: '6.2 Model Variations',
-    pdfNote: '§6.2',
-    en: 'To evaluate the importance of different components of the Transformer, we varied our base model in different ways, measuring the change in performance on English-to-German development set. … In Table 3 rows (A), we vary the number of attention heads and the attention key and value dimensions. … In Table 3 rows (C), we vary the number of layers and model size.',
-  },
-  'sec6-3': {
-    id: 'sec6-3',
-    section: '6.3 English Constituency Parsing',
-    pdfNote: '§6.3',
-    en: 'To evaluate if the Transformer can generalize to other tasks we performed experiments on English constituency parsing. This task presents specific challenges: the output is subject to strong structural constraints and is significantly longer than the input. … Our results show that despite the lack of task-specific tuning our model performs surprisingly well.',
-  },
-  sec7: {
-    id: 'sec7',
-    section: '7 Conclusion',
-    pdfNote: '§7',
-    en: 'In this work, we presented the Transformer, the first sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used in encoder-decoder architectures with multi-headed self-attention. For translation tasks, the Transformer can be trained significantly faster than architectures based on recurrent or convolutional layers. … We are excited about the future of attention-based models and plan to apply them to other tasks.',
-  },
+export const pdfAsset = `${import.meta.env?.BASE_URL ?? '/'}article/1706.03762v7.pdf`
+
+function passage(id: string, section: string, page: number, endPage: number, excerpt?: string): OriginalPassage {
+  const pdfNote = page === endPage ? `PDF p. ${page}` : `PDF pp. ${page}–${endPage}`
+  return {
+    id, section, pdfNote,
+    source: { section, page, endPage, locator: section },
+    en: excerpt ?? `${section} · ${pdfNote}`,
+  }
+}
+
+// In print order. Entries without an excerpt point to the English original in the PDF.
+const passages = [
+  passage('abstract', 'Abstract', 1, 1,
+    "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles, by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data."),
+  passage('sec1', '1 Introduction', 2, 2,
+    "In this work we propose the Transformer, a model architecture eschewing recurrence and instead relying entirely on an attention mechanism to draw global dependencies between input and output. The Transformer allows for significantly more parallelization and can reach a new state of the art in translation quality after being trained for as little as twelve hours on eight P100 GPUs."),
+  passage('sec2', '2 Background', 2, 2,
+    "The goal of reducing sequential computation also forms the foundation of the Extended Neural GPU [16], ByteNet [18] and ConvS2S [9], all of which use convolutional neural networks as basic building block, computing hidden representations in parallel for all input and output positions. In these models, the number of operations required to relate signals from two arbitrary input or output positions grows in the distance between positions, linearly for ConvS2S and logarithmically for ByteNet. This makes it more difficult to learn dependencies between distant positions [12]. In the Transformer this is reduced to a constant number of operations, albeit at the cost of reduced effective resolution due to averaging attention-weighted positions, an effect we counteract with Multi-Head Attention as described in section 3.2."),
+  passage('sec3', '3 Model Architecture', 2, 3,
+    "The Transformer follows this overall architecture using stacked self-attention and point-wise, fully connected layers for both the encoder and decoder, shown in the left and right halves of Figure 1, respectively."),
+  passage('sec3-1', '3.1 Encoder and Decoder Stacks', 3, 3,
+    "The decoder is also composed of a stack of N = 6 identical layers."),
+  passage('sec3-2', '3.2 Attention', 3, 4,
+    "An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors."),
+  passage('sec3-2-1', '3.2.1 Scaled Dot-Product Attention', 4, 4,
+    "In practice, we compute the attention function on a set of queries simultaneously, packed together into a matrix Q."),
+  passage('sec3-2-2', '3.2.2 Multi-Head Attention', 4, 5,
+    "Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions. With a single attention head, averaging inhibits this."),
+  passage('sec3-2-3', '3.2.3 Applications of Attention in our Model', 5, 5,
+    "In \"encoder-decoder attention\" layers, the queries come from the previous decoder layer, and the memory keys and values come from the output of the encoder. This allows every position in the decoder to attend over all positions in the input sequence. This mimics the typical encoder-decoder attention mechanisms in sequence-to-sequence models such as [38, 2, 9]."),
+  passage('sec3-3', '3.3 Position-wise Feed-Forward Networks', 5, 5,
+    "In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network, which is applied to each position separately and identically. This consists of two linear transformations with a ReLU activation in between."),
+  passage('sec3-4', '3.4 Embeddings and Softmax', 5, 5),
+  passage('sec3-5', '3.5 Positional Encoding', 6, 6,
+    "We also experimented with using learned positional embeddings [9] instead, and found that the two versions produced nearly identical results (see Table 3 row (E)). We chose the sinusoidal version because it may allow the model to extrapolate to sequence lengths longer than the ones encountered during training."),
+  passage('sec4', '4 Why Self-Attention', 6, 7,
+    "One is the total computational complexity per layer. Another is the amount of computation that can be parallelized, as measured by the minimum number of sequential operations required."),
+  passage('sec5', '5 Training', 7, 7,
+    "This section describes the training regime for our models."),
+  passage('sec5-1', '5.1 Training Data and Batching', 7, 7,
+    "We trained on the standard WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs. Sentences were encoded using byte-pair encoding [3], which has a shared source-target vocabulary of about 37000 tokens. For English-French, we used the significantly larger WMT 2014 English-French dataset consisting of 36M sentences and split tokens into a 32000 word-piece vocabulary [38]. Sentence pairs were batched together by approximate sequence length. Each training batch contained a set of sentence pairs containing approximately 25000 source tokens and 25000 target tokens."),
+  passage('sec5-2', '5.2 Hardware and Schedule', 7, 7,
+    "We trained our models on one machine with 8 NVIDIA P100 GPUs."),
+  passage('sec5-3', '5.3 Optimizer', 7, 7,
+    "We used warmup_steps = 4000."),
+  passage('sec5-4', '5.4 Regularization', 7, 8,
+    "We employ three types of regularization during training:"),
+  passage('sec6', '6 Results', 8, 8,
+    "6 Results"),
+  passage('sec6-1', '6.1 Machine Translation', 8, 8,
+    "On the WMT 2014 English-to-French translation task, our big model achieves a BLEU score of 41.0, outperforming all of the previously published single models, at less than 1/4 the training cost of the previous state-of-the-art model."),
+  passage('sec6-2', '6.2 Model Variations', 8, 9,
+    "While single-head attention is 0.9 BLEU worse than the best setting, quality also drops off with too many heads."),
+  passage('sec6-3', '6.3 English Constituency Parsing', 9, 10,
+    "To evaluate if the Transformer can generalize to other tasks we performed experiments on English constituency parsing. This task presents specific challenges: the output is subject to strong structural constraints and is significantly longer than the input. Furthermore, RNN sequence-to-sequence models have not been able to attain state-of-the-art results in small-data regimes [37]."),
+  passage('sec7', '7 Conclusion', 10, 10,
+    "In this work, we presented the Transformer, the first sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used in encoder-decoder architectures with multi-headed self-attention."),
+  passage('ack', 'Acknowledgements', 10, 10,
+    "We are grateful to Nal Kalchbrenner and Stephan Gouws for their fruitful comments, corrections and inspiration."),
+  passage('references', 'References', 10, 12),
+  passage('appendix', 'Attention Visualizations', 13, 15,
+    "Figure 3: An example of the attention mechanism following long-distance dependencies in the encoder self-attention in layer 5 of 6. Many of the attention heads attend to a distant dependency of the verb ‘making’, completing the phrase ‘making...more difficult’. Attentions here shown only for the word ‘making’. Different colors represent different heads. Best viewed in color."),
+]
+export const originals: Record<string, OriginalPassage> = Object.fromEntries(
+  passages.map(p => [p.id, p]),
+)
+
+export function originalSource(originalId: string): PaperSource {
+  const passage = originals[originalId]
+  if (!passage?.source) throw new Error(`Missing PDF source for originalId "${originalId}"`)
+  return passage.source
 }
