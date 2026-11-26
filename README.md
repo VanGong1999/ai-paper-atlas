@@ -30,6 +30,18 @@ npm run preview
 VITE_BASE=/your-repo-name/ npm run build
 ```
 
+### GitHub Pages 自动部署
+
+仓库已包含 `.github/workflows/deploy-pages.yml`。推送到 `main` 后，GitHub Actions 会自动构建并发布到 GitHub Pages。
+
+首次使用时，在仓库的 `Settings → Pages → Build and deployment → Source` 中选择 `GitHub Actions`。本仓库的项目站点地址通常是：
+
+```text
+https://<github-username>.github.io/ai-paper-atlas/
+```
+
+Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 以支持直接打开论文详情等前端路由。
+
 ## 页面
 
 | 路径 | 说明 |
