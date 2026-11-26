@@ -212,6 +212,8 @@
 
 .stage-canvas {
   position: relative;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -224,6 +226,8 @@
 
 .stage-svg {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
   display: block;
 }
@@ -246,6 +250,7 @@
 .stage-node text {
   fill: var(--text);
   font-size: 11px;
+  font-weight: 650;
   pointer-events: none;
 }
 
@@ -442,6 +447,11 @@
   font: 10px var(--font-mono);
 }
 
+.heatmap-panel {
+  position: absolute;
+  inset: auto 12px 12px;
+}
+
 .heat-grid {
   display: grid;
   grid-template-columns: 54px repeat(4, 1fr);
@@ -623,7 +633,27 @@
   }
 
   .stage-node text {
-    font-size: 15px;
+    font-size: 24px;
+  }
+
+  .stage-svg {
+    transform: none !important;
+  }
+
+  .stage-canvas:has(.heatmap-panel) {
+    display: grid;
+    grid-template-rows: minmax(220px, 1fr) auto;
+    overflow: auto;
+  }
+
+  .stage-canvas:has(.heatmap-panel) .heatmap-panel {
+    position: static;
+    inset: auto;
+    padding: 0 8px 8px;
+  }
+
+  .stage-canvas:has(.heatmap-panel) .stage-svg {
+    min-height: 220px;
   }
 
   .fulltext-main,

@@ -105,7 +105,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
       </svg>
 
       {lesson.id === 'sdp' && step.id === 'heat' && (
-        <div style={{ position: 'absolute', inset: 'auto 12px 12px 12px' }}>
+        <div className="heatmap-panel">
           <div className="heat-grid">
             <span className="lab">Q↓/K→</span>
             {words.map((w) => (

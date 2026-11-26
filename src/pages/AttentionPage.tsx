@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { LessonNav } from '../components/paper/LessonNav'
 import { OriginalDrawer } from '../components/paper/OriginalDrawer'
 import { PaperModeTabs, type PaperMode } from '../components/paper/PaperModeTabs'
@@ -38,7 +38,10 @@ export function AttentionPage() {
     visited: new Set([`${lessons[0].id}/${lessons[0].steps[0].id}`]),
   }))
   const [playing, setPlaying] = useState(false)
+  const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
+  const translationNavRef = useRef<HTMLElement>(null)
+  const translationItemRef = useRef<HTMLButtonElement>(null)
 
   const lesson = lessons[lessonIndex]
   const step = lesson.steps[stepIndex]
@@ -57,7 +60,19 @@ export function AttentionPage() {
       })
     }, 4200)
     return () => window.clearInterval(timer)
-  }, [playing, mode, lessonIndex])
+  }, [playing, mode, lessonIndex, playbackKey])
+
+  useLayoutEffect(() => {
+    if (mode !== 'fulltext') return
+    const nav = translationNavRef.current
+    const active = translationItemRef.current
+    if (!nav || !active) return
+
+    const bounds = nav.getBoundingClientRect()
+    const item = active.getBoundingClientRect()
+    if (item.top < bounds.top) nav.scrollTop += item.top - bounds.top
+    if (item.bottom > bounds.bottom) nav.scrollTop += item.bottom - bounds.bottom
+  }, [mode, section.id])
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
@@ -157,6 +172,7 @@ export function AttentionPage() {
               onTogglePlayback={() => setPlaying(value => !value)}
               onReplay={() => {
                 setPosition(current => visitStep(current, current.lessonIndex, 0))
+                setPlaybackKey(value => value + 1)
                 setPlaying(true)
               }}
             />
@@ -183,11 +199,12 @@ export function AttentionPage() {
 
         {mode === 'fulltext' && (
           <div className="fulltext-layout">
-            <nav className="fulltext-nav" aria-label="中文章节">
+            <nav className="fulltext-nav" aria-label="中文章节" ref={translationNavRef}>
               {fulltextZh.map(block => (
                 <button
                   key={block.id}
                   type="button"
+                  ref={block.id === section.id ? translationItemRef : undefined}
                   aria-current={block.id === section.id ? 'location' : undefined}
                   onClick={() => setPosition(current => ({ ...current, translationId: block.id }))}
                 >
