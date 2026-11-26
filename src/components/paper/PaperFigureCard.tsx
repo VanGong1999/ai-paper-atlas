@@ -36,8 +36,8 @@ const appendixFigureDetails: Record<string, { plain: string; role: string; detai
     teachingExplanation: '这是附录图注的观察对象，不是 §3.2.3 的 Q/K/V 定义。',
   },
   'figure-4': {
-    plain: '附录图 4 比较同一层中参与指代消解的两个头。',
-    role: '用于观察第 5 个头以及第 5、6 个头从 its 发出的注意力。',
+    plain: '附录图 4 比较同一层中似乎参与指代消解的两个头。',
+    role: '用于观察图注所称的第 5 个头以及第 5、6 个头从 its 发出的注意力。',
     detail: ['上图展示第 5 个头的完整注意力；下图展示第 5、6 个头从 its 发出的注意力。'],
     teachingExplanation: '这是附录图注的头部对比，不是 §3.2.3 的 Q/K/V 定义。',
   },

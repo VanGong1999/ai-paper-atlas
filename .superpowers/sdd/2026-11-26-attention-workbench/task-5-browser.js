@@ -132,6 +132,7 @@ async (page) => {
           assert(tooltipText.includes(marker), id + ' appendix caption')
           assert(tooltipText.includes('Attention Visualizations · PDF p. ' + pageNumber), id + ' appendix source')
           assert(!tooltipText.includes('Q · 查询') && !tooltipText.includes('K · 键') && !tooltipText.includes('V · 值'), id + ' inherited Q/K/V fact')
+          if (id === 'figure-4') assert(tooltipText.includes('似乎参与') && !tooltipText.includes('参与了指代消解的两个头。'), 'figure-4 qualified wording')
           await page.keyboard.press('Escape')
           await tip.waitFor({ state: 'hidden' })
         }

@@ -6,7 +6,10 @@ pw="$HOME/.codex/skills/playwright/scripts/playwright_cli.sh"
 suite=.superpowers/sdd/2026-11-26-attention-workbench
 base=http://127.0.0.1:5184
 status=0
+total=0
+passed=0
 for script in "$@"; do
+  total=$((total + 1))
   name=${script##*/}
   session="task5-${name%.js}"
   printf '%s\n' "${name%.js}"
@@ -31,7 +34,10 @@ for script in "$@"; do
   sed '/^### Ran Playwright code/,$d' "$suite/$name.log"
   if ! rg -q '^### Result$' "$suite/$name.log" || rg -q '^### Error$' "$suite/$name.log"; then
     status=1
+  else
+    passed=$((passed + 1))
   fi
   "$pw" -s="$session" close >/dev/null 2>&1 || true
 done
+printf 'summary: %s/%s suites passed\n' "$passed" "$total"
 exit "$status"

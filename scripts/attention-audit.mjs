@@ -82,25 +82,33 @@ const positionFormula = 'θ = pos / 10000^(2i/d_model)，PE(pos,2i) = sin θ，P
 // value is checked in the registered explainable and in its generated Learn
 // step, with the exact source section/page/originalId checked below.
 const trainingFacts = [
-  { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7,
-    entry: [/450 万句对/, /37000/, /3600 万句/, /32000/, /25000 个源词元/, /25000 个目标词元/],
-    lesson: [/25000 个源词元/, /25000 个目标词元/] },
-  { id: 'hardware', step: 'train/size', section: 'sec5-2', page: 7,
-    entry: [/8 块 P100/, /0\.4 秒\/步/, /100000 步/, /12 小时/, /1\.0 秒\/步/, /300000 步/, /3\.5 天/],
-    lesson: [/8 块 P100/, /100000 步/, /300000 步/, /12 小时/, /3\.5 天/] },
-  { id: 'optimizer', step: 'train/opt', section: 'sec5-3', page: 7,
-    entry: [/^Adam 与学习率/, /β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /d_model\^\(-0\.5\)/, /warmup\^\(-1\.5\)/],
-    lesson: [/^Adam 与学习率/, /β₁=0\.9/, /β₂=0\.98/, /ε=10⁻⁹/, /4000 个预热步/, /d_model\^\(-0\.5\)/, /warmup\^\(-1\.5\)/] },
-  { id: 'dropout', step: 'train/reg', section: 'sec5-4', page: 8,
-    entry: [/P_drop=0\.1(?![0-9])/], lesson: [/P_drop=0\.1(?![0-9])/] },
-  { id: 'smoothing', step: 'train/labels', section: 'sec5-4', page: 8,
-    entry: [/ε_ls=0\.1(?![0-9])/], lesson: [/ε_ls=0\.1(?![0-9])/] },
+  { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7, fields: [
+    ['corpus.en-de', /英德约 450 万句对.*37000/], ['corpus.en-fr', /英法为 3600 万句.*32000/],
+    ['batch.source_tokens', /25000 个源词元/], ['batch.target_tokens', /25000 个目标词元/],
+  ] },
+  { id: 'hardware', step: 'train/size', section: 'sec5-2', page: 7, fields: [
+    ['hardware.gpus', /8 块 P100/], ['hardware.base.step_time', /基础模型约 0\.4 秒\/步/],
+    ['hardware.base.steps', /基础模型约[^。]*100000 步/], ['hardware.base.duration', /基础模型训练 12 小时/],
+    ['hardware.big.step_time', /大模型 1\.0 秒\/步/], ['hardware.big.steps', /大模型[^。]*300000 步/],
+    ['hardware.big.duration', /大模型训练 3\.5 天/],
+  ] },
+  { id: 'optimizer', step: 'train/opt', section: 'sec5-3', page: 7, fields: [
+    ['optimizer.name', /^Adam 与学习率/], ['optimizer.beta1', /β₁=0\.9/], ['optimizer.beta2', /β₂=0\.98/],
+    ['optimizer.epsilon', /ε=10⁻⁹/], ['optimizer.warmup_steps', /4000 个预热步/],
+    ['equation3.model_width_exponent', /d_model\^\(-0\.5\)/], ['equation3.schedule_exponent', /warmup\^\(-1\.5\)/],
+  ] },
+  { id: 'dropout', step: 'train/reg', section: 'sec5-4', page: 8, fields: [
+    ['regularization.dropout', /P_drop=0\.1(?![0-9])/],
+  ] },
+  { id: 'smoothing', step: 'train/labels', section: 'sec5-4', page: 8, fields: [
+    ['regularization.label_smoothing', /ε_ls=0\.1(?![0-9])/],
+  ] },
 ]
 
 const appendixFacts = {
-  'figure-3': { page: 13, patterns: [/^图 3（第 13 页）/, /编码器 6 层中第 5 层/, /making/] },
-  'figure-4': { page: 14, patterns: [/^图 4（第 14 页）/, /指代消解/, /第 5 个头/, /第 5、6 个头/, /its/] },
-  'figure-5': { page: 15, patterns: [/^图 5（第 15 页）/, /两个不同的编码器自注意力头/, /句子结构/, /不同的任务/] },
+  'figure-3': { page: 13, caption: '图 3（第 13 页）展示了编码器 6 层中第 5 层的自注意力如何追踪远距离依赖。多个头关注动词 making 的远距离依赖，补全 making…more difficult 这一短语。图中仅显示 making 发出的注意力，不同颜色代表不同的头，宜用彩色查看。' },
+  'figure-4': { page: 14, caption: '图 4（第 14 页）中，同一层的两个头似乎参与了指代消解。上图展示第 5 个头的完整注意力，下图仅展示第 5、6 个头从 its 发出的注意力。这个词的注意力分布非常集中。' },
+  'figure-5': { page: 15, caption: '图 5（第 15 页）展示了同一层中两个不同的编码器自注意力头。许多头的行为似乎与句子结构有关。图中的两个头显然学会了执行不同的任务。' },
 }
 
 const tableColumns = {
@@ -145,7 +153,7 @@ export function audit() {
     ...lesson.steps.flatMap(step => step.explainableIds),
   ]))
 
-  for (const { id, step: stepId, section, page, entry: entryPatterns, lesson: lessonPatterns } of trainingFacts) {
+  for (const { id, step: stepId, section, page, fields } of trainingFacts) {
     const entry = explainables[id]
     const lessonStep = steps.get(stepId)
     const entryCopy = [entry?.title, entry?.plain, ...(entry?.detail ?? []), entry?.paperFact, entry?.teachingExplanation].filter(Boolean).join(' ')
@@ -154,8 +162,10 @@ export function audit() {
       `${id}: training fact source must be ${section} p. ${page}`)
     check(lessonStep?.source?.section === originals[lessonStep.originalId]?.source.section && lessonStep.source.page === page && lessonStep.originalId === section,
       `${id}: Learn entry source must be ${section} p. ${page}`)
-    check(entryPatterns.every(pattern => pattern.test(entryCopy)), `${id}: training fact value or schedule differs from PDF-grounded expected values`)
-    check(lessonPatterns.every(pattern => pattern.test(lessonCopy)), `${id}: Learn training fact value or schedule differs from PDF-grounded expected values`)
+    for (const [field, pattern] of fields) {
+      check(pattern.test(entryCopy), `${id}.${field}: explainable value differs from PDF-grounded expected value`)
+      check(pattern.test(lessonCopy), `${id}.${field}: Learn value differs from PDF-grounded expected value`)
+    }
   }
 
   check(isDeepStrictEqual(Object.keys(actualReading), Object.keys(reading)), 'English reader: missing or out-of-order PDF blocks')
@@ -240,12 +250,15 @@ export function audit() {
   for (const [id, entry] of Object.entries(table3Context)) checkExplainable(entry, `table-3 context/${id}`)
 
   const appendix = fulltextZh.find(block => block.id === 'appendix')
+  const figureIds = figures.map(figure => figure.id)
+  const duplicateFigureIds = figureIds.filter((id, index) => figureIds.indexOf(id) !== index)
+  check(duplicateFigureIds.length === 0, `Figures: duplicate stable IDs (${[...new Set(duplicateFigureIds)].join(', ')})`)
   for (const [figureId, expected] of Object.entries(appendixFacts)) {
     const figure = figures.find(item => item.id === figureId)
-    const paragraph = appendix?.paragraphs.find(text => text.startsWith(`图 ${figure?.number}`)) ?? ''
-    check(figure?.originalId === 'appendix' && figure.source.page === expected.page,
+    const paragraphs = appendix?.paragraphs.filter(text => text.startsWith(`图 ${figure?.number}（第 ${expected.page} 页）`)) ?? []
+    check(figure?.originalId === 'appendix' && figure.source.section === originals.appendix.source.section && figure.source.page === expected.page,
       `${figureId}: appendix source mapping is incorrect`)
-    check(expected.patterns.every(pattern => pattern.test(paragraph)), `${figureId}: appendix caption is missing or attached to the wrong stable figure ID`)
+    check(paragraphs.length === 1 && paragraphs[0] === expected.caption, `${figureId}: appendix caption is missing, duplicated, conflicting, or attached to the wrong stable figure ID`)
   }
 
   const offPaperContent = []

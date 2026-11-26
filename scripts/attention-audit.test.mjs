@@ -58,21 +58,21 @@ test('rejects exact training-field mutations in both explainables and Learn entr
     const smoothing = explainables.smoothing
     smoothing.paperFact = smoothing.paperFact.replace('0.1', '0.15')
     const optimizer = explainables.optimizer
-    optimizer.paperFact = optimizer.paperFact.replace('warmup^(-1.5)', 'warmup^(-0.6)')
+    optimizer.paperFact = optimizer.paperFact.replace('d_model^(-0.5)', 'd_model^(-0.6)')
     const labels = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'labels')
     labels.paperFact = labels.paperFact.replace('0.1', '0.15')
     labels.body = labels.body.replace('0.1', '0.15')
     const opt = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'opt')
-    opt.paperFact = opt.paperFact.replace('warmup^(-1.5)', 'warmup^(-0.6)')
-    opt.body = opt.body.replace('warmup^(-1.5)', 'warmup^(-0.6)')
+    opt.paperFact = opt.paperFact.replace('d_model^(-0.5)', 'd_model^(-0.6)')
+    opt.body = opt.body.replace('d_model^(-0.5)', 'd_model^(-0.6)')
     const result = await audit()
     console.log(JSON.stringify(result))
     process.exitCode = result.issues.length ? 1 : 0
   `)
   assert.equal(status, 1)
   const issues = report.issues.join('\n')
-  assert.match(issues, /smoothing.*training fact/)
-  assert.match(issues, /optimizer.*training fact/)
+  assert.match(issues, /smoothing\.regularization\.label_smoothing/)
+  assert.match(issues, /optimizer\.equation3\.model_width_exponent/)
 })
 
 test('rejects scientific notation with a flattened exponent', () => {
@@ -116,4 +116,30 @@ test('rejects appendix Figure 4 head metadata mutations', () => {
   `)
   assert.equal(status, 1)
   assert.match(report.issues.join('\n'), /figure-4.*appendix caption/)
+})
+
+test('rejects duplicate, reversed, and wrong-section appendix Figure 4 evidence', () => {
+  const mutations = [
+    `appendix.paragraphs.push(appendix.paragraphs.find(paragraph => paragraph.startsWith('图 4')))`,
+    `appendix.paragraphs = appendix.paragraphs.map(paragraph => paragraph.startsWith('图 4') ? paragraph.replace('非常集中', '非常分散') : paragraph)`,
+    `figures.find(figure => figure.id === 'figure-4').source.section = 'sec3-2-3'`,
+    `figures.push({ ...figures.find(figure => figure.id === 'figure-4') })`,
+    `const hardware = explainables.hardware; const swapped = '基础模型训练 3.5 天，大模型训练 12 小时'; hardware.paperFact = hardware.paperFact.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped); const hardwareStep = lessons.find(lesson => lesson.id === 'train').steps.find(step => step.id === 'size'); hardwareStep.paperFact = hardwareStep.paperFact.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped); hardwareStep.body = hardwareStep.body.replace('基础模型训练 12 小时，大模型训练 3.5 天', swapped)`,
+  ]
+  for (const mutation of mutations) {
+    const { status, report } = run(['--input-type=module'], `
+      import { audit } from './scripts/attention-audit.mjs'
+      import { fulltextZh } from './src/data/papers/attention/fulltext-zh.ts'
+      import { figures } from './src/data/papers/attention/figures.ts'
+      import { explainables } from './src/data/papers/attention/explainables.ts'
+      import { lessons } from './src/data/papers/attention/lessons.ts'
+      const appendix = fulltextZh.find(block => block.id === 'appendix')
+      ${mutation}
+      const result = await audit()
+      console.log(JSON.stringify(result))
+      process.exitCode = result.issues.length ? 1 : 0
+    `)
+    assert.equal(status, 1)
+    assert.ok(report.issues.length > 0)
+  }
 })
