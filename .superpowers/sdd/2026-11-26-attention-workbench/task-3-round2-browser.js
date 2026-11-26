@@ -18,9 +18,8 @@ async (page) => {
   await page.goto('http://127.0.0.1:5178/papers/attention')
 
   await chapter('编码器与解码器')
-  const flowTargets = page.locator('[data-explainable-kind="data-flow"]')
-  const linearFlow = flowTargets.nth(3)
-  const outputSoftmaxFlow = flowTargets.nth(4)
+  const linearFlow = page.locator('[data-explainable-kind="data-flow"][aria-label="解码器到词表线性投影"]')
+  const outputSoftmaxFlow = page.locator('[data-explainable-kind="data-flow"][aria-label="线性投影到输出 Softmax"]')
   check(await linearFlow.count() === 1, 'Decoder-to-linear flow target is missing')
   check(await outputSoftmaxFlow.count() === 1, 'Linear-to-output-Softmax flow target is missing')
   check(await linearFlow.getAttribute('aria-label') === '解码器到词表线性投影', 'Decoder-to-linear flow label is wrong')
@@ -78,6 +77,7 @@ async (page) => {
       `Full tooltip escaped viewport at ${left},${top}`)
     await page.keyboard.press('Escape')
     await page.mouse.move(160, 600)
+    await page.keyboard.press('Escape')
     await tooltip.waitFor({ state: 'hidden' })
   }
 

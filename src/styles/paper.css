@@ -302,7 +302,7 @@
 
 .stage-flow-target {
   cursor: pointer;
-  pointer-events: bounding-box;
+  pointer-events: none;
 }
 
 .stage-flow-target:focus-visible .stage-edge,
@@ -528,8 +528,22 @@
   font-size: 11px;
   line-height: 1.4;
   overflow-wrap: anywhere;
-  pointer-events: none;
+  pointer-events: auto;
   box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+}
+
+.tip-pop::-webkit-scrollbar {
+  width: 10px;
+}
+
+.tip-pop::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+.tip-pop::-webkit-scrollbar-thumb {
+  background: var(--accent-outline);
+  border: 2px solid var(--surface-2);
+  border-radius: 8px;
 }
 
 .tip-pop p {

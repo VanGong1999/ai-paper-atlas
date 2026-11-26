@@ -27,6 +27,17 @@ export function ArchitectureStage({ highlight }: StageProps) {
         <text className="stage-annotation" x={28} y={52}>源序列 ↑</text>
         <text className="stage-annotation" x={548} y={70} textAnchor="middle">下一词元概率</text>
 
+        {[287, 201].map(y => (
+          <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch
+            explanation="residual" label="编码器残差旁路"
+            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
+        ))}
+        {[287, 201, 115].map(y => (
+          <StageFlow key={y} d={`M339 ${y + 39}H254V${y - 26}H256`} active={decoderActive} branch
+            explanation="residual" label="解码器残差旁路"
+            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
+        ))}
+
         <StageFlow d="M120 414V405M120 366V356M120 330V322M120 287V279M120 244V236M120 201V193M120 158V119"
           active={encoderActive} explanation="encoder" label="编码器数据流"
           example="教学示意 · 沿箭头观察源序列表示经过编码器子层的方向。" />
@@ -42,17 +53,6 @@ export function ArchitectureStage({ highlight }: StageProps) {
         <StageFlow d="M548 148V122" active={highlight.has('softmax')}
           explanation="softmax" label="线性投影到输出 Softmax"
           example="教学示意 · 输出 Softmax 将词表分数转换成下一词元的预测概率。" />
-        {[287, 201].map(y => (
-          <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch
-            explanation="residual" label="编码器残差旁路"
-            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
-        ))}
-        {[287, 201, 115].map(y => (
-          <StageFlow key={y} d={`M339 ${y + 39}H254V${y - 26}H256`} active={decoderActive} branch
-            explanation="residual" label="解码器残差旁路"
-            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
-        ))}
-
         <StageBlock id="embedding" kind="architecture-node" text="输入嵌入" x={37} y={367} w={166} h={38} active={encoderActive} />
         <StageBlock id="position" kind="architecture-node" text="+ 位置编码" x={37} y={329} w={166} h={29} active={encoderActive} />
         {encoder.map(([id, text, y, tone]) => (

@@ -131,6 +131,7 @@ async (page) => {
       check(x < 20 ? box.x >= x + 12 : box.x + box.width <= x + 12, 'Tooltip failed to flip horizontally')
       check(y < 20 ? box.y >= y + 12 : box.y + box.height <= y + 12, 'Tooltip failed to flip vertically')
       await page.mouse.move(160, 600)
+      await page.keyboard.press('Escape')
       await tip.waitFor({ state: 'hidden', timeout: 1500 })
     }
     await page.reload()

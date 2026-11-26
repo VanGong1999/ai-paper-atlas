@@ -21,6 +21,8 @@ type Controller = {
   activeOwner?: string
   open: (target: Target) => void
   leave: (owner: string, pointer: boolean) => void
+  retain: (owner: string) => void
+  release: (owner: string) => void
   dismiss: (owner?: string) => void
   select: (id: ExplainableId, example?: string, content?: ExplainableContent) => void
 }
@@ -37,6 +39,7 @@ export function ExplainableScope({ children, onSelectExplainable }: {
     let shown: string | undefined
     let pending: string | undefined
     let timer: number | undefined
+    let retainedOwner: string | undefined
 
     function display(target?: Target) {
       shown = target?.owner
@@ -46,13 +49,20 @@ export function ExplainableScope({ children, onSelectExplainable }: {
 
     function update() {
       const target = intents.hover ?? intents.focus
+      if (retainedOwner) {
+        if (!target || target.owner === retainedOwner) {
+          window.clearTimeout(timer)
+          return
+        }
+        retainedOwner = undefined
+      }
       if (target && shown === target.owner) {
         window.clearTimeout(timer)
         display(target)
       } else if (pending !== target?.owner || (!target && shown)) {
         window.clearTimeout(timer)
         pending = target?.owner
-        timer = window.setTimeout(() => display(intents.hover ?? intents.focus), 100)
+        timer = window.setTimeout(() => display(intents.hover ?? intents.focus), target ? 100 : 260)
       }
     }
 
@@ -68,7 +78,17 @@ export function ExplainableScope({ children, onSelectExplainable }: {
         delete intents[key]
         update()
       },
+      retain(owner: string) {
+        retainedOwner = owner
+        window.clearTimeout(timer)
+      },
+      release(owner: string) {
+        if (retainedOwner !== owner) return
+        retainedOwner = undefined
+        update()
+      },
       dismiss(owner?: string) {
+        if (!owner || retainedOwner === owner) retainedOwner = undefined
         if (!owner || intents.hover?.owner === owner) delete intents.hover
         if (!owner || intents.focus?.owner === owner) delete intents.focus
         if (!owner || shown === owner) display()
@@ -100,7 +120,10 @@ export function ExplainableScope({ children, onSelectExplainable }: {
       {children}
       {createPortal(
         <AnimatePresence>
-          {active && <TooltipPop id={active.owner + '-tip'} {...active} content={active.content ?? explainables[active.explanation]} />}
+          {active && <TooltipPop id={active.owner + '-tip'} {...active}
+            onCardEnter={() => controller.retain(active.owner)}
+            onCardLeave={() => controller.release(active.owner)}
+            content={active.content ?? explainables[active.explanation]} />}
         </AnimatePresence>,
         document.body,
       )}

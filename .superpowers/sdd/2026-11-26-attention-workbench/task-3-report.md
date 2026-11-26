@@ -20,6 +20,94 @@ pw_task3=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
 /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-before run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-browser.js)"
 ```
 
+## Fix round 3
+
+Changes
+
+- Tooltip cards now accept pointer input, retain the active explanation while the pointer crosses from trigger to card, expose internal scrolling with a visible scrollbar, and keep the sourced paper fact, teaching explanation, and PDF citation available at 320x760 without document overflow.
+- Residual encoder/decoder paths are painted before the meaningful main-flow paths, and flow groups no longer use broad bounding-box pointer capture; transparent stroke hit targets preserve residual explanations without intercepting overlapping main arrows.
+- Regression scripts now use semantic flow labels after the residual z-order change and dismiss interactive cards with Escape in edge checks.
+
+Focused Chrome check
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round3c open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round3c run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-round3-browser.js)"
+```
+
+Output (exit 0)
+
+```text
+"Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering."
+```
+
+Task 3 browser checks
+
+Commands
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-full2 open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-full2 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-browser.js)"
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2-regression2 open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2-regression2 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-round2-browser.js)"
+```
+
+Output (exit 0)
+
+```text
+"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+```
+
+Task 2 browser checks
+
+Commands
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-base open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-base run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-2-browser.js)"
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r1 open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r1 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-2-round1-browser.js)"
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r3 open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r3 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-2-round3-browser.js)"
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r4b open http://127.0.0.1:5178/papers/attention --browser=chrome && /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-r4b run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-2-round4-browser.js)"
+```
+
+Output (exit 0)
+
+```text
+"Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
+"Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
+"Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
+{"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+```
+
+Build and PDF inventory
+
+Commands
+
+```sh
+npm run build
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+set -o pipefail
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -6
+git diff --check && git diff --exit-code -- src/data/papers/attention public/article/1706.03762v7.pdf
+```
+
+Output (exit 0)
+
+```text
+✓ 1205 modules transformed.
+✓ built in 1.36s
+(!) Some chunks are larger than 500 kB after minification.
+TAP version 13
+1..2
+# tests 2
+# pass 2
+# fail 0
+"explainables": 34,
+"lessons": 10,
+"steps": 28,
+"issues": []
+task1-diff-exit=0
+```
+
 Output (exit 1, expected)
 
 ```text

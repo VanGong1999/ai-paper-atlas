@@ -8,12 +8,14 @@ type Props = {
   example?: string
   element: Element
   pointer?: { x: number; y: number }
+  onCardEnter: () => void
+  onCardLeave: () => void
 }
 
 const gap = 8
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
 
-export function TooltipPop({ id, content, example, element, pointer }: Props) {
+export function TooltipPop({ id, content, example, element, pointer, onCardEnter, onCardLeave }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
 
@@ -91,6 +93,8 @@ export function TooltipPop({ id, content, example, element, pointer }: Props) {
       ref={ref}
       id={id}
       role="tooltip"
+      onPointerEnter={onCardEnter}
+      onPointerLeave={onCardLeave}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
