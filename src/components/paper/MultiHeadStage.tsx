@@ -18,8 +18,14 @@ export function MultiHeadStage({ highlight, showApplications }: StageProps & { s
         <text className="stage-annotation" x={408} y={31}>拼接</text>
         <text className="stage-annotation" x={540} y={31}>输出</text>
         <rect className="stage-lane" x={224} y={42} width={149} height={274} rx={9} />
-        <StageFlow d="M151 170H193" active={!showApplications} arrow={false} />
-        <StageFlow d="M471 163H486M530 163H539" active={!showApplications} />
+        <StageFlow d="M151 170H193M193 65V289" active={!showApplications} arrow={false}
+          explanation="heads" label="Q、K、V → 各头投影" example="教学示意 · Q、K、V → 各头投影：每个头使用自己的投影矩阵。" />
+        <StageFlow d="M380 65V289M380 163H394" active={!showApplications} arrow={false}
+          explanation="concat" label="各头输出 → Concat" example="教学示意 · 各头输出 → Concat：沿特征维拼接各头表示。" />
+        <StageFlow d="M471 163H486" active={!showApplications}
+          explanation="concat" label="Concat → Wᴼ" example="教学示意 · Concat → Wᴼ：拼接结果进入输出投影。" />
+        <StageFlow d="M530 163H539" active={!showApplications}
+          explanation="concat" label="Wᴼ → 表示" example="教学示意 · Wᴼ → 表示：输出投影恢复模型维度。" />
         <StageBlock id="heads" text="Q · K · V" caption="d_model = 512" x={23} y={146} w={128} h={48} tone="encoder" active={!showApplications} />
 
         {heads.map((head, index) => {
@@ -27,7 +33,10 @@ export function MultiHeadStage({ highlight, showApplications }: StageProps & { s
           const active = !showApplications && (selected === undefined || selected === head)
           return (
             <g key={head}>
-              <StageFlow d={`M193 170V${y + 13}H238M359 ${y + 13}H380V163H394`} active={active} arrow={false} />
+              <StageFlow d={`M193 ${y + 13}H238`} active={active} arrow={false}
+                explanation="heads" label={`投影 → Head ${head}`} example={`教学示意 · 投影 → Head ${head}：用本头投影后的查询、键和值计算注意力。`} />
+              <StageFlow d={`M359 ${y + 13}H380`} active={active} arrow={false}
+                explanation="concat" label={`Head ${head} → Concat`} example={`教学示意 · Head ${head} → Concat：本头的输出作为拼接结果中的一段。`} />
               <StageBlock id="heads" kind="attention-head" text={`Head ${head}`} x={238} y={y} w={121} h={26}
                 tone={index % 2 ? 'decoder' : 'attn'} active={active} selected={selected === head}
                 example={`教学示意 · 第 ${head} 个头沿独立投影计算一行权重。`} onActivate={() => setSelected(current => current === head ? undefined : head)} />

@@ -550,6 +550,11 @@
   margin: 3px 0;
 }
 
+.tip-key-hint {
+  display: block;
+  color: var(--muted);
+}
+
 .tip-title {
   font-size: 13px;
   line-height: 1.25;

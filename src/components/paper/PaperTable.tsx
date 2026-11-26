@@ -4,6 +4,7 @@ import { paperTables, table3Context, type TableRedraw } from './paperTables'
 
 export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: TableRedraw }) {
   const table = paperTables[redraw]
+  const base = redraw === 'variants' ? table.rows.find(row => row.baseline) : undefined
   const reference = `${figure.kind} ${figure.number}`
   return (
     <>
@@ -33,12 +34,20 @@ export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: Ta
                       : redraw === 'variants' && span === 9 ? 'Configuration' : column.label
                     const context = `${row.label} · ${label} · ${text}`
                     const cellContent = cellObject?.content ?? (span > 1 ? row.content : column.content)
+                    const baseline = base?.cells[index]
+                    let example = `${reference} · ${context}`
+                    // The last three Table 3 columns are dev PPL, dev BLEU and millions of parameters.
+                    if (!row.baseline && index >= 9 && text && typeof baseline === 'string') {
+                      const delta = Number(text) - Number(baseline)
+                      const precision = baseline.split('.')[1]?.length ?? 0
+                      example += ` · 相对 base（教学计算）：${text} − ${baseline} = ${delta > 0 ? '+' : ''}${delta.toFixed(precision)}`
+                    }
                     const best = table.best?.(row, index)
                     return (
                       <td key={index} colSpan={span} className={best ? 'paper-table-best' : undefined}>
                         {text && (
                           <Explainable as="button" explanation={column.explanation} kind="paper-table-cell"
-                            content={cellContent} label={context} example={`${reference} · ${context}`}>
+                            content={cellContent} label={context} example={example}>
                             {text}
                           </Explainable>
                         )}

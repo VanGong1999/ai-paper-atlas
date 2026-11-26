@@ -198,10 +198,14 @@ def printed_table_rows(page, box, data_top, starts):
         boundaries = [box[0], *starts, box[2]]
         cells = []
         for left, right in zip(boundaries, boundaries[1:]):
-            text = pdfplumber.utils.extract_text(
-                [char for char in line["chars"] if left <= char["x0"] < right],
-                x_tolerance=1,
-            )
+            chars = [char for char in line["chars"] if left <= char["x0"] < right]
+            # Table 1 uses a smaller, raised glyph for powers of n and d.
+            # Recover that distinction before extract_text flattens the baseline.
+            for index, (base, power) in enumerate(zip(chars, chars[1:]), start=1):
+                if (base["text"] in ("n", "d") and power["text"].isdigit()
+                        and power["size"] < base["size"] and power["bottom"] < base["bottom"]):
+                    chars[index] = {**power, "text": power["text"].translate(SUPERSCRIPT)}
+            text = pdfplumber.utils.extract_text(chars, x_tolerance=1)
             cells.append(re.sub(
                 r"(\d+(?:\.\d+)?)\s*·\s*10(\d{2,3})",
                 lambda match: f"{match.group(1)} · 10{match.group(2).translate(SUPERSCRIPT)}",

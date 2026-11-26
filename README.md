@@ -73,7 +73,7 @@ node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.tes
 npm run build
 ```
 
-浏览器验收使用仓库提交的 10 个套件（Task 3 四个、Task 4 五个、Task 5 一个）。运行器需要 Chrome、ripgrep 和已缓存 Playwright CLI 的 Codex Playwright 包装脚本。用下面的命令启动开发服务器，在另一个终端运行套件。
+浏览器验收使用仓库提交的 11 个套件（Task 3 四个、Task 4 五个、Task 5 两个）。运行器需要 Chrome、ripgrep 和已缓存 Playwright CLI 的 Codex Playwright 包装脚本。用下面的命令启动开发服务器，在另一个终端运行套件。
 
 ```sh
 npm run dev -- --host 127.0.0.1 --port 5184 --strictPort
@@ -84,7 +84,7 @@ s=.superpowers/sdd/2026-11-26-attention-workbench
 bash "$s/task-5-run-browser.sh" \
   "$s/task-3-browser.js" "$s/task-3-round1-browser.js" "$s/task-3-round2-browser.js" "$s/task-3-round4-browser.js" \
   "$s/task-4-browser.js" "$s/task-4-round1-browser.js" "$s/task-4-round2-browser.js" "$s/task-4-round3-browser.js" "$s/task-4-round4-browser.js" \
-  "$s/task-5-browser.js"
+  "$s/task-5-browser.js" "$s/task-5-final-browser.js"
 ```
 
 `task-5-browser.js` 在 1440、1024、390 三种宽度下分别检查浅色和深色主题，共六种组合。每种组合都通过鼠标悬停和键盘聚焦检查图 4 提示卡摘要中的“似乎参与”。

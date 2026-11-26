@@ -537,3 +537,149 @@ Exit 0. Exact TAP totals follow.
 # todo 0
 # duration_ms 86948.37875
 ```
+
+## Final fix wave for whole-branch review
+
+Parent `97825668175ae0a6eb890b2f0e9c41335bf4e6f3`. The paper evidence for this wave comes from `public/article/1706.03762v7.pdf`.
+
+| Review finding | Change and evidence |
+| --- | --- |
+| Keyboard access | Focus opens the card immediately. Up/Down, Page Up/Down and Home/End scroll its contents from the trigger. Tab advances to the next target and Escape dismisses the card. The browser regression measures the visible bounds of the fact, teaching paragraph and citation, plus document scroll and width. It exercises Softmax and Head 1 at 390×844, and Softmax and the Figure 4 title at 1024×184. |
+| Live selection | Leaving Learn clears the selected element along with its stage. Moving either position-encoding slider clears the previous point explanation. Tests select animal → ate at 0.20 and the sine point at position 16, then verify the mode roundtrip, pressed state, and the formula after moving from dimension 64 to 66. |
+| Table 1 | The PDF stores the exponent as a smaller raised glyph. Extraction retains that distinction and the comparator preserves it. The mutation changes the three superscript 2s to ordinary digits in memory. The audit identifies each changed row on p. 6. |
+| Data flows | Five scaled dot-product paths use §3.2.1, p. 4. Twenty multi-head paths use §3.2.2, p. 5. Each head has distinct incoming and outgoing hit targets. The regression measures real SVG hit points on every path and exercises hover, Tab and Enter on the score → Softmax and Head 4 → Concat paths. |
+| Training | §5.2–5.3, p. 7 supplies the 4000-step warmup and the independent run endpoints. Base took about 0.4 seconds per step for 100000 steps and 12 hours. Big took 1.0 seconds per step for 300000 steps and 3.5 days. The stage labels its logarithmic step axis and teaching calculation, exposes the milestones, and evaluates equation (3) using the Table 3 model widths. The base readout ends at its reported final step. |
+| Table 3 | PPL, BLEU and parameter-count tooltips subtract the base row's printed value in the same column. The arithmetic is labeled as a teaching calculation. The regression checks a negative difference (single-head BLEU 24.9 − 25.8 = −0.9), a tie (row E PPL) and a positive difference (big parameter count) against Table 3, p. 9. |
+
+The exact keyboard, state, path, training and metric probes all failed against a temporary archive of the reviewed parent. At the starting revision the old comparator accepted all three flattened expressions and the mutation test failed as expected. During replay, the original Table 3 and Figure 4 suites exposed a hidden-description text collision and a tooltip-summary lookup failure. The final markup keeps the accessible description beside the HTML button and the summary immediately after the title.
+
+### Commands
+
+Run from the repository root with Node 22.22.1. The Chrome runner uses the Vite dev server on port 5184.
+
+```sh
+export PDF_PYTHON="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python"
+node scripts/attention-audit.mjs
+node scripts/attention-pdf-inventory.mjs --validate
+node --test scripts/attention-audit.test.mjs scripts/attention-pdf-inventory.test.mjs scripts/attention-reader.test.mjs
+npm run build
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --exit-code 9782566 -- public/article src/data/papers/attention src/components/paper/attention-original-text.json scripts/attention-pdf-inventory.mjs
+git diff --cached --check
+
+d=.superpowers/sdd/2026-11-26-attention-workbench
+git ls-files "$d/task-[345]*browser.js" | xargs bash "$d/task-5-run-browser.sh"
+```
+
+### Source audit and PDF inventory
+
+Both commands exited 0. The audit matched all 27 English blocks, 40 references, 3 stable appendix captions, 13/13 key claims, 9/9 formulas, and 9/9 original preview crops. Table row matches were 4/4, 10/10, 20/20 and 12/12 (46/46 total). The audit returned empty `issues`, `missingPreviews`, `orphanedExplainables` and `offPaperContent` arrays.
+
+The inventory reports 15 pages, 27 sections, 34 explainables, 10 lessons, 28 steps and `issues: []`. The supplied PDF SHA-256 is `bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697`. The built PDF comparison and the protected-file diff both exited 0.
+
+### Node data and mutation suites
+
+Exit 0.
+
+```text
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 107364.602209
+```
+
+### Chrome suites
+
+Exit 0. Exact runner output follows.
+
+```text
+task-3-browser
+### Result
+"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+task-3-round1-browser
+### Result
+"Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
+task-3-round2-browser
+### Result
+"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+task-3-round4-browser
+### Result
+"Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal."
+task-4-browser
+### Result
+"Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark."
+task-4-round1-browser
+### Result
+"Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations."
+task-4-round2-browser
+### Result
+"Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers."
+task-4-round3-browser
+### Result
+"Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables."
+task-4-round4-browser
+### Result
+"Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset."
+task-5-browser
+### Result
+["1440x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1440x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1024x900 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","1024x900 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","390x844 light: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary","390x844 dark: 4 modes, no overflow, 4 hover + 4 focus corners, pause/replay/reduced motion, both PDF fallbacks, Figure 4 qualified hover/focus summary"]
+task-5-final-browser
+### Result
+["Softmax keyboard reading at 390x844","Head 1 keyboard reading at 390x844","Softmax keyboard reading at 1024x184","Figure 4 keyboard reading at 1024x184","heatmap mode roundtrip","position dimension change","缩放分数 → Softmax hit, hover and keyboard","Head 4 → Concat hit, hover and keyboard","training schedule milestones","Table 3 metric differences"]
+summary: 11/11 suites passed
+```
+
+The five historical, local-only compatibility probes also ran with `bash "$d/task-5-run-browser.sh" "$d"/task-2*browser.js "$d/task-3-round3-browser.js"`. They cover Task 2 and the pointer-retention/residual-path regression. The runner returned `summary: 5/5 suites passed`. The committed replay above is self-contained. A separate training-stage layout check found document widths 1440, 1024 and 390, stage client/scroll width pairs 863/863, 597/597 and 390/390, and zero node labels wider than their boxes.
+
+### Production build
+
+Exit 0.
+
+```text
+> ai-paper-atlas@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 1213 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                       1.09 kB │ gzip:   0.59 kB
+dist/assets/index-D2zCNl1R.css       42.06 kB │ gzip:   9.30 kB
+dist/assets/ForceOrbit-DytF8_dF.js  206.43 kB │ gzip:  71.02 kB
+dist/assets/index-YTMarTBj.js       596.61 kB │ gzip: 201.43 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.52s
+```
+
+The additional GitHub Pages build with `VITE_BASE=/ai-paper-atlas/` also exited 0. Its index uses the configured asset prefix and its deployed PDF compared byte-for-byte equal. The production build retains Vite’s main-chunk size advisory. The whole-branch review deferred individual focus targets for appendix word pairs. Their original PDF plots supply the weights.
+
+### Files in the wave
+
+```text
+.superpowers/sdd/2026-11-26-attention-workbench/task-5-final-browser.js
+.superpowers/sdd/2026-11-26-attention-workbench/task-5-report.md
+README.md
+scripts/attention-audit.mjs
+scripts/attention-audit.test.mjs
+scripts/attention-reader-assets.py
+src/components/paper/AttentionMatrixStage.tsx
+src/components/paper/Explainable.tsx
+src/components/paper/MultiHeadStage.tsx
+src/components/paper/PaperTable.tsx
+src/components/paper/PositionEncodingStage.tsx
+src/components/paper/Stage.tsx
+src/components/paper/TooltipPop.tsx
+src/components/paper/TrainingStage.tsx
+src/pages/AttentionPage.tsx
+src/styles/paper.css
+```

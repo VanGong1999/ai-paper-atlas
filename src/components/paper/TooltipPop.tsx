@@ -20,6 +20,10 @@ export function TooltipPop({ id, content, example, element, pointer, onCardEnter
   const reduceMotion = useReducedMotion()
 
   useLayoutEffect(() => {
+    if (ref.current) ref.current.scrollTop = 0
+  }, [element, example, content])
+
+  useLayoutEffect(() => {
     const tip = ref.current
     if (!tip) return
 
@@ -61,7 +65,9 @@ export function TooltipPop({ id, content, example, element, pointer, onCardEnter
       const preferredWidth = Math.min(288, Math.max(rightSpace, leftSpace))
       const preferredHeight = Math.max(1, Math.max(lowerSpace, upperSpace))
       tip.style.maxWidth = `${preferredWidth}px`
-      tip.style.maxHeight = `${preferredHeight}px`
+      // A short viewport still has room beside the focused trigger.
+      const beside = !pointer && preferredHeight < 110 && Math.max(leftSpace, rightSpace) >= 160
+      tip.style.maxHeight = `${beside ? maxY - minY : preferredHeight}px`
       const { width, height } = tip.getBoundingClientRect()
       const xRight = compactTrigger ? Math.max(x + gap, anchor.right + gap) : x + gap
       const xLeft = compactTrigger ? Math.min(x - gap - width, anchor.left - gap - width) : x - gap - width
@@ -102,6 +108,7 @@ export function TooltipPop({ id, content, example, element, pointer, onCardEnter
     >
       <strong className="tip-title">{content.title}</strong>
       <p>{content.plain} {content.role}</p>
+      {!pointer && <span className="tip-key-hint">↑ ↓ / PgUp PgDn 滚动 · Esc 关闭</span>}
       {example && <p className="tip-example"><strong>{example}</strong></p>}
       {content.detail.map(line => <p className="tip-detail" key={line}>{line}</p>)}
       <p><strong>论文事实 · {content.paperFact}</strong></p>

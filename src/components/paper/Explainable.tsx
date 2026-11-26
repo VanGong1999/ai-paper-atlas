@@ -74,9 +74,15 @@ export function ExplainableScope({ children, onSelectExplainable }: {
 
     return {
       open(target: Target) {
-        if (!target.pointer && intents.hover?.owner !== target.owner) delete intents.hover
-        intents[target.pointer ? 'hover' : 'focus'] = target
-        update()
+        if (target.pointer) {
+          intents.hover = target
+          update()
+        } else {
+          delete intents.hover
+          intents.focus = target
+          retainedOwner = undefined
+          display(target)
+        }
       },
       leave(owner: string, pointer: boolean) {
         const key = pointer ? 'hover' : 'focus'
@@ -161,7 +167,8 @@ export function Explainable(props: Props) {
   const { open, leave, dismiss, select } = scope
   const descriptionId = owner + '-description'
   const explainable = content ?? explainables[explanation]
-  const description = [example, explainable.plain].filter(Boolean).join(' ')
+  const description = [example, explainable.plain, '论文事实 · ' + explainable.paperFact,
+    '教学解释 · ' + explainable.teachingExplanation, `${explainable.source.section} · PDF p. ${explainable.source.page}`].filter(Boolean).join(' ')
 
   useEffect(() => () => dismiss(owner), [dismiss, owner])
 
@@ -183,6 +190,24 @@ export function Explainable(props: Props) {
 
   function onKeyDown(event: KeyboardEvent<Element>) {
     if (event.key === 'Escape') dismiss()
+    const tip = document.getElementById(owner + '-tip')
+    if (scope?.activeOwner && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      // The trigger owns keyboard focus. Tab stays in the diagram's reading order.
+      const page = Math.max(16, (tip?.clientHeight ?? 0) - 20)
+      const height = tip?.scrollHeight ?? 0
+      const distance: Record<string, number> = {
+        ArrowDown: 16, ArrowUp: -16, PageDown: page, PageUp: -page, Home: -height, End: height,
+      }
+      if (Object.hasOwn(distance, event.key)) {
+        event.preventDefault()
+        if (tip && scope.activeOwner === owner) {
+          tip.scrollTop += distance[event.key]
+        } else {
+          open({ owner, explanation, content, identity, example, element: event.currentTarget })
+        }
+        return
+      }
+    }
     if (props.as !== 'g' || (event.key !== 'Enter' && event.key !== ' ')) return
     event.preventDefault()
     if (!event.repeat) activate(event.currentTarget)
@@ -218,9 +243,9 @@ export function Explainable(props: Props) {
   }
   const { as, explanation: id, kind: targetKind, label: name, example: text, content: targetContent, identity: targetIdentity, onActivate: action, children, ...attributes } = props
   return (
-    <button {...attributes} {...bindings} type="button">
-      {children}
+    <>
+      <button {...attributes} {...bindings} type="button">{children}</button>
       <span hidden id={descriptionId}>{description}</span>
-    </button>
+    </>
   )
 }

@@ -5,6 +5,7 @@ import { AttentionMatrixStage } from './AttentionMatrixStage'
 import { ComplexityStage } from './ComplexityStage'
 import { MultiHeadStage } from './MultiHeadStage'
 import { PositionEncodingStage } from './PositionEncodingStage'
+import { TrainingStage } from './TrainingStage'
 import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
 
 type Props = {
@@ -12,27 +13,29 @@ type Props = {
   step: LessonStep
   playing: boolean
   playbackKey: number
+  onClearSelection: () => void
   zoom: number
 }
 
-export function Stage({ lesson, step, playing, playbackKey, zoom }: Props) {
+export function Stage({ lesson, step, playing, playbackKey, zoom, onClearSelection }: Props) {
   const highlight = useMemo(() => new Set(step.highlight), [step.highlight])
 
   return (
     <div className="stage-canvas" data-stage={lesson.stage} data-playing={playing} data-replay={playbackKey % 2}>
       <div className="stage-scene" style={{ '--stage-zoom': zoom } as CSSProperties}>
-        <LessonScene key={lesson.id} lesson={lesson} step={step} highlight={highlight} />
+        <LessonScene onClearSelection={onClearSelection} key={lesson.id} lesson={lesson} step={step} highlight={highlight} />
       </div>
     </div>
   )
 }
 
-function LessonScene({ lesson, step, highlight }: StageProps & Pick<Props, 'lesson' | 'step'>) {
+function LessonScene({ lesson, step, highlight, onClearSelection }: StageProps & Pick<Props, 'lesson' | 'step' | 'onClearSelection'>) {
   switch (lesson.stage) {
     case 'architecture': return <ArchitectureStage highlight={highlight} />
     case 'attention': return <AttentionMatrixStage highlight={highlight} showHeatmap={step.id === 'heat'} />
     case 'multi-head': return <MultiHeadStage highlight={highlight} showApplications={step.id === 'types'} />
-    case 'position': return <PositionEncodingStage />
+    case 'training': return <TrainingStage highlight={highlight} onClearSelection={onClearSelection} />
+    case 'position': return <PositionEncodingStage onClearSelection={onClearSelection} />
     case 'complexity': return <ComplexityStage key={step.id} highlight={highlight} />
     default: return <LessonDiagram lesson={lesson} highlight={highlight} />
   }

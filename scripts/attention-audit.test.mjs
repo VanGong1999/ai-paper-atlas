@@ -202,3 +202,16 @@ test('reports each equation exponent on the surface where it changed', () => {
     'equation3.step_number_exponent: Learn optimizer.paperFact differs from sec5-3 p. 7',
   ])
 })
+
+test('rejects flattened variable exponents in Table 1 complexity cells', () => {
+  const { status, report } = auditMutation(`
+    const { paperTables } = await import('./src/components/paper/paperTables.ts')
+    for (const row of paperTables.complexity.rows.slice(0, 3)) {
+      row.cells[0] = row.cells[0].replace('²', '2')
+    }
+  `)
+  assert.equal(status, 1)
+  for (const row of [1, 2, 3]) {
+    assert.ok(report.issues.some(issue => issue.startsWith('Table 1 (p. 6) row ' + row + ' ')), report.issues)
+  }
+})

@@ -94,7 +94,10 @@ export function AttentionPage() {
   }, [])
 
   function changeMode(nextMode: PaperMode) {
-    if (nextMode !== 'learn') setPlaying(false)
+    if (nextMode !== 'learn') {
+      setPlaying(false)
+      setSelection(null)
+    }
     setMode(nextMode)
   }
 
@@ -183,7 +186,7 @@ export function AttentionPage() {
                     <button type="button" aria-label="放大" onClick={() => setZoom(value => Math.min(1.4, value + 0.1))}>+</button>
                   </div>
                 </div>
-                <Stage lesson={lesson} step={step} playing={playing} playbackKey={playbackKey} zoom={zoom} />
+                <Stage onClearSelection={() => setSelection(null)} lesson={lesson} step={step} playing={playing} playbackKey={playbackKey} zoom={zoom} />
               </div>
 
               <aside className="detail-panel" ref={detailPanelRef} key={`${lesson.id}/${step.id}`}>

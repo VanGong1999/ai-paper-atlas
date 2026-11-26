@@ -13,7 +13,7 @@ const x = (pos: number) => left + (right - left) * pos / maxPosition
 const y = (value: number) => center - amplitude * value
 const waveTypes = ['sin', 'cos'] as const
 
-export function PositionEncodingStage() {
+export function PositionEncodingStage({ onClearSelection }: { onClearSelection: () => void }) {
   const [position, setPosition] = useState(8)
   const [pair, setPair] = useState(32)
   const divisor = 10000 ** (2 * pair / modelWidth)
@@ -68,11 +68,17 @@ export function PositionEncodingStage() {
       <div className="workbench-stage-controls position-controls">
         <label><span>位置 pos <output>{position}</output></span>
           <input type="range" aria-label="位置 pos" min={0} max={maxPosition} value={position}
-            onChange={event => setPosition(event.currentTarget.valueAsNumber)} />
+            onChange={event => {
+              setPosition(event.currentTarget.valueAsNumber)
+              onClearSelection()
+            }} />
         </label>
         <label><span>维度对 i <output>{pair}</output></span>
           <input type="range" aria-label="维度对 i" min={0} max={modelWidth / 2 - 1} value={pair}
-            onChange={event => setPair(event.currentTarget.valueAsNumber)} />
+            onChange={event => {
+              setPair(event.currentTarget.valueAsNumber)
+              onClearSelection()
+            }} />
         </label>
       </div>
       <p className="stage-caption"><strong>§3.5 · PDF p. 6</strong><span>教学示意 · 代入论文公式，位置范围取 0–24，基础模型 d_model = 512。</span></p>

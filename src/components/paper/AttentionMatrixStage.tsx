@@ -28,12 +28,20 @@ export function AttentionMatrixStage({ highlight, showHeatmap }: StageProps & { 
         <text className="stage-annotation" x={160} y={27}>相似度</text>
         <text className="stage-annotation" x={333} y={27}>沿键归一化</text>
         <text className="stage-annotation" x={499} y={27}>汇总对应的值</text>
-        <StageFlow d="M126 65H140V80H158M126 119H140V94H158" active={highlight.has('query') || highlight.has('scale')} />
-        <StageFlow d="M306 87H330" active={highlight.has('scale') || highlight.has('weights')} />
-        <StageFlow d="M469 87H497M126 173H565V115" active={highlight.has('value') || highlight.has('weights')} branch />
         <StageBlock id="query" kind="qkv" text="Q · 查询" x={24} y={47} w={102} tone="encoder" active={highlight.has('query')} />
         <StageBlock id="key" kind="qkv" text="K · 键" x={24} y={101} w={102} tone="encoder" active={highlight.has('key')} />
         <StageBlock id="value" kind="qkv" text="V · 值" x={24} y={155} w={102} tone="decoder" active={highlight.has('value')} />
+        <StageFlow d="M126 65H140V80H158" active={highlight.has('query') || highlight.has('scale')}
+          explanation="query" label="Q → 缩放分数" example="教学示意 · Q → 缩放分数：每行查询与各键做点积。" />
+        <StageFlow d="M126 119H140V94H158" active={highlight.has('key') || highlight.has('scale')}
+          explanation="key" label="K → 缩放分数" example="教学示意 · K → 缩放分数：每个键贡献一列匹配分数。" />
+        <StageFlow d="M306 87H330" active={highlight.has('scale') || highlight.has('weights')}
+          explanation="scale" content={attentionSoftmaxExplainable} label="缩放分数 → Softmax"
+          example="教学示意 · 缩放分数 → Softmax：沿键所在的维度归一化。" />
+        <StageFlow d="M469 87H497" active={highlight.has('weights')} branch
+          explanation="value" label="注意力权重 → 加权求和" example="教学示意 · 注意力权重 → 加权求和：每行权重给出对应值的系数。" />
+        <StageFlow d="M126 173H565V115" active={highlight.has('value') || highlight.has('weights')} branch
+          explanation="value" label="V → 加权求和" example="教学示意 · V → 加权求和：将各位置的值按权重相加。" />
         <StageBlock id="scale" text="QKᵀ / √dₖ" caption="缩放分数" x={158} y={63} w={148} h={50} tone="attn" active={highlight.has('scale')} />
         <StageBlock id="softmax" text="Softmax" caption="注意力权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn"
           content={attentionSoftmaxExplainable} identity="attention-softmax" active={highlight.has('softmax')} />
