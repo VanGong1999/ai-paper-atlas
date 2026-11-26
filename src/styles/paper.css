@@ -34,7 +34,7 @@
   right: 8px;
   bottom: 0;
   height: 2px;
-  background: var(--lime);
+  background: var(--accent-outline);
 }
 
 .cockpit-tabs .spacer {
@@ -81,7 +81,7 @@
 .progress-bar > span {
   display: block;
   height: 100%;
-  background: var(--lime);
+  background: var(--accent-outline);
 }
 
 .lesson-item {
@@ -101,9 +101,9 @@
 }
 
 .lesson-item.active {
-  border-color: var(--line-strong);
-  background: var(--surface-2);
-  color: var(--text);
+  border-color: var(--accent-outline);
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .lesson-item small {
@@ -120,8 +120,8 @@
   grid-template-rows: 40px minmax(0, 1fr);
   border-right: 1px solid var(--line);
   background:
-    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--lime) 8%, transparent), transparent 45%),
-    var(--bg);
+    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent-fill) 45%, transparent), transparent 45%),
+    linear-gradient(180deg, var(--surface), var(--bg));
 }
 
 .stage-toolbar {
@@ -145,13 +145,21 @@
 }
 
 .stage-toolbar button:hover {
-  border-color: var(--lime);
-  color: var(--lime);
+  border-color: var(--hover-border);
+  color: var(--accent-ink);
+  background: var(--control-hover);
 }
 
 .stage-canvas {
   position: relative;
   overflow: hidden;
+}
+
+[data-theme='light'] .stage-canvas {
+  --stage-grid: color-mix(in srgb, var(--line) 35%, transparent);
+  background:
+    linear-gradient(90deg, var(--stage-grid) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(var(--stage-grid) 1px, transparent 1px) 0 0 / 40px 40px;
 }
 
 .stage-svg {
@@ -172,8 +180,7 @@
 
 .stage-node.active rect,
 .stage-node:hover rect {
-  stroke: var(--lime);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--lime) 40%, transparent));
+  stroke: var(--accent-outline);
 }
 
 .stage-node text {
@@ -184,7 +191,7 @@
 
 .stage-edge {
   fill: none;
-  stroke: color-mix(in srgb, var(--lime) 45%, var(--line));
+  stroke: color-mix(in srgb, var(--accent-outline) 68%, var(--muted));
   stroke-width: 1.5;
 }
 
@@ -194,13 +201,13 @@
   max-width: 260px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-3) 96%, black);
-  border: 1px solid var(--lime-dim);
+  background: var(--surface);
+  border: 1px solid var(--hover-border);
   color: var(--text);
   font-size: 12px;
   line-height: 1.55;
   pointer-events: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--panel-shadow);
 }
 
 .detail-panel {
@@ -216,7 +223,7 @@
 }
 
 .detail-panel .body {
-  color: #b7c1b0;
+  color: color-mix(in srgb, var(--text) 75%, var(--muted));
   line-height: 1.75;
   font-size: 12.5px;
 }
@@ -234,6 +241,7 @@
 
 .diff-box {
   margin: 12px 0;
+  background: var(--surface-2);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   padding: 10px;
@@ -246,7 +254,7 @@
 }
 
 .diff-box li {
-  color: color-mix(in srgb, var(--lime) 75%, white);
+  color: var(--accent-ink);
   font-size: 12px;
   margin: 4px 0;
 }
@@ -271,7 +279,14 @@
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  background: color-mix(in srgb, var(--surface) 90%, black);
+  background: var(--surface);
+}
+
+.step-rail .chip:disabled {
+  cursor: default;
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--muted-2);
 }
 
 .step-rail .steps {
@@ -322,9 +337,9 @@
 }
 
 .step-dot.active i {
-  background: var(--lime);
-  color: #111;
-  border-color: var(--lime);
+  background: var(--accent-fill);
+  color: var(--accent-ink);
+  border-color: var(--accent-outline);
 }
 
 .step-dot span {
@@ -356,9 +371,23 @@
 }
 
 .heat-grid button {
-  cursor: pointer;
-  color: #e8f5dc;
+  background: color-mix(in srgb, var(--lime) var(--heat-strength), var(--surface));
+  color: var(--text);
 }
+
+.heat-grid [data-level='0'] { --heat-strength: 8%; }
+.heat-grid [data-level='1'] { --heat-strength: 16%; }
+.heat-grid [data-level='2'] { --heat-strength: 26%; }
+.heat-grid [data-level='3'] { --heat-strength: 48%; }
+.heat-grid [data-level='4'] { --heat-strength: 72%; }
+
+[data-theme='dark'] .heat-grid [data-level='3'],
+[data-theme='dark'] .heat-grid [data-level='4'] {
+  color: var(--bg);
+}
+
+[data-theme='light'] .heat-grid [data-level='3'] { --heat-strength: 38%; }
+[data-theme='light'] .heat-grid [data-level='4'] { --heat-strength: 49%; }
 
 .fulltext-layout {
   display: grid;
@@ -390,14 +419,19 @@
   border-radius: 6px;
 }
 
-.fulltext-nav button.active,
 .fulltext-nav button:hover {
   background: var(--surface-2);
   color: var(--text);
 }
 
+.fulltext-nav button.active {
+  background: var(--accent-fill);
+  color: var(--accent-ink);
+}
+
 .fulltext-main {
   padding: 18px 22px 40px;
+  background: var(--surface);
 }
 
 .fulltext-main article {
@@ -410,14 +444,14 @@
 }
 
 .fulltext-main p {
-  color: #b4beb0;
+  color: color-mix(in srgb, var(--text) 80%, var(--muted));
   line-height: 1.85;
   margin: 0 0 12px;
 }
 
 .original-drawer {
   border-left: 1px solid var(--line);
-  background: #101410;
+  background: var(--surface-2);
   padding: 14px;
 }
 
@@ -429,15 +463,15 @@
 .original-drawer pre {
   white-space: pre-wrap;
   font: 11.5px/1.7 var(--font-mono);
-  color: #c5d0bf;
+  color: color-mix(in srgb, var(--text) 80%, var(--muted));
   margin: 0;
 }
 
-.group-encoder { fill: #1f2a1c; }
-.group-decoder { fill: #1a2430; }
-.group-attn { fill: #241f30; }
-.group-io { fill: #22251c; }
-.group-train { fill: #2a2318; }
+.group-encoder { fill: color-mix(in srgb, var(--accent-fill), var(--surface)); }
+.group-decoder { fill: color-mix(in srgb, var(--info-fill), var(--surface)); }
+.group-attn { fill: color-mix(in srgb, var(--agent-fill), var(--surface)); }
+.group-io { fill: var(--surface-3); }
+.group-train { fill: color-mix(in srgb, var(--warning-fill), var(--surface)); }
 
 @media (max-width: 1100px) {
   .learn-layout {

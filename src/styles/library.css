@@ -19,7 +19,7 @@
 }
 
 .library-hero h1 span {
-  color: var(--lime);
+  color: var(--accent-ink);
 }
 
 .library-hero p {
@@ -36,7 +36,7 @@
 .library-count strong {
   display: block;
   font: 42px var(--font-mono);
-  color: var(--lime);
+  color: var(--accent-ink);
   letter-spacing: -0.06em;
 }
 
@@ -53,6 +53,7 @@
 
 .library-toolbar .search-box {
   max-width: 420px;
+  background: var(--surface);
 }
 
 .library-grid {
@@ -70,11 +71,12 @@
   border-radius: 10px;
   background: var(--surface);
   min-height: 210px;
+  box-shadow: var(--panel-shadow);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .library-card:hover {
-  border-color: var(--lime-dim);
+  border-color: var(--hover-border);
   background: var(--surface-2);
 }
 
@@ -87,14 +89,15 @@
 }
 
 .library-kind {
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 .library-org {
   font: 10px var(--font-mono);
-  color: var(--lime);
+  color: var(--accent-ink);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -121,7 +124,7 @@
 
 .library-card-foot {
   margin-top: 4px;
-  color: var(--lime);
+  color: var(--accent-ink);
   font-size: 12px;
 }
 
@@ -140,7 +143,7 @@
 }
 
 .library-detail-nav a:hover {
-  color: var(--lime);
+  color: var(--accent-ink);
 }
 
 .library-detail h1 {
@@ -158,12 +161,12 @@
 .detail-block h2 {
   margin: 0 0 8px;
   font-size: 14px;
-  color: var(--lime);
+  color: var(--accent-ink);
 }
 
 .detail-block p,
 .detail-block li {
-  color: #b7c1b0;
+  color: color-mix(in srgb, var(--text) 75%, var(--muted));
   line-height: 1.8;
   font-size: 14px;
 }

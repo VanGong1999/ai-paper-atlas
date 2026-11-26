@@ -18,12 +18,6 @@ const values = [
   [0.05, 0.15, 0.25, 0.55],
 ]
 
-function heatClass(v: number) {
-  const n = Math.min(4, Math.ceil(v * 5))
-  const colors = ['#283e27', '#2f4626', '#4e7135', '#8dac50', '#cef47b']
-  return colors[n] || colors[0]
-}
-
 export function Stage({ lesson, step, playing, zoom }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null)
@@ -127,7 +121,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
                 <button
                   key={`${i}-${j}`}
                   type="button"
-                  style={{ background: heatClass(v), color: v > 0.35 ? '#10180b' : '#e8f5dc' }}
+                  data-level={Math.min(4, Math.ceil(v * 5))}
                   onClick={() =>
                     setHeatMsg(
                       `示意：查询「${words[i]}」对键「${words[j]}」分配 ${v.toFixed(2)} 的注意力（行和为 1）。`,
@@ -139,7 +133,7 @@ export function Stage({ lesson, step, playing, zoom }: Props) {
               )),
             ])}
           </div>
-          <p style={{ textAlign: 'center', color: 'var(--lime)', fontSize: 12 }}>{heatMsg}</p>
+          <p style={{ textAlign: 'center', color: 'var(--accent-ink)', fontSize: 12 }}>{heatMsg}</p>
         </div>
       )}
 

@@ -1,4 +1,9 @@
 .home {
+  --chart-grid: color-mix(in srgb, var(--line) 45%, transparent);
+  --chart-background:
+    linear-gradient(90deg, var(--chart-grid) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(var(--chart-grid) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(180deg, var(--surface), var(--bg));
   display: grid;
   grid-template-rows: auto auto auto minmax(420px, 58vh) auto;
   min-height: calc(100vh - var(--header-h));
@@ -13,8 +18,8 @@
   align-items: center;
   border-bottom: 1px solid var(--line);
   background:
-    radial-gradient(800px 220px at 10% 0%, color-mix(in srgb, var(--lime) 12%, transparent), transparent),
-    radial-gradient(600px 200px at 90% 0%, color-mix(in srgb, var(--blue) 10%, transparent), transparent);
+    radial-gradient(800px 220px at 10% 0%, color-mix(in srgb, var(--accent-fill) 45%, transparent), transparent),
+    radial-gradient(600px 200px at 90% 0%, color-mix(in srgb, var(--info-fill) 35%, transparent), transparent);
 }
 
 .home-hero h1 {
@@ -55,9 +60,14 @@
   font-size: 12px;
 }
 
+.view-switch button:hover {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
 .view-switch button.active {
-  background: color-mix(in srgb, var(--lime) 18%, transparent);
-  color: var(--lime);
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .home-filters {
@@ -108,8 +118,12 @@
   outline: none;
 }
 
+.search-box::placeholder {
+  color: var(--muted-2);
+}
+
 .search-box:focus {
-  border-color: var(--lime-dim);
+  border-color: var(--focus-ring);
 }
 
 .home-body {
@@ -133,22 +147,13 @@
   overflow: hidden;
   border: 1px solid var(--line-strong);
   border-radius: 12px;
+}
+
+.graph-stage.panel {
   background:
-    radial-gradient(700px 280px at 20% 15%, color-mix(in srgb, var(--lime) 10%, transparent), transparent 60%),
-    radial-gradient(500px 260px at 85% 70%, color-mix(in srgb, var(--blue) 10%, transparent), transparent 55%),
-    linear-gradient(180deg, #101410, #0c0e0d 70%),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 39px,
-      color-mix(in srgb, var(--line) 40%, transparent) 40px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 39px,
-      color-mix(in srgb, var(--line) 28%, transparent) 40px
-    );
+    radial-gradient(700px 280px at 20% 15%, color-mix(in srgb, var(--accent-fill) 45%, transparent), transparent 60%),
+    radial-gradient(500px 260px at 85% 70%, color-mix(in srgb, var(--info-fill) 35%, transparent), transparent 55%),
+    var(--chart-background);
 }
 
 .force-orbit {
@@ -156,6 +161,11 @@
   width: 100%;
   height: 100%;
   min-height: 420px;
+}
+
+/* The transparent canvas uses a fixed luminous palette for marks and labels. */
+[data-theme='light'] .force-orbit canvas {
+  filter: brightness(0.38);
 }
 
 .force-orbit-badge {
@@ -169,7 +179,7 @@
   padding: 6px 10px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 88%, black);
+  background: var(--surface);
   font: 10px var(--font-mono);
   color: var(--muted);
   pointer-events: none;
@@ -180,7 +190,7 @@
   height: 7px;
   border-radius: 50%;
   background: var(--lime);
-  box-shadow: 0 0 12px var(--lime);
+  box-shadow: var(--status-shadow);
   animation: breathe 1.8s ease-in-out infinite;
 }
 
@@ -207,10 +217,10 @@
 
 .dash-card {
   border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent);
-  background: color-mix(in srgb, var(--surface) 92%, black);
+  background: var(--surface);
   border-radius: 12px;
   padding: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--panel-shadow);
 }
 
 .status-row {
@@ -229,9 +239,9 @@
 }
 
 .status-pill.live {
-  color: var(--lime);
-  border-color: color-mix(in srgb, var(--lime) 45%, var(--line-strong));
-  box-shadow: 0 0 12px color-mix(in srgb, var(--lime) 25%, transparent);
+  color: var(--accent-ink);
+  border-color: var(--accent-outline);
+  background: var(--accent-fill);
 }
 
 .dash-metrics {
@@ -305,6 +315,10 @@
   border-radius: 99px;
 }
 
+[data-theme='light'] .topic-bar-fill {
+  filter: brightness(0.62);
+}
+
 .hover-panel h3 {
   margin: 4px 0 6px;
   font-size: 14px;
@@ -318,7 +332,7 @@
 }
 
 .hover-panel .why {
-  color: color-mix(in srgb, var(--lime) 65%, white);
+  color: var(--accent-ink);
 }
 
 .focus-meta {
@@ -385,7 +399,7 @@
   height: 34px;
   border-bottom: 1px solid var(--line);
   overflow: hidden;
-  background: #0e120f;
+  background: var(--surface-2);
 }
 
 .live-ticker-label {
@@ -393,8 +407,8 @@
   display: grid;
   place-items: center;
   padding: 0 12px;
-  background: var(--lime);
-  color: #11170d;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font: 700 10px var(--font-mono);
   letter-spacing: 0.08em;
 }
@@ -410,7 +424,7 @@
   white-space: nowrap;
   padding-left: 16px;
   font: 10px var(--font-mono);
-  color: #a8b49e;
+  color: var(--muted);
   animation: ticker 48s linear infinite;
 }
 
@@ -429,20 +443,7 @@
   overflow: hidden;
   cursor: grab;
   touch-action: none;
-  background:
-    linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 40%, transparent)),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 39px,
-      color-mix(in srgb, var(--line) 55%, transparent) 40px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 39px,
-      color-mix(in srgb, var(--line) 35%, transparent) 40px
-    );
+  background: var(--chart-background);
 }
 
 .home-stage.is-panning {
@@ -460,7 +461,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 92%, black);
+  background: var(--surface);
 }
 
 .stage-controls button {
@@ -474,7 +475,8 @@
 
 .stage-controls button:hover {
   border-color: var(--lime);
-  color: var(--lime);
+  color: var(--accent-ink);
+  background: var(--control-hover);
 }
 
 .stage-hint {
@@ -510,6 +512,16 @@
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--lime) 50%, transparent));
 }
 
+[data-theme='light'] .timeline-path.active-glow {
+  filter: none;
+}
+
+[data-theme='light'] .node-core {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  filter: none !important; /* Override the inline, color-specific glow. */
+}
+
 .node-hit {
   cursor: pointer;
 }
@@ -536,10 +548,10 @@
   z-index: 5;
   width: min(320px, calc(100% - 24px));
   padding: 12px 14px;
-  background: color-mix(in srgb, var(--surface) 94%, black);
+  background: var(--surface);
   border: 1px solid var(--line-strong);
   border-radius: 10px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--panel-shadow);
   pointer-events: none;
 }
 
@@ -571,7 +583,7 @@
 }
 
 .hover-card .why {
-  color: color-mix(in srgb, var(--lime) 70%, white);
+  color: var(--accent-ink);
 }
 
 .hover-card .cta {
@@ -648,7 +660,7 @@
   grid-template-columns: 110px minmax(0, 1fr) 130px;
   gap: 12px;
   padding: 16px 0;
-  border-bottom: 1px solid #272d26;
+  border-bottom: 1px solid var(--line);
   transition: background 0.15s ease;
 }
 
@@ -659,7 +671,7 @@
 .event-date strong {
   display: block;
   font: 11px var(--font-mono);
-  color: #aab5a4;
+  color: var(--muted);
 }
 
 .event-date small {
@@ -711,7 +723,7 @@
 
 .event-tag {
   border: 1px solid var(--line-strong);
-  color: #a6b39f;
+  color: var(--muted);
   padding: 4px 8px;
   font: 9px var(--font-mono);
   border-radius: 999px;
@@ -719,11 +731,13 @@
 
 .event-tag.infra {
   border-color: color-mix(in srgb, var(--blue) 50%, var(--line-strong));
+  background: var(--info-fill);
   color: var(--blue);
 }
 
 .event-tag.agent {
   border-color: color-mix(in srgb, var(--violet) 50%, var(--line-strong));
+  background: var(--agent-fill);
   color: var(--violet);
 }
 
