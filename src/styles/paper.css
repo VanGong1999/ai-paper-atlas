@@ -633,11 +633,15 @@
   }
 
   .stage-node text {
-    font-size: 24px;
+    font-size: 21px;
   }
 
   .stage-svg {
-    transform: none !important;
+    transform-origin: left center !important;
+  }
+
+  .stage-canvas {
+    overflow: auto;
   }
 
   .stage-canvas:has(.heatmap-panel) {
