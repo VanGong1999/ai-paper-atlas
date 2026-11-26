@@ -42,6 +42,7 @@ export function AttentionPage() {
     visited: new Set([`${lessons[0].id}/${lessons[0].steps[0].id}`]),
   }))
   const [figureChapter, setFigureChapter] = useState('all')
+  const [figureChapterExplicit, setFigureChapterExplicit] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -94,7 +95,15 @@ export function AttentionPage() {
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
-    if (nextMode === 'figures') setFigureChapter(normalizeFigureChapter(translationId))
+    if (nextMode === 'figures') {
+      const normalizedTranslation = normalizeFigureChapter(translationId)
+      if (mode === 'fulltext') {
+        setFigureChapter(normalizedTranslation)
+        setFigureChapterExplicit(false)
+      } else if (!figureChapterExplicit && normalizedTranslation !== 'all') {
+        setFigureChapter(normalizedTranslation)
+      }
+    }
     setMode(nextMode)
   }
 
@@ -127,7 +136,9 @@ export function AttentionPage() {
 
   function readChapterFigures() {
     setFigureChapter(section.originalId)
-    changeMode('figures')
+    setFigureChapterExplicit(true)
+    setPlaying(false)
+    setMode('figures')
     document.getElementById('paper-mode-figures')?.focus()
   }
 
@@ -216,7 +227,10 @@ export function AttentionPage() {
         )}
 
         {mode === 'figures' && (
-          <FiguresView chapter={figureChapter} onChapterChange={setFigureChapter} activeFigureIds={step.figureIds}
+          <FiguresView chapter={figureChapter} onChapterChange={chapter => {
+            setFigureChapter(chapter)
+            setFigureChapterExplicit(true)
+          }} activeFigureIds={step.figureIds}
             onSelectStep={readRelatedStep} onReadTranslation={readTranslation} />
         )}
 

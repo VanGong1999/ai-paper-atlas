@@ -26,12 +26,13 @@ export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: Ta
                     const index = columnIndex
                     const span = typeof cell === 'object' && cell !== null ? cell.span : 1
                     const text = typeof cell === 'string' ? cell : cell?.text
+                    const cellObject = typeof cell === 'object' && cell !== null ? cell : null
                     columnIndex += span
                     const column = table.columns[index]
                     const label = redraw === 'translation' && span === 2 ? 'Training Cost (FLOPs)'
                       : redraw === 'variants' && span === 9 ? 'Configuration' : column.label
                     const context = `${row.label} · ${label} · ${text}`
-                    const cellContent = row.content ?? column.content
+                    const cellContent = cellObject?.content ?? (span > 1 ? row.content : column.content)
                     const best = table.best?.(row, index)
                     return (
                       <td key={index} colSpan={span} className={best ? 'paper-table-best' : undefined}>

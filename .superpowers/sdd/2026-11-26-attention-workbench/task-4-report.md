@@ -367,3 +367,103 @@ validation: sections 27, explainables 34, lessons 10, steps 28, issues []
 ```
 
 The existing Vite advisory remains for the main bundle exceeding 500 kB. No Task 1 data or supplied PDF bytes changed.
+
+## Task 4 fix round 3
+
+The Figures mode now tracks whether its current chapter filter was explicitly chosen or entered by a direct figure link. A mode switch from bilingual fulltext still hands off a valid chapter and normalizes unsupported chapters such as References to `all`. Switching Figures → Learn → Figures preserves the explicit valid filter, and direct `本节图表 →` links set an explicit filter without being overwritten. Table 3 row-level content now applies only to cells spanning multiple columns, so row E's merged cell uses the positional-embedding explanation while its PPL and BLEU metric cells use their own column explainables.
+
+Focused red regression command before implementation
+
+```sh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+"$PW" -s=t4-round3-red2 open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null
+"$PW" -s=t4-round3-red2 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-4-round3-browser.js)"
+```
+
+Expected red output
+
+```text
+### Error
+Error: Figures → Learn → Figures should preserve §6.1 filter
+```
+
+Focused green command
+
+```sh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+"$PW" -s=t4-round3-final open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null
+"$PW" -s=t4-round3-final run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-4-round3-browser.js)"
+```
+
+Output and exit 0
+
+```text
+### Result
+"Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables."
+```
+
+The focused check verified §6.1 → Table 2 across Figures → Learn → Figures and through the direct chapter figure link, bilingual §4 → Table 1, References → all nine cards, row E's merged positional-embedding tooltip, and distinct PPL/BLEU tooltips for 4.92 and 25.7.
+
+Full Chrome regression command
+
+```zsh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+suite=.superpowers/sdd/2026-11-26-attention-workbench
+run_suite() {
+  local name="$1" session="r3-suite-$1"
+  "$PW" -s="$session" open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null || return 1
+  local source result
+  source=$(sed -e 's/127\.0\.0\.1:5178/127.0.0.1:5184/g' -e "s/page.getByRole('tabpanel')/page.locator('#paper-mode-panel')/g" "$suite/$name.js")
+  result=$("$PW" -s="$session" run-code "$source")
+  print -r -- "$name"
+  print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+  "$PW" -s="$session" close >/dev/null 2>&1 || true
+  [[ "$result" == '### Result'* ]]
+}
+run_suite task-4-round3-browser
+run_suite task-4-browser
+run_suite task-2-browser
+run_suite task-2-round1-browser
+run_suite task-2-round3-browser
+run_suite task-2-round4-browser
+run_suite task-3-browser
+run_suite task-3-round1-browser
+run_suite task-3-round2-browser
+run_suite task-3-round3-browser
+run_suite task-3-round4-browser
+```
+
+Output and exit 0
+
+```text
+task-4-round3-browser: Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables.
+task-4-browser: Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark.
+task-2-browser: Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes.
+task-2-round1-browser: Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal.
+task-2-round3-browser: Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks.
+task-2-round4-browser: {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+task-3-browser: Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion.
+task-3-round1-browser: Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation.
+task-3-round2-browser: Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement.
+task-3-round3-browser: Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering.
+task-3-round4-browser: Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal.
+```
+
+Build, data, inventory, and integrity command
+
+```sh
+npm run build && node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs && export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python && node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -10 && cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf && git diff --exit-code b9a5857 -- src/data/papers/attention public/article/1706.03762v7.pdf && git diff --check
+```
+
+Output and exit 0
+
+```text
+✓ 1211 modules transformed.
+✓ built in 1.33s
+index-Cn_FO7Cp.js 588.84 kB | gzip: 199.00 kB
+reader: 4 passed, 0 failed
+inventory: 2 passed, 0 failed
+validation: sections 27, explainables 34, lessons 10, steps 28, issues []
+```
+
+The existing Vite 500 kB advisory remains. No Task 1 data or supplied PDF bytes changed.

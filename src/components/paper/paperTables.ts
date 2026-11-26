@@ -2,7 +2,7 @@ import type { Explainable as ExplainableContent, ExplainableId } from '../../dat
 import { originalSource, type PaperSource } from '../../data/papers/attention/originals-en.ts'
 
 type Column = { label: string; explanation: ExplainableId; content?: ExplainableContent }
-type Cell = string | null | { text: string; span: number }
+type Cell = string | null | { text: string; span: number; content?: ExplainableContent }
 type Row = { label: string; cells: Cell[]; baseline?: boolean; content?: ExplainableContent }
 export type TableRedraw = 'complexity' | 'translation' | 'variants' | 'parsing'
 
