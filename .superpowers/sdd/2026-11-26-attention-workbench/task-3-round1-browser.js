@@ -27,17 +27,21 @@ async (page) => {
 
   await chapter('缩放点积注意力')
   await step(1)
-  const pipelineSoftmax = page.locator('[data-explainable="softmax"]').first()
-  const formulaSoftmax = page.locator('.formula-box [data-explainable="softmax"]')
+  const pipelineSoftmax = page.locator('[data-explainable="attention-softmax"]').first()
+  const formulaSoftmax = page.locator('.formula-box [data-explainable="attention-softmax"]')
   check(await pipelineSoftmax.count() === 1, 'Pipeline Softmax hook is missing')
   check(await formulaSoftmax.count() === 1, 'Formula Softmax hook is missing')
   await pipelineSoftmax.hover()
-  await tooltip.filter({ hasText: '输出 Softmax' }).waitFor({ state: 'visible' })
+  await tooltip.filter({ hasText: '注意力 Softmax' }).waitFor({ state: 'visible' })
   check(!(await tooltip.innerText()).includes('注意力矩阵单元'), 'Pipeline Softmax opened the matrix-cell explanation')
   await formulaSoftmax.focus()
-  await tooltip.filter({ hasText: '输出 Softmax' }).waitFor({ state: 'visible' })
-  check((await tooltip.innerText()).includes('输出 Softmax'), 'Formula Softmax did not retain its operation explanation')
+  await tooltip.filter({ hasText: '注意力 Softmax' }).waitFor({ state: 'visible' })
+  check((await tooltip.innerText()).includes('注意力 Softmax'), 'Formula Softmax did not retain its operation explanation')
   check(await page.locator('[data-explainable="weights"]').count() === 0, 'Softmax step exposed a weights identity')
+
+  await page.locator('.steps button').nth(1).focus()
+  await page.mouse.move(1, 1)
+  await tooltip.waitFor({ state: 'hidden' })
 
   await page.setViewportSize({ width: 320, height: 760 })
   const trigger = page.locator('.detail-panel [data-explainable-kind="formula-variable"]').first()
@@ -61,7 +65,7 @@ async (page) => {
     const overlaps = tooltipBox.x < triggerBox.x + triggerBox.width && tooltipBox.x + tooltipBox.width > triggerBox.x &&
       tooltipBox.y < triggerBox.y + triggerBox.height && tooltipBox.y + tooltipBox.height > triggerBox.y
     check(!overlaps, `Tooltip overlaps its trigger at ${left},${top}`)
-    await page.mouse.move(160, 600)
+    await page.mouse.move(1, 1)
     await tooltip.waitFor({ state: 'hidden' })
   }
 

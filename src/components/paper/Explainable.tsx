@@ -37,13 +37,17 @@ export function ExplainableScope({ children, onSelectExplainable }: {
   const controller = useMemo(() => {
     const intents: { hover?: Target; focus?: Target } = {}
     let shown: string | undefined
-    let pending: string | undefined
-    let timer: number | undefined
+    let pending: { owner?: string; timer: number } | undefined
     let retainedOwner: string | undefined
 
-    function display(target?: Target) {
-      shown = target?.owner
+    function cancelPending() {
+      if (pending) window.clearTimeout(pending.timer)
       pending = undefined
+    }
+
+    function display(target?: Target) {
+      cancelPending()
+      shown = target?.owner
       setActive(target ?? null)
     }
 
@@ -51,18 +55,20 @@ export function ExplainableScope({ children, onSelectExplainable }: {
       const target = intents.hover ?? intents.focus
       if (retainedOwner) {
         if (!target || target.owner === retainedOwner) {
-          window.clearTimeout(timer)
+          cancelPending()
           return
         }
         retainedOwner = undefined
       }
-      if (target && shown === target.owner) {
-        window.clearTimeout(timer)
-        display(target)
-      } else if (pending !== target?.owner || (!target && shown)) {
-        window.clearTimeout(timer)
-        pending = target?.owner
-        timer = window.setTimeout(() => display(intents.hover ?? intents.focus), target ? 100 : 260)
+      if (shown === target?.owner) {
+        if (target) display(target)
+        else cancelPending()
+      } else if (!pending || pending.owner !== target?.owner) {
+        cancelPending()
+        pending = {
+          owner: target?.owner,
+          timer: window.setTimeout(() => display(intents.hover ?? intents.focus), target ? 100 : 260),
+        }
       }
     }
 
@@ -79,8 +85,9 @@ export function ExplainableScope({ children, onSelectExplainable }: {
         update()
       },
       retain(owner: string) {
+        if (owner !== shown) return
         retainedOwner = owner
-        window.clearTimeout(timer)
+        cancelPending()
       },
       release(owner: string) {
         if (retainedOwner !== owner) return
@@ -94,9 +101,7 @@ export function ExplainableScope({ children, onSelectExplainable }: {
         if (!owner || shown === owner) display()
         update()
       },
-      dispose() {
-        window.clearTimeout(timer)
-      },
+      dispose: cancelPending,
     }
   }, [])
 

@@ -439,3 +439,94 @@ Output (exit 0)
 "steps": 28,
 "issues": []
 ```
+
+## Fix round 4
+
+On `2b38b3c`, entering the Softmax card canceled the timer that would restore K but left K recorded as pending. Leaving the card then skipped scheduling K. The controller now stores the timer and its owner in one pending transition. Showing a card, retaining it, and disposing the controller each clear that transition. Card exit evaluates the current hover and focus again.
+
+### Targeted Chrome reproduction
+
+Commands from the repository root in zsh against the existing Vite server, before the fix
+
+```sh
+pw=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+suite=.superpowers/sdd/2026-11-26-attention-workbench
+"$pw" -s=r4-target open http://127.0.0.1:5178/papers/attention --browser=chrome
+"$pw" -s=r4-target run-code "$(cat "$suite/task-3-round4-browser.js")" | sed -n '1,6p'
+"$pw" -s=r4-target eval '({focused: document.activeElement?.getAttribute("data-explainable"), title: document.querySelector(".tip-title")?.textContent})'
+```
+
+The script timed out after 2500 ms waiting for the K card on exit. The DOM probe returned `{"focused":"key","title":"注意力 Softmax"}`.
+
+Fresh Chrome session helper and targeted rerun after the fix
+
+```zsh
+pw=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+suite=.superpowers/sdd/2026-11-26-attention-workbench
+run_browser() {
+  local script="$1" session="r4-$1"
+  "$pw" -s="$session" open http://127.0.0.1:5178/papers/attention --browser=chrome >/dev/null || return 1
+  local result
+  result=$("$pw" -s="$session" run-code "$(cat "$suite/$script.js")")
+  print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+  "$pw" -s="$session" close >/dev/null
+  [[ "$result" == '### Result'* ]]
+}
+run_browser task-3-round4-browser
+```
+
+Result (exit 0)
+
+```text
+"Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal."
+```
+
+### Full Task 3 Chrome suite
+
+```zsh
+for script in task-3-browser task-3-round1-browser task-3-round2-browser task-3-round3-browser; do run_browser "$script"; done
+run_browser task-3-round1-browser
+```
+
+The first round-1 run timed out after 3000 ms waiting for `[data-explainable="softmax"]` in the attention stage. Round 2 introduced `attention-softmax` for this stage. The round-1 script now checks that identity and moves focus and pointer off the explainables for its pointer-only edge checks. Its separate rerun passed. Final results in script order
+
+```text
+"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+"Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
+"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+"Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering."
+```
+
+### Full Task 2 Chrome suite
+
+```zsh
+for script in task-2-browser task-2-round1-browser task-2-round3-browser task-2-round4-browser; do run_browser "$script"; done
+```
+
+All four scripts passed
+
+```text
+"Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
+"Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
+"Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
+{"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+```
+
+### Production build and source integrity
+
+```sh
+npm run build && cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --check && git diff --exit-code HEAD -- src/data/papers/attention public/article/1706.03762v7.pdf
+```
+
+Both commands exited 0. TypeScript passed and Vite built 1205 modules in 4.22 seconds. The main bundle was 535.91 kB (180.90 kB gzipped), triggering the existing 500 kB advisory. The built PDF matched the source byte for byte. The Task 1 diff was empty.
+
+### PDF inventory
+
+```sh
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+set -o pipefail
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -6
+```
+
+Exit 0. Both inventory tests passed. Validation reported 34 explainables, 10 lessons, 28 steps, and `"issues": []`.
