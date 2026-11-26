@@ -467,3 +467,183 @@ validation: sections 27, explainables 34, lessons 10, steps 28, issues []
 ```
 
 The existing Vite 500 kB advisory remains. No Task 1 data or supplied PDF bytes changed.
+
+## Task 4 fix round 4
+
+Figures now derives its default filter from the selected translation chapter or, when there is no manual translation selection, from the current Learn step’s source. The gallery normalizes chapters without figures to `all`. A direct chapter link or manual gallery choice (including `all`) overrides that default for the current reading position. Switching tabs preserves the override. Moving to a different lesson, step, or translation chapter clears it. Step navigation and playback use the same position update. Gallery filtering leaves the lesson, step, and reading progress intact.
+
+### Targeted Chrome reproduction
+
+Before the fix, changing Learn steps cleared the translation ID and the Figures tab handler skipped its filter update. The handler also skipped unsupported chapters when entering Figures from Learn. The following is the exact focused suite output before the implementation change, exit 1.
+
+```text
+task-4-round4-browser
+### Error
+Error: §4 → Learn BLEU → Figures: expected sec6-1/table-2, got sec4/table-1
+manual filter across unchanged reading views: expected sec4/table-1, got all/table-2,figure-1,figure-2,table-1,table-3,table-4,figure-3,figure-4,figure-5
+References → Learn → Figures: expected all/9 cards, got sec4/table-1
+revisited BLEU step after leaving it: expected sec6-1/table-2, got all/table-2,figure-1,figure-2,table-1,table-3,table-4,figure-3,figure-4,figure-5
+```
+
+### Task 2, Task 3 and Task 4 Chrome suites
+
+Started Vite with `npm run dev -- --host 127.0.0.1 --port 5184 --strictPort`. Each `task-{2,3,4}*browser.js` ran in a fresh Chrome session using the installed Playwright CLI. The runner served an empty stylesheet for the external Google Fonts URL, navigated to `/papers/attention`, then executed the suite with `run-code`. As in earlier rounds, it replaced port 5178 with 5184 and scoped the legacy `page.getByRole('tabpanel')` selector to `#paper-mode-panel`. Each run required a `### Result` response. The final round 4 suite also checks that clicking the direct §6.1 link supersedes a manual `all` selection within the same chapter.
+
+Exact runner output with the CLI’s echoed JavaScript omitted, exit 0.
+
+```text
+task-2-browser
+### Result
+"Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
+task-2-round1-browser
+### Result
+"Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
+task-2-round3-browser
+### Result
+"Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
+task-2-round4-browser
+### Result
+{"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+task-3-browser
+### Result
+"Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+task-3-round1-browser
+### Result
+"Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation."
+task-3-round2-browser
+### Result
+"Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+task-3-round3-browser
+### Result
+"Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering."
+task-3-round4-browser
+### Result
+"Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal."
+task-4-browser
+### Result
+"Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark."
+task-4-round1-browser
+### Result
+"Passed bilingual chapter handoff, direct figure chapter links, and distinct Table 3 parameter explanations."
+task-4-round2-browser
+### Result
+"Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers."
+task-4-round3-browser
+### Result
+"Passed Figures filter preservation, §6.1/§4/References coverage, and row E merged-versus-metric explainables."
+task-4-round4-browser
+### Result
+"Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset."
+```
+
+### Reader data and PDF inventory
+
+```sh
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs scripts/attention-pdf-inventory.test.mjs
+```
+
+Exact output, exit 0.
+
+```text
+TAP version 13
+# Subtest: identifies the BLEU step when its source is changed to another valid passage
+ok 1 - identifies the BLEU step when its source is changed to another valid passage
+  ---
+  duration_ms: 2727.614042
+  type: 'test'
+  ...
+# Subtest: identifies omitted author credits and numbered references in the Chinese reader
+ok 2 - identifies omitted author credits and numbered references in the Chinese reader
+  ---
+  duration_ms: 1789.927958
+  type: 'test'
+  ...
+# Subtest: all nine captions and titles resolve to their exact supplied PDF page
+ok 3 - all nine captions and titles resolve to their exact supplied PDF page
+  ---
+  duration_ms: 2.503792
+  type: 'test'
+  ...
+# Subtest: each Chinese section aligns with an English entry and its exact source range
+ok 4 - each Chinese section aligns with an English entry and its exact source range
+  ---
+  duration_ms: 0.311625
+  type: 'test'
+  ...
+# Subtest: every section has a full English reading, including non-excerpt paragraphs and page continuations
+ok 5 - every section has a full English reading, including non-excerpt paragraphs and page continuations
+  ---
+  duration_ms: 2.148041
+  type: 'test'
+  ...
+# Subtest: Table 3 columns carry distinct source-grounded parameter explanations
+ok 6 - Table 3 columns carry distinct source-grounded parameter explanations
+  ---
+  duration_ms: 0.12825
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4613.375917
+```
+
+```sh
+set -o pipefail
+node scripts/attention-pdf-inventory.mjs --validate 2>&1 | tail -10
+```
+
+Exact output, exit 0.
+
+```text
+        "redrawType": "attention-pattern"
+      }
+    ],
+    "sections": 27,
+    "explainables": 34,
+    "lessons": 10,
+    "steps": 28,
+    "issues": []
+  }
+}
+```
+
+### Production build and source integrity
+
+`npm run build` output, exit 0.
+
+```text
+
+> ai-paper-atlas@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 1211 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                       1.09 kB │ gzip:   0.59 kB
+dist/assets/index-D7CcjKhQ.css       42.01 kB │ gzip:   9.29 kB
+dist/assets/ForceOrbit-CKLKWxLx.js  206.43 kB │ gzip:  71.02 kB
+dist/assets/index-FgSVEmT6.js       588.96 kB │ gzip: 198.95 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.52s
+```
+
+The following checks each exited 0 with empty output.
+
+```sh
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --exit-code b9a5857 -- src/data/papers/attention public/article/1706.03762v7.pdf
+git diff --cached --check
+```

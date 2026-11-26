@@ -1,0 +1,62 @@
+async (page) => {
+  const tab = name => page.getByRole('tab', { name, exact: true }).click()
+  const chapter = name => page.getByRole('navigation', { name: '中文章节' })
+    .getByRole('button', { name, exact: true }).click()
+  const filter = page.getByLabel('图表章节')
+  const cards = page.locator('[data-paper-figure]')
+  const failures = []
+  async function gallery(path, expected, table) {
+    const actual = await filter.inputValue()
+    const ids = await cards.evaluateAll(entries => entries.map(entry => entry.dataset.paperFigure))
+    const matches = table ? ids.length === 1 && ids[0] === table : ids.length === 9
+    if (actual !== expected || !matches) {
+      failures.push(path + ': expected ' + expected + '/' + (table || '9 cards') + ', got ' + actual + '/' + ids.join(','))
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('http://127.0.0.1:5184/papers/attention')
+  await tab('全文中译')
+  await chapter('4 为什么选择自注意力')
+  await tab('Figures')
+  await gallery('Chinese §4', 'sec4', 'table-1')
+  await tab('Learn')
+  await page.getByRole('navigation', { name: '课程目录' }).getByRole('button', { name: /实验结果/ }).click()
+  await page.getByRole('group', { name: '本章步骤' }).getByRole('button', { name: /翻译测试集 BLEU/ }).click()
+  await tab('Figures')
+  await gallery('§4 → Learn BLEU → Figures', 'sec6-1', 'table-2')
+  const context = await page.locator('.workbench-context').innerText()
+  if (!context.includes('实验结果') || !context.includes('翻译测试集 BLEU')) throw new Error('Lost BLEU context')
+
+  await filter.selectOption('sec4')
+  await tab('Learn')
+  await tab('全文中译')
+  await tab('Figures')
+  await gallery('manual filter across unchanged reading views', 'sec4', 'table-1')
+  await filter.selectOption('sec4')
+  await tab('全文中译')
+  await chapter('参考文献')
+  await tab('Learn')
+  await tab('Figures')
+  await gallery('References → Learn → Figures', 'all')
+  if (await page.locator('.workbench-context').innerText() !== context) throw new Error('References moved the lesson')
+
+  await tab('全文中译')
+  await chapter('6.1 机器翻译')
+  await page.getByRole('button', { name: '本节图表 →' }).click()
+  await gallery('§6.1 direct link', 'sec6-1', 'table-2')
+  await filter.selectOption('all')
+  await tab('Learn')
+  await tab('Figures')
+  await gallery('explicit all on unchanged BLEU step', 'all')
+  await tab('全文中译')
+  await page.getByRole('button', { name: '本节图表 →' }).click()
+  await gallery('direct link replaces explicit all', 'sec6-1', 'table-2')
+  await filter.selectOption('all')
+  await tab('Learn')
+  await page.getByRole('button', { name: '下一步', exact: true }).click()
+  await page.getByRole('button', { name: '上一步', exact: true }).click()
+  await tab('Figures')
+  await gallery('revisited BLEU step after leaving it', 'sec6-1', 'table-2')
+  if (failures.length) throw new Error(failures.join('\n'))
+  return 'Passed §4 → BLEU/Table 2, References via Learn → all nine cards, unchanged lesson context, §6.1 direct link, manual filters and revisited-step reset.'
+}

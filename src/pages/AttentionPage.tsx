@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ExplainableScope } from '../components/paper/Explainable'
-import { FiguresView, normalizeFigureChapter } from '../components/paper/FiguresView'
+import { FiguresView } from '../components/paper/FiguresView'
 import { LessonNav } from '../components/paper/LessonNav'
 import { OriginalDrawer } from '../components/paper/OriginalDrawer'
 import { PaperFormula } from '../components/paper/PaperFormula'
@@ -18,6 +18,7 @@ import '../styles/paper.css'
 type ReadingPosition = {
   lessonIndex: number
   stepIndex: number
+  figureChapterOverride: string | null
   translationId: string | null
   visited: ReadonlySet<string>
 }
@@ -28,21 +29,20 @@ function visitStep(current: ReadingPosition, lessonIndex: number, stepIndex: num
   const lesson = lessons[lessonIndex]
   const step = lesson.steps[stepIndex]
   return {
-    lessonIndex, stepIndex, translationId: null,
+    lessonIndex, stepIndex, translationId: null, figureChapterOverride: null,
     visited: new Set([...current.visited, `${lesson.id}/${step.id}`]),
   }
 }
 
 export function AttentionPage() {
   const [mode, setMode] = useState<PaperMode>('learn')
-  const [{ lessonIndex, stepIndex, translationId, visited }, setPosition] = useState<ReadingPosition>(() => ({
+  const [{ lessonIndex, stepIndex, translationId, figureChapterOverride, visited }, setPosition] = useState<ReadingPosition>(() => ({
     lessonIndex: 0,
     stepIndex: 0,
     translationId: null,
+    figureChapterOverride: null,
     visited: new Set([`${lessons[0].id}/${lessons[0].steps[0].id}`]),
   }))
-  const [figureChapter, setFigureChapter] = useState('all')
-  const [figureChapterExplicit, setFigureChapterExplicit] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -95,15 +95,6 @@ export function AttentionPage() {
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
-    if (nextMode === 'figures') {
-      const normalizedTranslation = normalizeFigureChapter(translationId)
-      if (mode === 'fulltext') {
-        setFigureChapter(normalizedTranslation)
-        setFigureChapterExplicit(false)
-      } else if (!figureChapterExplicit && normalizedTranslation !== 'all') {
-        setFigureChapter(normalizedTranslation)
-      }
-    }
     setMode(nextMode)
   }
 
@@ -122,8 +113,20 @@ export function AttentionPage() {
     else if (canNext) selectStep(lessonIndex + 1, 0)
   }
 
+  function selectTranslation(originalId: string | null) {
+    setPosition(current => {
+      const stepSource = lessons[current.lessonIndex].steps[current.stepIndex].originalId
+      const sameChapter = (current.translationId ?? stepSource) === (originalId ?? stepSource)
+      return {
+        ...current,
+        translationId: originalId,
+        figureChapterOverride: sameChapter ? current.figureChapterOverride : null,
+      }
+    })
+  }
+
   function readTranslation(originalId: string | null) {
-    setPosition(current => ({ ...current, translationId: originalId }))
+    selectTranslation(originalId)
     changeMode('fulltext')
     document.getElementById('paper-mode-fulltext')?.focus()
   }
@@ -134,11 +137,13 @@ export function AttentionPage() {
     document.getElementById('paper-mode-learn')?.focus()
   }
 
+  function selectFigureChapter(chapter: string) {
+    setPosition(current => ({ ...current, figureChapterOverride: chapter }))
+  }
+
   function readChapterFigures() {
-    setFigureChapter(section.originalId)
-    setFigureChapterExplicit(true)
-    setPlaying(false)
-    setMode('figures')
+    selectFigureChapter(section.originalId)
+    changeMode('figures')
     document.getElementById('paper-mode-figures')?.focus()
   }
 
@@ -227,10 +232,8 @@ export function AttentionPage() {
         )}
 
         {mode === 'figures' && (
-          <FiguresView chapter={figureChapter} onChapterChange={chapter => {
-            setFigureChapter(chapter)
-            setFigureChapterExplicit(true)
-          }} activeFigureIds={step.figureIds}
+          <FiguresView chapter={figureChapterOverride ?? section.originalId} onChapterChange={selectFigureChapter}
+            activeFigureIds={step.figureIds}
             onSelectStep={readRelatedStep} onReadTranslation={readTranslation} />
         )}
 
@@ -243,7 +246,7 @@ export function AttentionPage() {
                   type="button"
                   ref={block.id === section.id ? translationItemRef : undefined}
                   aria-current={block.id === section.id ? 'location' : undefined}
-                  onClick={() => setPosition(current => ({ ...current, translationId: block.id }))}
+                  onClick={() => selectTranslation(block.id)}
                 >
                   {/^\d/.test(block.section) && `${block.section} `}{block.title}
                 </button>

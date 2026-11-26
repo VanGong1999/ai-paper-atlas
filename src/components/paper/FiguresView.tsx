@@ -15,8 +15,8 @@ type Props = {
 const chapters = fulltextZh.filter(block => figures.some(figure => figure.originalId === block.originalId))
 const figureChapterIds = new Set(chapters.map(block => block.originalId))
 
-export function normalizeFigureChapter(chapter: string | null | undefined) {
-  return chapter && (chapter === 'all' || figureChapterIds.has(chapter)) ? chapter : 'all'
+function normalizeFigureChapter(chapter: string) {
+  return figureChapterIds.has(chapter) ? chapter : 'all'
 }
 const readingSteps = lessons.flatMap((lesson, lessonIndex) =>
   lesson.steps.map((step, stepIndex) => ({
