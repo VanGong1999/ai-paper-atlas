@@ -302,6 +302,7 @@
 
 .stage-flow-target {
   cursor: pointer;
+  pointer-events: bounding-box;
 }
 
 .stage-flow-target:focus-visible .stage-edge,
@@ -516,7 +517,9 @@
   width: 288px;
   max-width: calc(100vw - 16px);
   max-height: calc(100dvh - 16px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   padding: 8px 10px;
   border-radius: 7px;
   background: var(--surface);

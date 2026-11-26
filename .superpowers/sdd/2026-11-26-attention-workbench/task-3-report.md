@@ -254,3 +254,100 @@ Output (exit 0)
 "steps": 28,
 "issues": []
 ```
+
+## Fix round 2
+
+Review findings addressed
+
+- The decoder-to-linear-projection and linear-projection-to-output-Softmax paths are accessible `data-flow` targets with hover, focus, keyboard activation, source-bound explainables, and teaching-labeled path copy.
+- Attention normalization now has a component-local `attention-softmax` identity sourced from the existing §3.2.1 explainable anchor. It is used by the attention pipeline node, SVG formula token, and inline formula. The output vocabulary Softmax continues to use the existing §3.4 `softmax` explainable. Matrix cells continue to use `weights`.
+- Tooltip cards now render paper fact, teaching explanation, and PDF citation. The placement algorithm expands available height on short viewports and uses internal vertical scrolling only when the available side cannot fit the card. Compact edge triggers remain separated from the card.
+
+Focused fix-round browser check
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2 open http://127.0.0.1:5178/papers/attention --browser=chrome
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2 run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-round2-browser.js)"
+```
+
+Output (exit 0)
+
+```text
+Result "Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement."
+```
+
+Full Task 3 browser check
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2-final open http://127.0.0.1:5178/papers/attention --browser=chrome
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task3-round2-final run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-3-browser.js)" | sed -n '1,2p'
+```
+
+Output (exit 0)
+
+```text
+Result "Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion."
+```
+
+Task 2 regression checks
+
+Command
+
+```sh
+/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-round2-final open http://127.0.0.1:5178/papers/attention --browser=chrome
+for test in task-2-round1-browser task-2-round3-browser task-2-round4-browser task-2-browser; do
+  /Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh -s=attention-task2-round2-final run-code "$(cat ".superpowers/sdd/2026-11-26-attention-workbench/${test}.js")" | sed -n '1,2p' || exit
+done
+```
+
+Output (exit 0)
+
+```text
+Result "Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal."
+Result "Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks."
+Result {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+Result "Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes."
+```
+
+Build and source-integrity check
+
+Command
+
+```sh
+npm run build && git diff --check && git diff --exit-code -- src/data/papers/attention public/article/1706.03762v7.pdf
+```
+
+Output (exit 0)
+
+```text
+✓ 1205 modules transformed.
+✓ built in 2.48s
+The existing Vite advisory reported a 535.64 kB main bundle before gzip.
+The diff check and Task 1 data/PDF diff completed silently.
+```
+
+PDF inventory check
+
+Command
+
+```sh
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -6
+```
+
+Output (exit 0)
+
+```text
+1..2
+# tests 2
+# pass 2
+# fail 0
+"explainables": 34,
+"lessons": 10,
+"steps": 28,
+"issues": []
+```

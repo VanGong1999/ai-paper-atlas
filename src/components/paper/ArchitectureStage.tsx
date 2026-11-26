@@ -36,7 +36,12 @@ export function ArchitectureStage({ highlight }: StageProps) {
         <StageFlow d="M207 97H230V218H253" active={highlight.has('cross')} branch
           explanation="cross" label="编码器到解码器的跨序列连接"
           example="教学示意 · 解码器查询编码器输出中的源序列表示。" />
-        <StageFlow d="M424 44H453V164H478M548 148V122" active={highlight.has('linear') || highlight.has('softmax')} />
+        <StageFlow d="M424 44H453V164H478" active={highlight.has('linear') || highlight.has('softmax')}
+          explanation="linear" label="解码器到词表线性投影"
+          example="教学示意 · 解码器输出经过线性变换，得到词表候选的分数。" />
+        <StageFlow d="M548 148V122" active={highlight.has('softmax')}
+          explanation="softmax" label="线性投影到输出 Softmax"
+          example="教学示意 · 输出 Softmax 将词表分数转换成下一词元的预测概率。" />
         {[287, 201].map(y => (
           <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch
             explanation="residual" label="编码器残差旁路"

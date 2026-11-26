@@ -4,12 +4,14 @@ import {
   type ComponentPropsWithoutRef, type FocusEvent, type KeyboardEvent, type PointerEvent, type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { explainables, type ExplainableId } from '../../data/papers/attention/explainables'
+import { explainables, type Explainable as ExplainableContent, type ExplainableId } from '../../data/papers/attention/explainables'
 import { TooltipPop } from './TooltipPop'
 
 type Target = {
   owner: string
   explanation: ExplainableId
+  content?: ExplainableContent
+  identity?: string
   example?: string
   element: Element
   pointer?: { x: number; y: number }
@@ -20,7 +22,7 @@ type Controller = {
   open: (target: Target) => void
   leave: (owner: string, pointer: boolean) => void
   dismiss: (owner?: string) => void
-  select: (id: ExplainableId, example?: string) => void
+  select: (id: ExplainableId, example?: string, content?: ExplainableContent) => void
 }
 
 const Overlay = createContext<Controller | null>(null)
@@ -98,7 +100,7 @@ export function ExplainableScope({ children, onSelectExplainable }: {
       {children}
       {createPortal(
         <AnimatePresence>
-          {active && <TooltipPop id={active.owner + '-tip'} content={explainables[active.explanation]} {...active} />}
+          {active && <TooltipPop id={active.owner + '-tip'} {...active} content={active.content ?? explainables[active.explanation]} />}
         </AnimatePresence>,
         document.body,
       )}
@@ -111,12 +113,14 @@ type CommonProps = {
   kind: string
   label?: string
   example?: string
+  content?: ExplainableContent
+  identity?: string
   onActivate?: () => void
 }
 
 type Props = CommonProps & (
-  | ({ as: 'g' } & ComponentPropsWithoutRef<'g'>)
-  | ({ as: 'button' } & ComponentPropsWithoutRef<'button'>)
+  | ({ as: 'g' } & Omit<ComponentPropsWithoutRef<'g'>, keyof CommonProps>)
+  | ({ as: 'button' } & Omit<ComponentPropsWithoutRef<'button'>, keyof CommonProps>)
 )
 
 export function Explainable(props: Props) {
@@ -125,25 +129,26 @@ export function Explainable(props: Props) {
 
   const owner = useId()
   const pressedWithPointer = useRef(false)
-  const { explanation, kind, label, example, onActivate } = props
+  const { explanation, kind, label, example, content, identity, onActivate } = props
   const { open, leave, dismiss, select } = scope
   const descriptionId = owner + '-description'
-  const description = [example, explainables[explanation].plain].filter(Boolean).join(' ')
+  const explainable = content ?? explainables[explanation]
+  const description = [example, explainable.plain].filter(Boolean).join(' ')
 
   useEffect(() => () => dismiss(owner), [dismiss, owner])
 
   function hover(event: PointerEvent<Element>) {
     if (event.pointerType === 'touch') return
-    open({ owner, explanation, example, element: event.currentTarget, pointer: { x: event.clientX, y: event.clientY } })
+    open({ owner, explanation, content, identity, example, element: event.currentTarget, pointer: { x: event.clientX, y: event.clientY } })
   }
 
   function focus(event: FocusEvent<Element>) {
-    if (!pressedWithPointer.current) open({ owner, explanation, example, element: event.currentTarget })
+    if (!pressedWithPointer.current) open({ owner, explanation, content, identity, example, element: event.currentTarget })
     pressedWithPointer.current = false
   }
 
   function activate() {
-    select(explanation, example)
+    select(explanation, example, content)
     onActivate?.()
   }
 
@@ -155,9 +160,9 @@ export function Explainable(props: Props) {
   }
 
   const bindings = {
-    'data-explainable': explanation,
+    'data-explainable': identity ?? explanation,
     'data-explainable-kind': kind,
-    'aria-label': label ?? explainables[explanation].title,
+    'aria-label': label ?? explainable.title,
     'aria-describedby': scope.activeOwner === owner ? owner + '-tip' : descriptionId,
     onPointerEnter: hover,
     onPointerMove: hover,
@@ -174,7 +179,7 @@ export function Explainable(props: Props) {
   }
 
   if (props.as === 'g') {
-    const { as, explanation, kind, label, example, onActivate, children, ...attributes } = props
+    const { as, explanation, kind, label, example, content, identity, onActivate, children, ...attributes } = props
     return (
       <g {...attributes} {...bindings} role="button" tabIndex={0}>
         <desc id={descriptionId}>{description}</desc>
@@ -182,7 +187,7 @@ export function Explainable(props: Props) {
       </g>
     )
   }
-  const { as, explanation: id, kind: targetKind, label: name, example: text, onActivate: action, children, ...attributes } = props
+  const { as, explanation: id, kind: targetKind, label: name, example: text, content: targetContent, identity: targetIdentity, onActivate: action, children, ...attributes } = props
   return (
     <button {...attributes} {...bindings} type="button">
       {children}

@@ -43,7 +43,7 @@ export function AttentionPage() {
   const [playing, setPlaying] = useState(false)
   const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
-  const [selection, setSelection] = useState<{ id: ExplainableId; example?: string } | null>(null)
+  const [selection, setSelection] = useState<{ id: ExplainableId; example?: string; content?: Explainable } | null>(null)
   const detailPanelRef = useRef<HTMLElement>(null)
   const translationNavRef = useRef<HTMLElement>(null)
   const translationItemRef = useRef<HTMLButtonElement>(null)
@@ -86,8 +86,8 @@ export function AttentionPage() {
     if (item.bottom > bounds.bottom) nav.scrollTop += item.bottom - bounds.bottom
   }, [mode, section.id])
 
-  const selectExplainable = useCallback((id: ExplainableId, example?: string) => {
-    setSelection({ id, example })
+  const selectExplainable = useCallback((id: ExplainableId, example?: string, content?: Explainable) => {
+    setSelection({ id, example, content })
   }, [])
 
   function changeMode(nextMode: PaperMode) {
@@ -156,7 +156,7 @@ export function AttentionPage() {
               </div>
 
               <aside className="detail-panel" ref={detailPanelRef} key={`${lesson.id}/${step.id}`}>
-                {selection && <SelectedExplanation content={explainables[selection.id]} example={selection.example}
+                {selection && <SelectedExplanation content={selection.content ?? explainables[selection.id]} example={selection.example}
                   onClear={() => setSelection(null)} />}
 
                 <div className="paper-label">本步解释</div>

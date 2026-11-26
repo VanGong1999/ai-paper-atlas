@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ExplainableId } from '../../data/papers/attention/explainables'
+import { attentionSoftmaxExplainable } from './attentionSoftmaxExplainable'
 import { Explainable } from './Explainable'
 import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
 
@@ -34,12 +35,15 @@ export function AttentionMatrixStage({ highlight, showHeatmap }: StageProps & { 
         <StageBlock id="key" kind="qkv" text="K · 键" x={24} y={101} w={102} tone="encoder" active={highlight.has('key')} />
         <StageBlock id="value" kind="qkv" text="V · 值" x={24} y={155} w={102} tone="decoder" active={highlight.has('value')} />
         <StageBlock id="scale" text="QKᵀ / √dₖ" caption="缩放分数" x={158} y={63} w={148} h={50} tone="attn" active={highlight.has('scale')} />
-        <StageBlock id="softmax" text="Softmax" caption="权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn" active={highlight.has('softmax')} />
+        <StageBlock id="softmax" text="Softmax" caption="注意力权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn"
+          content={attentionSoftmaxExplainable} identity="attention-softmax" active={highlight.has('softmax')} />
         <StageBlock id="value" text="加权求和" caption="输出表示" x={497} y={63} w={119} h={50} tone="decoder" active={highlight.has('weights')} />
         <rect className="stage-lane" x={24} y={202} width={592} height={44} rx={7} />
         <text className="stage-annotation" x={39} y={230}>式 (1)</text>
         {variables.map(({ id, text, x, w, label }) => (
           <Explainable key={text} as="g" explanation={id} kind="formula-variable" label={label ?? text}
+            content={id === 'softmax' ? attentionSoftmaxExplainable : undefined}
+            identity={id === 'softmax' ? 'attention-softmax' : undefined}
             className="stage-node formula-token" >
             <rect x={x} y={209} width={w} height={30} rx={4} />
             <text x={x + w / 2} y={224}>{text}</text>

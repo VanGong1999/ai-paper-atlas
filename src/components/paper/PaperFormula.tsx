@@ -1,6 +1,7 @@
 import type { ExplainableId } from '../../data/papers/attention/explainables'
 import type { LessonStep } from '../../data/papers/attention/lessons'
 import { Explainable } from './Explainable'
+import { attentionSoftmaxExplainable } from './attentionSoftmaxExplainable'
 
 const tokens: Record<string, ExplainableId> = {
   Q: 'query', K: 'key', 'Kᵀ': 'key', V: 'value', '√dₖ': 'scale', softmax: 'softmax',
@@ -20,7 +21,9 @@ export function PaperFormula({ step }: { step: LessonStep }) {
         const explanation = tokens[part]
         return index % 2 && explanation
           ? <Explainable key={index} as="button" explanation={part === 'x' && step.id === 'res' ? 'residual' : explanation}
-              kind="formula-variable" label={part}>{part}</Explainable>
+              kind="formula-variable" label={part}
+              content={part === 'softmax' && step.stage === 'attention' ? attentionSoftmaxExplainable : undefined}
+              identity={part === 'softmax' && step.stage === 'attention' ? 'attention-softmax' : undefined}>{part}</Explainable>
           : part
       })}
     </div>

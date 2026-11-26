@@ -57,7 +57,7 @@ export function TooltipPop({ id, content, example, element, pointer }: Props) {
       const lowerSpace = Math.max(1, (compactTrigger ? maxY - anchor.bottom : maxY - y) - gap)
       const upperSpace = Math.max(1, (compactTrigger ? anchor.top - minY : y - minY) - gap)
       const preferredWidth = Math.min(288, Math.max(rightSpace, leftSpace))
-      const preferredHeight = Math.min(360, Math.max(lowerSpace, upperSpace))
+      const preferredHeight = Math.max(1, Math.max(lowerSpace, upperSpace))
       tip.style.maxWidth = `${preferredWidth}px`
       tip.style.maxHeight = `${preferredHeight}px`
       const { width, height } = tip.getBoundingClientRect()
@@ -101,6 +101,7 @@ export function TooltipPop({ id, content, example, element, pointer }: Props) {
       {example && <p className="tip-example"><strong>{example}</strong></p>}
       {content.detail.map(line => <p className="tip-detail" key={line}>{line}</p>)}
       <p><strong>论文事实 · {content.paperFact}</strong></p>
+      <p className="tip-teaching"><strong>教学解释 · </strong>{content.teachingExplanation}</p>
       {content.misconception && <p>{content.misconception}</p>}
       <small>{/^\d/.test(content.source.section) ? '§' : ''}{content.source.section} · PDF p. {content.source.page}</small>
     </motion.div>
