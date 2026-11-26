@@ -31,12 +31,13 @@ export function PaperTable({ figure, redraw }: { figure: PaperFigure; redraw: Ta
                     const label = redraw === 'translation' && span === 2 ? 'Training Cost (FLOPs)'
                       : redraw === 'variants' && span === 9 ? 'Configuration' : column.label
                     const context = `${row.label} · ${label} · ${text}`
+                    const cellContent = row.content ?? column.content
                     const best = table.best?.(row, index)
                     return (
                       <td key={index} colSpan={span} className={best ? 'paper-table-best' : undefined}>
                         {text && (
                           <Explainable as="button" explanation={column.explanation} kind="paper-table-cell"
-                            content={column.content} label={context} example={`${reference} · ${context}`}>
+                            content={cellContent} label={context} example={`${reference} · ${context}`}>
                             {text}
                           </Explainable>
                         )}

@@ -13,6 +13,11 @@ type Props = {
 }
 
 const chapters = fulltextZh.filter(block => figures.some(figure => figure.originalId === block.originalId))
+const figureChapterIds = new Set(chapters.map(block => block.originalId))
+
+export function normalizeFigureChapter(chapter: string | null | undefined) {
+  return chapter && (chapter === 'all' || figureChapterIds.has(chapter)) ? chapter : 'all'
+}
 const readingSteps = lessons.flatMap((lesson, lessonIndex) =>
   lesson.steps.map((step, stepIndex) => ({
     lessonIndex, stepIndex, lessonTitle: lesson.title, stepTitle: step.title, figureIds: step.figureIds,
@@ -20,7 +25,8 @@ const readingSteps = lessons.flatMap((lesson, lessonIndex) =>
 )
 
 export function FiguresView({ chapter, onChapterChange, activeFigureIds, onSelectStep, onReadTranslation }: Props) {
-  const visible = figures.filter(figure => chapter === 'all' || figure.originalId === chapter)
+  const normalizedChapter = normalizeFigureChapter(chapter)
+  const visible = figures.filter(figure => normalizedChapter === 'all' || figure.originalId === normalizedChapter)
   const ordered = [...visible.filter(figure => activeFigureIds.includes(figure.id)),
     ...visible.filter(figure => !activeFigureIds.includes(figure.id))]
 
@@ -33,7 +39,7 @@ export function FiguresView({ chapter, onChapterChange, activeFigureIds, onSelec
         </div>
         <label>
           图表章节
-          <select value={chapter} onChange={event => onChapterChange(event.target.value)}>
+          <select value={normalizedChapter} onChange={event => onChapterChange(normalizeFigureChapter(event.target.value))}>
             <option value="all">全部章节</option>
             {chapters.map(block => (
               <option key={block.originalId} value={block.originalId}>

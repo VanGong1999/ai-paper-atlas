@@ -3,7 +3,7 @@ import { originalSource, type PaperSource } from '../../data/papers/attention/or
 
 type Column = { label: string; explanation: ExplainableId; content?: ExplainableContent }
 type Cell = string | null | { text: string; span: number }
-type Row = { label: string; cells: Cell[]; baseline?: boolean }
+type Row = { label: string; cells: Cell[]; baseline?: boolean; content?: ExplainableContent }
 export type TableRedraw = 'complexity' | 'translation' | 'variants' | 'parsing'
 
 type Table = {
@@ -27,6 +27,15 @@ function table3Explainable(title: string, plain: string, paperFact: string, teac
   }
 }
 
+function trainingExplainable(title: string, plain: string, paperFact: string, teachingExplanation: string): ExplainableContent {
+  const originalId = title === '学习率安排' ? 'sec5-3' : 'sec5-1'
+  const source = originalSource(originalId)
+  return {
+    title, plain, role: '补充 Table 3 附近的训练设置来源。', detail: [], paperFact, teachingExplanation,
+    originalId, source: { ...source, page: 7 },
+  }
+}
+
 const table3Columns = {
   layers: table3Explainable('层数 N', 'N 表示 Transformer 堆叠的层数。', 'Table 3 的 base 行使用 N=6，C 组改变层数。', '把 N 与同一行的其余配置一起读取，观察层数变化对应的开发集结果。'),
   modelDimension: table3Explainable('模型维度 d_model', 'd_model 是子层和嵌入输出的表示维度。', '§3.1 说明 base 模型的 d_model=512，Table 3 的 C 组比较了不同模型规模。', '先确认行中改变的是 d_model 还是 d_ff，再比较 PPL、BLEU 与参数量。'),
@@ -40,11 +49,12 @@ const table3Columns = {
   ppl: table3Explainable('开发集 PPL', 'PPL 是表中按子词计算的开发集困惑度。', 'Table 3 说明 PPL 按 byte-pair encoding 的 wordpiece 计算，不能与按词困惑度直接比较。', '比较 PPL 时保持分词单位一致。'),
   bleu: table3Explainable('开发集 BLEU', 'BLEU 是英译德 newstest2013 开发集分数。', 'Table 3 的所有指标都来自 English-to-German newstest2013 开发集。', '先确认这是开发集 BLEU，再与 Table 2 的 newstest2014 结果区分。'),
   params: table3Explainable('参数量', 'params ×10⁶ 表示百万参数。', 'Table 3 的 base 行为 65，big 行为 213，单位是百万参数。', '把参数量与该行的完整配置一起看，避免将差异归因于单个列。'),
+  positionEmbeddings: table3Explainable('学习的位置嵌入', 'row E 用学习的位置嵌入替换正弦位置编码。', 'Table 3 row (E) replaces sinusoidal positional encoding with learned positional embeddings and reports PPL 4.92 and BLEU 25.7.', '把 row E 作为一个整体读取，因为它是表中的合并说明行。'),
 }
 
 export const table3Context = {
-  learningRate: table3Explainable('学习率安排', '学习率按训练步数变化，并包含 warmup 阶段。', '§5.3 使用 Adam，并令 warmup_steps=4000。', 'Table 3 的 train steps 是训练长度，§5.3 的 warmup_steps 是学习率安排中的步数。'),
-  batchTokens: table3Explainable('批次 token 数', '每个训练批次按近似序列长度组批。', '§5.1 说明每批约含 25000 个 source tokens 和 25000 个 target tokens。', '这是训练批次规模，和 Table 3 的 train steps 列是不同概念。'),
+  learningRate: trainingExplainable('学习率安排', '学习率按训练步数变化，并包含 warmup 阶段。', '§5.3 使用 Adam，并令 warmup_steps=4000。', 'Table 3 的 train steps 是训练长度，§5.3 的 warmup_steps 是学习率安排中的步数。'),
+  batchTokens: trainingExplainable('批次 token 数', '每个训练批次按近似序列长度组批。', '§5.1 说明每批约含 25000 个 source tokens 和 25000 个 target tokens。', '这是训练批次规模，和 Table 3 的 train steps 列是不同概念。'),
 }
 
 // Transcribed from the tables on PDF pages 6, 8, 9 and 10. Null preserves a printed blank.
@@ -109,7 +119,7 @@ export const paperTables: Record<TableRedraw, Table> = {
       row('(D)', [null, null, null, null, null, null, '0.2', null, null, '4.95', '25.5', null]),
       row('(D)', [null, null, null, null, null, null, null, '0.0', null, '4.67', '25.3', null]),
       row('(D)', [null, null, null, null, null, null, null, '0.2', null, '5.47', '25.7', null]),
-      row('(E)', [span('positional embedding instead of sinusoids', 9), '4.92', '25.7', null]),
+      { ...row('(E)', [span('positional embedding instead of sinusoids', 9), '4.92', '25.7', null]), content: table3Columns.positionEmbeddings },
       row('big', ['6', '1024', '4096', '16', null, null, '0.3', null, '300K', '4.33', '26.4', '213']),
     ],
     best: ({ label }, index) => label === 'big' && (index === 9 || index === 10),

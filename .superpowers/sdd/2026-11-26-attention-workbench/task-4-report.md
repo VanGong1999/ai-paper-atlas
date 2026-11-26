@@ -260,3 +260,110 @@ node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-p
 ```
 
 Both exited 0. The reader check reported 4 passed and 0 failed. The inventory check reported 2 passed and validation ended with `"sections": 27`, `"explainables": 34`, `"lessons": 10`, `"steps": 28` and `"issues": []`.
+
+## Task 4 fix round 2
+
+The References/all-chapters handoff now normalizes unsupported reader chapter IDs to `all` before rendering or storing the Figures filter. Valid figure-bearing chapter IDs remain explicit, including direct figure-specific links. Table 3 merged row E now supplies a row-level explainable for learned positional embeddings replacing sinusoidal positional encoding. The learning-rate/warmup and batch-token explainables now use their training-section sources on PDF p. 7, with `5.3 Optimizer` and `5.1 Training Data and Batching` labels.
+
+Focused data command
+
+```sh
+node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs
+```
+
+Output and exit 0
+
+```text
+1..4
+# tests 4
+# pass 4
+# fail 0
+```
+
+Focused Chrome command
+
+```sh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+"$PW" -s=t4-round2-pass open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null
+"$PW" -s=t4-round2-pass run-code "$(cat .superpowers/sdd/2026-11-26-attention-workbench/task-4-round2-browser.js)"
+```
+
+Output and exit 0
+
+```text
+### Result
+"Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers."
+```
+
+The focused browser assertions observed `chapter: all` and `cards: 9` after References → Figures, verified row E with `learned positional embeddings`, `PDF p. 9`, and no layer-count explanation, and verified warmup and batch-token footers with `5.3 Optimizer` / `5.1 Training Data` and `PDF p. 7`.
+
+Full Chrome regression command
+
+```zsh
+PW=/Users/gongfan/.codex/skills/playwright/scripts/playwright_cli.sh
+suite=.superpowers/sdd/2026-11-26-attention-workbench
+run_suite() {
+  local name="$1" session="r2-suite-$1"
+  "$PW" -s="$session" open http://127.0.0.1:5184/papers/attention --browser=chrome >/dev/null || return 1
+  local source result
+  source=$(sed -e 's/127\.0\.0\.1:5178/127.0.0.1:5184/g' -e "s/page.getByRole('tabpanel')/page.locator('#paper-mode-panel')/g" "$suite/$name.js")
+  result=$("$PW" -s="$session" run-code "$source")
+  print -r -- "$name"
+  print -r -- "$result" | sed '/^### Ran Playwright code/,$d'
+  "$PW" -s="$session" close >/dev/null 2>&1 || true
+  [[ "$result" == '### Result'* ]]
+}
+run_suite task-4-round2-browser
+run_suite task-4-browser
+run_suite task-2-browser
+run_suite task-2-round1-browser
+run_suite task-2-round3-browser
+run_suite task-2-round4-browser
+run_suite task-3-browser
+run_suite task-3-round1-browser
+run_suite task-3-round2-browser
+run_suite task-3-round3-browser
+run_suite task-3-round4-browser
+```
+
+Output and exit 0
+
+```text
+task-4-round2-browser: Passed References-to-Figures normalization, row E positional-embedding explanation, and p.7 training source footers.
+task-4-browser: Passed all nine previews and redraw tabs, PDF fallback on image failure, exact badges, chapter/step links, four tables and cell hover/focus, all 27 bilingual mappings and narrow scrolling in light/dark.
+task-2-browser: Passed mode switching, source context, playback and progress, PDF, desktop columns and 390/320px overflow checks in light/dark themes.
+task-2-round1-browser: Passed responsive SVG reachability/readability, zoom clipping, overflow, replay timer reset, and deep translation chapter reveal.
+task-2-round3-browser: Passed 768px top visibility, 320px functional zoom bounds, right-panned tooltip visibility, and document overflow checks.
+task-2-round4-browser: {"cursorGapsPx":[11,11,11],"reachableNodes":11,"directCellClicks":16}
+task-3-browser: Passed architecture, Q/K/V, formula variables, all matrix cells, eight heads, Table 1, curve controls, tooltip hover/focus and viewport edges, stage pan, pause/replay and reduced motion.
+task-3-round1-browser: Passed explainable architecture flows, distinct Softmax identity, and 320px trigger separation.
+task-3-round2-browser: Passed output data-flow targets, distinct attention/output Softmax identities, full sourced tooltip content, and 320x760 placement.
+task-3-round3-browser: Passed 320x760 interactive sourced tooltip content/scrolling and encoder/decoder residual hit ordering.
+task-3-round4-browser: Passed focused K restoration, Enter/Escape, and pointer-only card retention and dismissal.
+```
+
+Build, inventory, and integrity command
+
+```sh
+npm run build
+node --disable-warning=ExperimentalWarning --test scripts/attention-reader.test.mjs
+export PDF_PYTHON=/Users/gongfan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python
+set -o pipefail
+node --test scripts/attention-pdf-inventory.test.mjs && node scripts/attention-pdf-inventory.mjs --validate | tail -10
+cmp public/article/1706.03762v7.pdf dist/article/1706.03762v7.pdf
+git diff --exit-code b9a5857 -- src/data/papers/attention public/article/1706.03762v7.pdf
+git diff --check
+```
+
+Output and exit 0
+
+```text
+✓ 1211 modules transformed.
+✓ built in 1.29s
+index-BjR3Qric.js 588.65 kB | gzip: 198.91 kB
+reader: 4 passed, 0 failed
+inventory: 2 passed, 0 failed
+validation: sections 27, explainables 34, lessons 10, steps 28, issues []
+```
+
+The existing Vite advisory remains for the main bundle exceeding 500 kB. No Task 1 data or supplied PDF bytes changed.

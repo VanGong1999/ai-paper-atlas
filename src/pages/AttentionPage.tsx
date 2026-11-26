@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ExplainableScope } from '../components/paper/Explainable'
-import { FiguresView } from '../components/paper/FiguresView'
+import { FiguresView, normalizeFigureChapter } from '../components/paper/FiguresView'
 import { LessonNav } from '../components/paper/LessonNav'
 import { OriginalDrawer } from '../components/paper/OriginalDrawer'
 import { PaperFormula } from '../components/paper/PaperFormula'
@@ -94,7 +94,7 @@ export function AttentionPage() {
 
   function changeMode(nextMode: PaperMode) {
     if (nextMode !== 'learn') setPlaying(false)
-    if (nextMode === 'figures' && translationId) setFigureChapter(translationId)
+    if (nextMode === 'figures') setFigureChapter(normalizeFigureChapter(translationId))
     setMode(nextMode)
   }
 
