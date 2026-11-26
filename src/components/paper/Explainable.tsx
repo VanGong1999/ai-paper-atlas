@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion'
 import {
   createContext, useContext, useEffect, useId, useMemo, useRef, useState,
-  type ComponentPropsWithoutRef, type FocusEvent, type KeyboardEvent, type PointerEvent, type ReactNode,
+  type ComponentPropsWithoutRef, type FocusEvent, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { explainables, type Explainable as ExplainableContent, type ExplainableId } from '../../data/papers/attention/explainables'
@@ -24,14 +24,14 @@ type Controller = {
   retain: (owner: string) => void
   release: (owner: string) => void
   dismiss: (owner?: string) => void
-  select: (id: ExplainableId, example?: string, content?: ExplainableContent) => void
+  select?: (id: ExplainableId, example?: string, content?: ExplainableContent) => void
 }
 
 const Overlay = createContext<Controller | null>(null)
 
 export function ExplainableScope({ children, onSelectExplainable }: {
   children: ReactNode
-  onSelectExplainable: Controller['select']
+  onSelectExplainable?: Controller['select']
 }) {
   const [active, setActive] = useState<Target | null>(null)
   const controller = useMemo(() => {
@@ -175,8 +175,9 @@ export function Explainable(props: Props) {
     pressedWithPointer.current = false
   }
 
-  function activate() {
-    select(explanation, example, content)
+  function activate(element: Element) {
+    if (select) select(explanation, example, content)
+    else open({ owner, explanation, content, identity, example, element })
     onActivate?.()
   }
 
@@ -184,7 +185,7 @@ export function Explainable(props: Props) {
     if (event.key === 'Escape') dismiss()
     if (props.as !== 'g' || (event.key !== 'Enter' && event.key !== ' ')) return
     event.preventDefault()
-    if (!event.repeat) activate()
+    if (!event.repeat) activate(event.currentTarget)
   }
 
   const bindings = {
@@ -203,7 +204,7 @@ export function Explainable(props: Props) {
     onFocus: focus,
     onBlur: () => leave(owner, false),
     onKeyDown,
-    onClick: activate,
+    onClick: (event: MouseEvent<Element>) => activate(event.currentTarget),
   }
 
   if (props.as === 'g') {

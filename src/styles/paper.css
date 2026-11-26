@@ -896,79 +896,365 @@
 }
 
 .fulltext-layout {
-  grid-template-columns: minmax(176px, 16%) minmax(0, 1fr) minmax(245px, 31%);
+  grid-template-columns: minmax(176px, 16%) repeat(2, minmax(0, 1fr));
 }
 
 .fulltext-main,
-.figures-layout {
-  padding: 14px 16px 20px;
+.original-drawer {
+  padding: 16px clamp(14px, 2vw, 28px) 24px;
+  scroll-margin-top: calc(var(--header-h) + 8px);
 }
 
-.fulltext-main article {
+.fulltext-main article,
+.original-prose {
   max-width: 72ch;
+  margin-inline: auto;
 }
 
-.fulltext-main p {
-  margin: 8px 0 12px;
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.8;
+.fulltext-heading {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
 }
 
 .original-drawer {
   border-left: 1px solid var(--line);
   background: var(--surface-2);
-  padding: 14px;
 }
 
 .original-drawer h3 {
-  margin: 0 0 8px;
-  font-size: 13px;
+  margin: 4px 0 8px;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
-.original-drawer pre {
-  white-space: pre-wrap;
-  font: 11.5px/1.7 var(--font-mono);
-  color: var(--text);
-  margin: 0;
-}
-
-.figures-layout > p,
-.figure-index p {
-  margin: 6px 0 0;
+.original-locator {
+  margin-top: 6px;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 11px;
+}
+
+.fulltext-main p,
+.original-prose p {
+  margin: 10px 0 13px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+:is(.fulltext-main, .original-prose) .reader-equation {
+  padding: 7px 9px;
+  border-inline-start: 2px solid var(--accent-outline);
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-weight: 650;
+}
+
+.fulltext-jump {
+  display: none;
+}
+
+.figures-layout {
+  padding: 14px clamp(10px, 2.5vw, 32px) 24px;
+  background: var(--bg);
+}
+
+.figures-toolbar,
+.figure-index {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.figures-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin-bottom: 12px;
+}
+
+.figures-toolbar h2 {
+  margin: 0 0 2px;
+}
+
+.figures-attribution,
+.figures-toolbar label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.figures-toolbar label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+}
+
+.figures-toolbar select {
+  max-width: 100%;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 12px var(--font-sans);
 }
 
 .figure-index {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
-  gap: 7px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
-.figure-index > li {
-  padding: 9px;
+.paper-figure {
+  min-width: 0;
+  padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
+  background: var(--surface);
 }
 
-.figure-index > .related {
+.paper-figure[data-related] {
   border-color: var(--accent-outline);
 }
 
-.figure-index h3 {
-  margin: 0 0 5px;
-  font-size: 13px;
-}
-
 .figure-context {
-  padding-inline-start: 6px;
+  align-self: center;
   color: var(--accent-ink);
   font-size: 11px;
+}
+
+.paper-figure-heading h3 {
+  margin: 5px 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.paper-figure-heading h3 button,
+.figure-flow button {
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: help;
+}
+
+.paper-figure-heading h3 button:hover {
+  color: var(--accent-ink);
+}
+
+.figure-tabs {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.figure-tabs button {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.figure-tabs button:is(:hover, [aria-selected='true']) {
+  color: var(--accent-ink);
+}
+
+.figure-tabs button[aria-selected='true'] {
+  border-color: var(--line-strong);
+  background: var(--accent-fill);
+}
+
+.figure-panel {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-2);
+}
+
+.figure-preview {
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.figure-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 330px;
+  object-fit: contain;
+}
+
+.figure-pdf-link {
+  display: inline-block;
+  padding: 6px 2px 1px;
+  color: var(--accent-ink);
+  font-size: 11px;
+}
+
+.paper-figure p {
+  margin: 7px 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.paper-figure :is(.figure-caption, .figure-table-note) {
+  color: var(--muted);
+}
+
+.paper-figure .figure-redraw-label {
+  margin: 0 0 6px;
+  color: var(--accent-ink);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.figure-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+}
+
+.figure-links .chip {
+  min-height: 26px;
+  font-size: 11px;
+}
+
+.figure-architecture,
+.paper-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.figure-architecture .stage-svg {
+  min-width: 425px;
+}
+
+.figure-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.figure-flow,
+.figure-pattern section {
+  padding: 7px;
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.figure-panel h4 {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.figure-flow ol,
+.figure-pattern ul {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.figure-flow li,
+.figure-pattern li {
+  padding: 2px 6px;
+  border-inline-start: 2px solid var(--accent-outline);
+  background: var(--accent-fill);
+  font: 11px/1.45 var(--font-mono);
+}
+
+.figure-flow li + li::before {
+  content: '↓ ';
+  color: var(--accent-ink);
+}
+
+.figure-pattern section + section {
+  margin-top: 6px;
+}
+
+.figure-pattern ul {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.figure-pattern li span {
+  color: var(--accent-ink);
+}
+
+.paper-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.paper-table :is(th, td) {
+  border-bottom: 1px solid var(--line);
+  padding: 0 6px;
+}
+
+.paper-table thead th {
+  padding: 6px;
+  background: var(--surface-3);
+  font-weight: 700;
+}
+
+.paper-table th:first-child {
+  border-inline-end: 1px solid var(--line);
+  text-align: left;
+}
+
+.paper-table tbody th {
+  font-weight: 550;
+}
+
+.paper-table td[colspan]:not([colspan="1"]) {
+  text-align: center;
+}
+
+.paper-table td button {
+  margin-inline: -3px;
+  padding: 4px 3px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: help;
+}
+
+.paper-table td button:is(:hover, :focus-visible) {
+  background: var(--control-hover);
+  color: var(--accent-ink);
+}
+
+.paper-table-base {
+  background: var(--info-fill);
+}
+
+.paper-table-best {
+  color: var(--text);
+  font-weight: 800;
 }
 
 .pdf-layout {
@@ -1031,8 +1317,17 @@
   }
 
   .fulltext-main,
-  .original-drawer {
+  .original-drawer,
+  .figures-layout {
     overflow: visible;
+  }
+
+  .fulltext-jump {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 6px;
+    color: var(--accent-ink);
+    font-size: 12px;
   }
 
   .original-drawer {
@@ -1042,6 +1337,43 @@
 
   .pdf-layout iframe {
     height: max(360px, 70dvh);
+  }
+}
+
+@media (max-width: 680px) {
+  .figure-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  .cockpit,
+  .cockpit-panel,
+  .fulltext-layout,
+  .figure-index {
+    display: block;
+    height: auto;
+  }
+
+  .cockpit :is(.figures-layout, .fulltext-main, .original-drawer, .paper-table-scroll, .figure-architecture) {
+    overflow: visible;
+  }
+
+  .cockpit :is(.cockpit-header, .fulltext-nav, .workbench-context, .fulltext-jump, .figure-tabs, .figure-links, .figures-toolbar label) {
+    display: none;
+  }
+
+  .cockpit :is(.paper-figure, .reader-equation) {
+    break-inside: avoid;
+  }
+
+  .cockpit .paper-figure {
+    margin-bottom: 12px;
+  }
+
+  .cockpit .paper-table {
+    width: 100%;
+    white-space: normal;
   }
 }
 

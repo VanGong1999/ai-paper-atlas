@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ExplainableScope } from '../components/paper/Explainable'
+import { FiguresView } from '../components/paper/FiguresView'
 import { LessonNav } from '../components/paper/LessonNav'
 import { OriginalDrawer } from '../components/paper/OriginalDrawer'
 import { PaperFormula } from '../components/paper/PaperFormula'
@@ -40,6 +41,7 @@ export function AttentionPage() {
     translationId: null,
     visited: new Set([`${lessons[0].id}/${lessons[0].steps[0].id}`]),
   }))
+  const [figureChapter, setFigureChapter] = useState('all')
   const [playing, setPlaying] = useState(false)
   const [playbackKey, setPlaybackKey] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -110,10 +112,22 @@ export function AttentionPage() {
     else if (canNext) selectStep(lessonIndex + 1, 0)
   }
 
-  function readStepTranslation() {
-    setPosition(current => ({ ...current, translationId: null }))
+  function readTranslation(originalId: string | null) {
+    setPosition(current => ({ ...current, translationId: originalId }))
     changeMode('fulltext')
     document.getElementById('paper-mode-fulltext')?.focus()
+  }
+
+  function readRelatedStep(nextLesson: number, nextStep: number) {
+    selectStep(nextLesson, nextStep)
+    changeMode('learn')
+    document.getElementById('paper-mode-learn')?.focus()
+  }
+
+  function readChapterFigures() {
+    setFigureChapter(section.originalId)
+    changeMode('figures')
+    document.getElementById('paper-mode-figures')?.focus()
   }
 
   return (
@@ -177,7 +191,7 @@ export function AttentionPage() {
                   <p>{step.teachingExplanation}</p>
                   {step.diffs && <ul>{step.diffs.map(detail => <li key={detail}>{detail}</li>)}</ul>}
                 </section>
-                <button type="button" className="chip active" onClick={readStepTranslation}>查看本节中译 →</button>
+                <button type="button" className="chip active" onClick={() => readTranslation(null)}>查看本节中译 →</button>
               </aside>
 
               <StepRail
@@ -201,21 +215,8 @@ export function AttentionPage() {
         )}
 
         {mode === 'figures' && (
-          <div className="figures-layout">
-            <h2>论文图表</h2>
-            <p>图表预览待接入，点击来源可在 PDF 中查看原图或原表。</p>
-            {stepFigures.length === 0 && <p>当前步骤没有关联图表。</p>}
-            <ul className="figure-index">
-              {[...stepFigures, ...figures.filter(figure => !step.figureIds.includes(figure.id))].map(figure => (
-                <li key={figure.id} className={step.figureIds.includes(figure.id) ? 'related' : undefined}>
-                  <h3>{figure.title}</h3>
-                  <SourceBadge source={figure.source} reference={`${figure.kind} ${figure.number}`} href={figure.originalAsset} />
-                  {step.figureIds.includes(figure.id) && <span className="figure-context">当前步骤</span>}
-                  <p lang="en">{figure.caption}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FiguresView chapter={figureChapter} onChapterChange={setFigureChapter} activeFigureIds={step.figureIds}
+            onSelectStep={readRelatedStep} onReadTranslation={readTranslation} />
         )}
 
         {mode === 'fulltext' && (
@@ -233,11 +234,20 @@ export function AttentionPage() {
                 </button>
               ))}
             </nav>
-            <div className="fulltext-main" key={`translation/${section.id}`}>
-              <article>
-                <h2>{/^\d/.test(section.section) && `${section.section} `}{section.title}</h2>
-                <SourceBadge source={section.source} />
-                {section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            <div className="fulltext-main" key={`translation/${section.id}`} id="paper-translation"
+              lang="zh-Hans" tabIndex={0} data-original-id={section.originalId}>
+              <article aria-labelledby="paper-translation-heading">
+                <header className="fulltext-heading">
+                  <div className="paper-label">中文译文</div>
+                  <h2 id="paper-translation-heading">{/^\d/.test(section.section) && `${section.section} `}{section.title}</h2>
+                  <div className="source-row">
+                    <SourceBadge source={section.source} />
+                    <a className="fulltext-jump" href="#paper-original">英文 ↓</a>
+                    {figures.some(figure => figure.originalId === section.originalId) &&
+                      <button type="button" className="chip" onClick={readChapterFigures}>本节图表 →</button>}
+                  </div>
+                </header>
+                {section.paragraphs.map((paragraph, index) => <TranslationParagraph key={index} text={paragraph} />)}
               </article>
             </div>
             <OriginalDrawer key={`original/${section.id}`} originalId={section.originalId} />
@@ -255,6 +265,16 @@ export function AttentionPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function TranslationParagraph({ text }: { text: string }) {
+  const emphasized = /(28\.4 BLEU|41\.[08] BLEU|N=6|d_model=512|d_ff=2048|warmup_steps=4000|8 块 P100 GPU|4 万个训练句|WSJ 第 23 节)/g
+  const equation = /^(?:Attention\(|MultiHead\(|PE\(|lrate =)/.test(text)
+  return (
+    <p className={equation ? 'reader-equation' : undefined}>
+      {text.split(emphasized).map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : part)}
+    </p>
   )
 }
 
