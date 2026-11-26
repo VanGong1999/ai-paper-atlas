@@ -41,8 +41,8 @@
   --surface: #fffcf5;
   --surface-2: #f5efe3;
   --surface-3: #ebe4d6;
-  --line: #e4dccd;
-  --line-strong: #c9beac;
+  --line: rgb(84 63 33 / 17%);
+  --line-strong: rgb(84 63 33 / 33%);
   --text: #252b22;
   --muted: #555e50;
   --muted-2: #686e61;

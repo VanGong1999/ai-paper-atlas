@@ -206,27 +206,17 @@ a.toplink:hover {
 }
 
 @media (max-width: 580px) {
+  .app-header,
   .topbar {
-    display: grid;
-    grid-template-areas: 'brand link' 'nav nav';
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: 1fr 1fr;
-    gap: 0 8px;
-  }
-
-  .brand {
-    grid-area: brand;
-    justify-self: start;
-  }
-
-  .topnav {
-    grid-area: nav;
     gap: 8px;
   }
 
+  .topnav {
+    gap: 6px;
+  }
+
+  .topnav,
   .toplink {
-    grid-area: link;
-    margin-left: 0;
     line-height: 1.2;
   }
 }
