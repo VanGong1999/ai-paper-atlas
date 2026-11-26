@@ -229,7 +229,18 @@ a.toplink:hover {
     gap: 0;
   }
 
-  .toplink {
-    flex: 0 0 34px;
+  a.toplink {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font: 12px var(--font-sans);
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar:has(a.toplink) .brandmark,
+  .topnav > span {
+    display: none;
   }
 }
