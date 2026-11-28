@@ -25,6 +25,7 @@ export function KDScene({ scene, playing, onHover }: SceneProps & { scene: strin
   if (scene === 'history') return <HistoryScene onHover={onHover} />
   if (scene === 'compression-map') return <CompressionMapScene onHover={onHover} />
   if (scene === 'metrics') return <MetricsScene onHover={onHover} />
+  if (['transfer-details', 'mnist-edge', 'speech-detail', 'jft-details', 'jft-results'].includes(scene)) return <DetailedEvidenceScene scene={scene} onHover={onHover} />
   return <OverviewScene playing={playing} onHover={onHover} />
 }
 
@@ -84,7 +85,7 @@ function CalculationScene({ onHover }: { onHover: (id: string) => void }) {
     <div className="kd-calc-controls"><label>T <b>{temperature}</b><input type="range" min="1" max="10" step="1" value={temperature} onChange={event => setTemperature(Number(event.target.value))} /></label><label>α <b>{alpha.toFixed(2)}</b><input type="range" min="0" max="1" step=".05" value={alpha} onChange={event => setAlpha(Number(event.target.value))} /></label></div>
     <div className="kd-calc-columns"><div><header><b>Student logits</b><span onMouseEnter={() => onHover('student-logit')}>[-5, 2, 7, 9]</span></header><div className="kd-calc-row kd-calc-head"><span>class</span><span>T=1</span><span>T={temperature}</span></div>{classes.map((name, index) => <div className="kd-calc-row" key={name}><span>{name}</span><button type="button" onMouseEnter={() => onHover('student-logit')}>{studentT1[index].toFixed(4)}</button><button type="button" onMouseEnter={() => onHover('soft-predictions')}>{studentT[index].toFixed(4)}</button></div>)}</div><div><header><b>Teacher logits</b><span onMouseEnter={() => onHover('teacher-logit')}>[-10, 0, 3, 12]</span></header><div className="kd-calc-row kd-calc-head"><span>class</span><span>T={temperature}</span><span>soft target</span></div>{classes.map((name, index) => <div className="kd-calc-row" key={name}><span>{name}</span><button type="button" onMouseEnter={() => onHover('teacher-logit')}>{teacherT[index].toFixed(4)}</button><button type="button" onMouseEnter={() => onHover('soft-targets')}>{(teacherT[index] * 100).toFixed(1)}%</button></div>)}</div></div>
     <div className="kd-calc-losses"><button type="button" onMouseEnter={() => onHover('hard-ce')}><span>hard CE = −log(Student<sub>T=1</sub>[马])</span><b>{hard.toFixed(3)}</b></button><button type="button" onMouseEnter={() => onHover('soft-kl')}><span>soft KL ≈ −Σ Teacher<sub>T</sub>·log Student<sub>T</sub> × T²</span><b>{soft.toFixed(3)}</b></button><strong>L = α·soft + (1−α)·hard = {(alpha * soft + (1 - alpha) * hard).toFixed(3)}</strong></div>
-    <p className="kd-caption"><b>第一性原理：</b>T=1 只问“马的概率够不够”；T={temperature} 还问“驴是否比狗更像马”。蒸馏就是把后一个问题也交给 Student。</p>
+    <p className="kd-caption"><b>第一性原理：</b>T=1 只问“马的概率够不够”；T={temperature} 还问“驴是否比狗更像马”。蒸馏就是把后一个问题也交给 Student。</p><a className="kd-calc-source" href="/article/distillation/figures/cross-entropy-handwritten.png" target="_blank" rel="noreferrer"><img src="/article/distillation/figures/cross-entropy-handwritten.png" alt="交叉熵与 soft target 手算教学图" /><span>展开查看：交叉熵从逐样本展开到分布形式 ↗</span></a>
   </div>
 }
 
@@ -146,4 +147,16 @@ function CompressionMapScene({ onHover }: { onHover: (id: string) => void }) {
 function MetricsScene({ onHover }: { onHover: (id: string) => void }) {
   const metrics = [['Params', '参数量', 'efficiency-metrics'], ['FLOPs / MACs', '计算量', 'efficiency-metrics'], ['Memory access', '访存量', 'efficiency-metrics'], ['Latency', '真实延迟', 'hardware-deploy'], ['Energy', '能耗 / 碳排', 'efficiency-metrics'], ['Accuracy', '任务精度', 'knowledge-distillation']]
   return <div className="kd-sandbox kd-metrics" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>DEPLOYMENT SCORECARD / 轻量化不能只看参数</strong><span>目标设备上的 Pareto 权衡</span></div><div className="kd-metric-grid">{metrics.map(([label, desc, id], index) => <button type="button" key={label} onMouseEnter={() => onHover(id)}><span>{label}</span><i style={{ width: `${[45, 58, 72, 34, 28, 91][index]}%` }} /><small>{desc}</small></button>)}</div><p className="kd-caption"><b>第一性原理：</b>优化目标不是“最小模型”，而是在固定设备和延迟约束下，找到准确率、内存、吞吐、能耗的可接受平衡。</p></div>
+}
+
+function DetailedEvidenceScene({ scene, onHover }: { scene: string; onHover: (id: string) => void }) {
+  const content: Record<string, { title: string; subtitle: string; items: Array<[string, string, string]> }> = {
+    'transfer-details': { title: 'SOFT TARGETS / 信息密度', subtitle: '同一个输入，Teacher 输出一整份分布', items: [['算术/几何平均', '多个 Teacher 的互补判断合成一个目标。', 'arithmetic-mean'], ['高熵目标', '更多非正确类保留非零概率，梯度方差更低。', 'high-entropy-target'], ['未标注 transfer set', '只要能询问 Teacher，不一定必须有人工标签。', 'transfer-set']] },
+    'mnist-edge': { title: 'MNIST / MISSING CLASS', subtitle: '没有见过 3，也可能学会 3', items: [['原始结果', '206 errors，其中 133 个发生在 1010 个数字 3 上。', 'mythical-class'], ['调高 3 的 bias', 'bias +3.5 后总错误降到 109，3 的识别率达到 98.6%。', 'mythical-class'], ['只用 7/8', '47.3% test errors → 调低 bias 7.6 后为 13.2%。', 'mythical-class']] },
+    'speech-detail': { title: 'SPEECH / ACOUSTIC MODEL', subtitle: '局部帧分类如何连接到最终 WER', items: [['输入', '26 帧 × 40 维 Mel filter-bank，预测第 21 帧。', 'speech-acoustic-model'], ['模型', '8 层 × 2560 ReLU，14,000 HMM labels，约 85M 参数。', 'speech-acoustic-model'], ['结果', 'Baseline 58.9% / 10.9% WER；Distilled 60.8% / 10.7% WER。', 'wer-mismatch']] },
+    'jft-details': { title: 'JFT / SPECIALIST PIPELINE', subtitle: 'generalist 选路，specialist 解决局部难点', items: [['数据', '约 1 亿标注图像、15,000 labels。', 'jft-dataset'], ['训练', '61 个 specialist，每个约 300 类 + dustbin；从 generalist 初始化。', 'specialist-initialization'], ['推理', 'generalist top-1 → active specialists → 联合 KL 优化全类分布。', 'specialist-inference']] },
+    'jft-results': { title: 'RESULTS / REGULARIZATION / MoE', subtitle: '论文结论与边界放在同一张卡片上', items: [['JFT', 'overall top-1 43.1% → 45.9%；conditional 25.0% → 26.1%。', 'specialist-results'], ['3% 数据', 'hard 44.5% test frame accuracy；soft 57.0%，无需 early stopping。', 'soft-regularizer'], ['边界', '论文尚未证明 specialist 知识已经回蒸到单个大模型。', 'discussion-limit']] },
+  }
+  const data = content[scene]
+  return <div className="kd-sandbox kd-evidence" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>{data.title}</strong><span>{data.subtitle}</span></div><div className="kd-evidence-grid">{data.items.map(([label, text, id]) => <button type="button" key={label} onMouseEnter={() => onHover(id)}><b>{label}</b><span>{text}</span></button>)}</div><p className="kd-caption"><b>读法：</b>先看事实，再悬停节点理解它为什么成立、系统如何实现，以及不做这一步会牺牲什么。</p></div>
 }
