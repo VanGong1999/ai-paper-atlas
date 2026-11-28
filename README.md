@@ -50,6 +50,7 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 | `/library` | 已收录论文库；点击进入详情或可视化 |
 | `/library/:id` | 单篇摘要详情（无可视化时） |
 | `/papers/attention` | 《Attention Is All You Need》工作台 |
+| `/papers/pagedattention` | PagedAttention / vLLM 工作台 |
 
 ## Attention 论文工作台
 
@@ -61,6 +62,15 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 | PDF | 在当前步骤所引页打开内嵌 PDF，也可在新标签页打开完整文件。 |
 
 工作台的论文事实以仓库内的 [`1706.03762v7.pdf`](public/article/1706.03762v7.pdf) 为唯一来源。英译法大模型的 BLEU 按原文标注，摘要和表 2 为 **41.8**，§6.1 正文为 **41.0**。热力图中的手设权重和曲线代入值有教学示意标签。
+
+Attention 与 PagedAttention 的速查模式还包含论文覆盖矩阵：按概念、公式、流程、实现、实验和边界列出关键论点，并保留章节/页码锚点。覆盖审计命令为：
+
+```sh
+node scripts/paper-coverage-audit.mjs
+node --test scripts/paper-coverage-audit.test.mjs
+```
+
+覆盖矩阵明确区分两篇论文的边界：Attention 定义 Q/K/V 如何产生数学结果；PagedAttention 不改变 attention mathematics，只负责 KV Cache 的存储布局、block table 地址翻译、共享、调度与 serving 实验。
 
 ### 本地验证
 
