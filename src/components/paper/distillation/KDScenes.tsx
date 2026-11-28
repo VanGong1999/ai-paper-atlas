@@ -12,6 +12,7 @@ const softmax = (xs: number[], temperature: number) => {
 export function KDScene({ scene, playing, onHover }: SceneProps & { scene: string }) {
   if (scene === 'temperature') return <TemperatureScene onHover={onHover} />
   if (scene === 'loss' || scene === 't2') return <LossScene onHover={onHover} />
+  if (scene === 'flow-detail') return <FlowDetailScene onHover={onHover} />
   if (scene === 'calculation') return <CalculationScene onHover={onHover} />
   if (scene === 'match') return <MatchScene onHover={onHover} />
   if (scene === 'numbers') return <MNISTScene onHover={onHover} />
@@ -52,6 +53,24 @@ function FlowScene({ playing, onHover }: SceneProps) {
     </div>
     <div className="kd-mode-switch">{(['hard', 'soft', 'mix'] as const).map(item => <button type="button" key={item} className={mode === item ? 'active' : ''} onClick={() => setMode(item)}>{item === 'hard' ? '仅 hard' : item === 'soft' ? '仅 soft' : 'soft + hard'}</button>)}</div>
     <div className="kd-flow-loss"><span>当前训练模式</span><strong>{mode === 'hard' ? '只优化 student loss' : mode === 'soft' ? '只优化 distillation loss' : '两条 loss 加权合流'}</strong></div>
+  </div>
+}
+
+function FlowDetailScene({ onHover }: { onHover: (id: string) => void }) {
+  const nodes = [
+    ['teacher', 'Teacher Model', '大模型先产生 logits'],
+    ['temperature', 'Softmax / T=t', '高温暴露 dark knowledge'],
+    ['soft-targets', 'Soft target sᵢ', 'Teacher 的分布监督'],
+    ['soft-loss', 'Soft loss', '比较两份高温分布'],
+    ['hard-targets', 'Hard target yᵢ', '真实 one-hot 标签'],
+    ['hard-loss', 'Hard loss', '普通 T=1 交叉熵'],
+    ['total-loss', 'Total loss', '按 α / 1−α 加权求和'],
+  ]
+  return <div className="kd-sandbox kd-flow-detail" onMouseLeave={() => onHover('')}>
+    <div className="kd-sandbox-title"><strong>REFERENCE DIAGRAM / TWO SUPERVISIONS</strong><span>悬停节点查看论文级解释</span></div>
+    <div className="kd-reference-frame"><img src="/article/distillation/figures/teacher-student-total-loss.png" alt="Teacher、Student、Soft loss、Hard loss 与 Total loss 流程图" /></div>
+    <div className="kd-reference-nodes">{nodes.map(([id, title, description]) => <button type="button" key={id} onMouseEnter={() => onHover(id)}><b>{title}</b><span>{description}</span></button>)}</div>
+    <div className="kd-caption"><b>读图顺序：</b>同一个输入 x 同时进入 Teacher 与 Student；Teacher 的高温分布进入 soft loss，真实标签进入 hard loss，最后以 <code>α·soft + (1−α)·hard</code> 合成 total loss。部署时只保留 Student，T=t 分支不再参与推理。</div>
   </div>
 }
 
