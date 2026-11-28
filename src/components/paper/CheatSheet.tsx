@@ -1,6 +1,7 @@
 import { cheatSheet } from '../../data/papers/attention/cheatsheet'
 import { PaperCoveragePanel } from './PaperCoveragePanel'
 import type { CoverageItem } from '../../data/papers/coverage'
+import { CrossPaperBridge } from './CrossPaperBridge'
 
 type Props = { onNavigate: (lessonId: string, stepId: string) => void; coverage?: CoverageItem[] }
 
@@ -29,6 +30,7 @@ export function CheatSheet({ onNavigate, coverage }: Props) {
           ))}
         </div>
         <PaperCoveragePanel paper="attention" items={coverage} onNavigate={item => onNavigate(item.relatedLessonId!, item.relatedStepId!)} />
+        <CrossPaperBridge activePaper="attention" />
         <div className="cheatsheet-footer">ATTENTION IS ALL YOU NEED <span>·</span> 从概念出发，回到论文原文。</div>
       </div>
     </div>

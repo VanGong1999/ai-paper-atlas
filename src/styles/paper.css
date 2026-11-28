@@ -1481,6 +1481,20 @@
 .paper-coverage-card button { margin-top: 12px; padding: 0; border: 0; background: none; color: var(--accent); font: 11px var(--font-mono); cursor: pointer; }
 @media (max-width: 900px) { .paper-coverage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .paper-coverage { padding: 18px; } .paper-coverage-head { display: block; } .paper-coverage-meter { margin-top: 15px; text-align: left; } .paper-coverage-grid { grid-template-columns: 1fr; } }
+
+.cross-paper-bridge { margin-top: 28px; padding: 24px; border: 1px solid var(--accent-outline); border-radius: 18px; background: var(--accent-fill); }
+.cross-paper-bridge-head h2 { margin: 7px 0; }
+.cross-paper-bridge-head p { margin: 0; color: var(--muted); line-height: 1.7; }
+.cross-paper-bridge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.cross-paper-card { padding: 15px; border: 1px solid var(--accent-outline); background: var(--surface); }
+.cross-paper-card h3 { margin: 0 0 10px; font-size: 15px; }
+.cross-paper-path { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; color: var(--accent-ink); font: 11px var(--font-mono); }
+.cross-paper-path span { padding: 7px; border: 1px solid var(--accent-outline); }
+.cross-paper-path b { color: var(--orange); }
+.cross-paper-card p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+.cross-paper-card small { display: block; color: var(--muted-2); font: 10px var(--font-mono); line-height: 1.5; }
+.cross-paper-card a { display: inline-block; margin-top: 11px; color: var(--accent-ink); font: 11px var(--font-mono); }
+@media (max-width: 700px) { .cross-paper-bridge-grid { grid-template-columns: 1fr; } .cross-paper-path { grid-template-columns: 1fr; } .cross-paper-path b { transform: rotate(90deg); justify-self: center; } }
 @media (prefers-reduced-motion: reduce) { .cheatsheet-hero-art > span { animation: none; } .cheat-card, .cheat-card button span { transition: none; } }
 
 /* Original-paper diagrams */
