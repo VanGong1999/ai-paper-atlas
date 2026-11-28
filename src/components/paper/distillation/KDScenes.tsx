@@ -20,6 +20,9 @@ export function KDScene({ scene, playing, onHover }: SceneProps & { scene: strin
   if (scene === 'pytorch') return <FlowScene playing={playing} onHover={onHover} />
   if (scene === 'bmw') return <FlowScene playing={playing} onHover={onHover} />
   if (scene === 'convergence') return <ConvergenceScene playing={playing} onHover={onHover} />
+  if (scene === 'taxonomy') return <TaxonomyScene onHover={onHover} />
+  if (scene === 'variants') return <VariantsScene onHover={onHover} />
+  if (scene === 'history') return <HistoryScene onHover={onHover} />
   return <OverviewScene playing={playing} onHover={onHover} />
 }
 
@@ -116,4 +119,19 @@ function OverviewScene({ playing, onHover }: SceneProps) {
 
 function ConvergenceScene({ playing, onHover }: SceneProps) {
   return <div className="kd-sandbox kd-convergence" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>CONVERGENCE SPACE / 函数收敛区域</strong><span>{playing ? '● guided by Teacher' : 'Ⅱ paused'}</span></div><div className="kd-convergence-map"><div className="kd-region teacher-region" onMouseEnter={() => onHover('teacher')}><b>Teacher convergence</b><span>大模型已经找到的高质量函数区域</span></div><div className={`kd-region guided-region ${playing ? 'pulse' : ''}`} onMouseEnter={() => onHover('knowledge-distillation')}><b>Teacher-guided Student</b><span>soft targets 把 Student 拉向更好的区域</span></div><div className="kd-region student-region" onMouseEnter={() => onHover('student')}><b>Student convergence</b><span>只用 hard labels 可能停留的区域</span></div></div><div className="kd-caption"><b>不是复制权重：</b>Teacher 提供方向，Student 仍用自己的参数空间完成收敛。</div></div>
+}
+
+function TaxonomyScene({ onHover }: { onHover: (id: string) => void }) {
+  const cards = [['OFFLINE', 'Teacher 先训练好', 'Teacher → cache soft targets → Student', 'offline-distillation'], ['ONLINE', 'Teacher 与 Student 同步', 'x → Teacher + Student → loss → update', 'online-distillation'], ['SELF', '模型自己教自己', '旧模型 / 深层 → 当前模型', 'self-distillation']]
+  return <div className="kd-sandbox kd-taxonomy" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>DISTILLATION TAXONOMY / 谁在教谁</strong><span>时序决定系统结构</span></div><div className="kd-taxonomy-grid">{cards.map(([title, subtitle, flow, id]) => <button type="button" key={id} onMouseEnter={() => onHover(id)}><b>{title}</b><strong>{subtitle}</strong><span>{flow}</span></button>)}</div><p className="kd-caption"><b>共同底层：</b>都在用比 one-hot 更丰富的行为信号指导 Student；区别在 Teacher 是否预训练、是否实时更新。</p></div>
+}
+
+function VariantsScene({ onHover }: { onHover: (id: string) => void }) {
+  const items = [['Output', '最终 soft targets', 'knowledge-distillation'], ['Feature / Hint', '中间层表示', 'feature-distillation'], ['Relation', '样本之间的距离与图结构', 'relational-distillation'], ['Born-Again', '历史模型的 soft outputs', 'born-again']]
+  return <div className="kd-sandbox kd-variants" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>WHAT COUNTS AS KNOWLEDGE?</strong><span>从输出扩展到结构</span></div><div className="kd-variant-map"><div className="kd-variant-core"><b>Knowledge</b><span>可迁移的结构</span></div>{items.map(([title, desc, id], index) => <button type="button" className={`kd-variant v${index + 1}`} key={id} onMouseEnter={() => onHover(id)}><b>{title}</b><span>{desc}</span></button>)}</div><p className="kd-caption">选择接口的原则：Student 学得动、信号比硬标签丰富、并且和目标任务真正相关。</p></div>
+}
+
+function HistoryScene({ onHover }: { onHover: (id: string) => void }) {
+  const points = [['1989–2006', '剪枝 / 压缩 / 伪数据', 'history-1989'], ['2014–2015', 'dark knowledge / soft targets', 'history-2014'], ['2018', 'Born-Again / feature hints', 'born-again'], ['2019+', '关系 / 零样本 / teacher-free', 'history-2019']]
+  return <div className="kd-sandbox kd-history" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>RESEARCH TIMELINE / 扩展阅读</strong><span>核心论文与后续路线分开</span></div><div className="kd-history-line">{points.map(([year, label, id], index) => <button type="button" key={id} onMouseEnter={() => onHover(id)}><b>{year}</b><i className={index === 1 ? 'core' : ''} /><span>{label}</span></button>)}</div><p className="kd-caption"><b>边界：</b>2014/2015 是本页面论文的核心节点；其余是帮助理解“知识接口如何扩展”的后续研究线索。</p></div>
 }
