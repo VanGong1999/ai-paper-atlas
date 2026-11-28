@@ -6,3 +6,5 @@ dist
 .env.*
 docs
 .superpowers
+.playwright-cli
+output

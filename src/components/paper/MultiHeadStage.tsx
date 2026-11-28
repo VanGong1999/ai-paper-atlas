@@ -9,51 +9,38 @@ const applications = [
 ] as const
 
 export function MultiHeadStage({ highlight, showApplications }: StageProps & { showApplications: boolean }) {
-  const [selected, setSelected] = useState<number>()
+  const [selected, setSelected] = useState<number | undefined>()
   return (
     <>
-      <StageSvg label="Fig. 2 · 多头投影、并行注意力与拼接" height={showApplications ? 408 : 324}>
-        <text className="stage-annotation" x={23} y={31}>输入</text>
-        <text className="stage-annotation" x={239} y={31}>8 个头并行</text>
-        <text className="stage-annotation" x={408} y={31}>拼接</text>
-        <text className="stage-annotation" x={540} y={31}>输出</text>
-        <rect className="stage-lane" x={224} y={42} width={149} height={274} rx={9} />
-        <StageFlow d="M151 170H193M193 65V289" active={!showApplications} arrow={false}
-          explanation="heads" label="Q、K、V → 各头投影" example="教学示意 · Q、K、V → 各头投影：每个头使用自己的投影矩阵。" />
-        <StageFlow d="M380 65V289M380 163H394" active={!showApplications} arrow={false}
-          explanation="concat" label="各头输出 → Concat" example="教学示意 · 各头输出 → Concat：沿特征维拼接各头表示。" />
-        <StageFlow d="M471 163H486" active={!showApplications}
-          explanation="concat" label="Concat → Wᴼ" example="教学示意 · Concat → Wᴼ：拼接结果进入输出投影。" />
-        <StageFlow d="M530 163H539" active={!showApplications}
-          explanation="concat" label="Wᴼ → 表示" example="教学示意 · Wᴼ → 表示：输出投影恢复模型维度。" />
-        <StageBlock id="heads" text="Q · K · V" caption="d_model = 512" x={23} y={146} w={128} h={48} tone="encoder" active={!showApplications} />
-
-        {heads.map((head, index) => {
-          const y = 52 + index * 32
-          const active = !showApplications && (selected === undefined || selected === head)
-          return (
-            <g key={head}>
-              <StageFlow d={`M193 ${y + 13}H238`} active={active} arrow={false}
-                explanation="heads" label={`投影 → Head ${head}`} example={`教学示意 · 投影 → Head ${head}：用本头投影后的查询、键和值计算注意力。`} />
-              <StageFlow d={`M359 ${y + 13}H380`} active={active} arrow={false}
-                explanation="concat" label={`Head ${head} → Concat`} example={`教学示意 · Head ${head} → Concat：本头的输出作为拼接结果中的一段。`} />
-              <StageBlock id="heads" kind="attention-head" text={`Head ${head}`} x={238} y={y} w={121} h={26}
-                tone={index % 2 ? 'decoder' : 'attn'} active={active} selected={selected === head}
-                example={`教学示意 · 第 ${head} 个头沿独立投影计算一行权重。`} onActivate={() => setSelected(current => current === head ? undefined : head)} />
-            </g>
-          )
-        })}
-
-        <StageBlock id="concat" text="Concat" x={394} y={145} w={77} h={36} tone="attn" active={highlight.has('concat')} />
-        <StageBlock id="concat" kind="formula-variable" text="Wᴼ" x={487} y={145} w={43} h={36} tone="decoder" active={highlight.has('concat')} />
-        <StageBlock id="concat" text="表示" caption="512 维" x={540} y={139} w={76} h={48} tone="encoder" active={highlight.has('concat')} />
-        <text className="stage-annotation" x={24} y={212}>各头 dₖ = dᵥ = 64</text>
+      <StageSvg label="Fig. 2 右 · 多头注意力原图重绘" height={showApplications ? 510 : 425}>
+        <text className="diagram-title" x={320} y={35} textAnchor="middle">Multi-Head Attention</text>
+        <text className="diagram-subtitle" x={320} y={58} textAnchor="middle">多头注意力 · {selected ? `Head ${selected}` : '8 个头并行'}</text>
+        <StageFlow d="M320 102V76M320 143V131M320 188V172M320 241V224" active={!showApplications} explanation="concat" label="多头输出到拼接和线性投影" />
+        {[246, 320, 394].map(x => <StageFlow key={x} d={`M${x} 383V351M${x} 320V264H320V241`} active={!showApplications} explanation="heads" label="输入投影到并行注意力头" />)}
+        <StageBlock id="concat" text="Linear" x={270} y={102} w={100} h={29} tone="decoder" active={!showApplications} />
+        <StageBlock id="concat" text="Concat" x={270} y={143} w={100} h={29} tone="train" active={!showApplications} />
+        <g aria-hidden="true" className="head-stack">
+          <rect x={217} y={180} width={206} height={48} rx={7} />
+          <rect x={210} y={187} width={206} height={48} rx={7} />
+          <rect x={203} y={194} width={206} height={48} rx={7} />
+        </g>
+        <StageBlock id="heads" kind="attention-head" text="Scaled Dot-Product" caption="Attention" x={196} y={201} w={206} h={40} tone="attn" active={!showApplications} example={`原图以叠层表示 ${heads.length} 个并行头；${selected ? `当前选择第 ${selected} 个头。` : '每个头使用独立投影。'}`} />
+        <text className="diagram-label" x={426} y={220}>h = 8</text>
+        <StageBlock id="value" text="Linear" x={213} y={320} w={66} h={31} tone="decoder" active={!showApplications} />
+        <StageBlock id="key" text="Linear" x={287} y={320} w={66} h={31} tone="decoder" active={!showApplications} />
+        <StageBlock id="query" text="Linear" x={361} y={320} w={66} h={31} tone="decoder" active={!showApplications} />
+        <StageBlock id="value" text="V" x={225} y={383} w={42} h={29} tone="io" active={!showApplications} />
+        <StageBlock id="key" text="K" x={299} y={383} w={42} h={29} tone="io" active={!showApplications} />
+        <StageBlock id="query" text="Q" x={373} y={383} w={42} h={29} tone="io" active={!showApplications} />
         {showApplications && applications.map(({ id, title, caption }, index) => (
           <StageBlock key={id} id={id} kind="attention-use" text={title} caption={caption}
-            x={20 + index * 202} y={336} w={196} h={55} tone={index === 0 ? 'encoder' : 'decoder'} active={highlight.has(id)} />
+            x={12 + index * 208} y={444} w={200} h={53} tone={index === 0 ? 'encoder' : 'decoder'} active={highlight.has(id)} />
         ))}
       </StageSvg>
-      <p className="stage-caption"><strong>§3.2.2–3.2.3 · PDF p. 5</strong><span>头的编号用于追踪投影与拼接。选择某个头可突出它的路径。</span></p>
+      {!showApplications && <div className="head-selector" role="group" aria-label="选择注意力头">
+        <span>选择注意力头</span>{heads.map(head => <button key={head} type="button" aria-label={`第 ${head} 个注意力头`} aria-pressed={selected === head} onClick={() => setSelected(current => current === head ? undefined : head)}>{head}</button>)}
+      </div>}
+      <p className="stage-caption"><strong>FIG. 2 · PDF P. 4</strong><span>每个头独立投影并计算注意力，拼接后再做线性投影。</span></p>
     </>
   )
 }

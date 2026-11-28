@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { CheatSheet } from '../components/paper/CheatSheet'
 import { ExplainableScope } from '../components/paper/Explainable'
 import { FiguresView } from '../components/paper/FiguresView'
 import { LessonNav } from '../components/paper/LessonNav'
@@ -179,7 +180,7 @@ export function AttentionPage() {
 
               <div className="stage-wrap">
                 <div className="stage-toolbar">
-                  <strong>{lesson.title}</strong>
+                  <div className="stage-heading"><span>INTERACTIVE EXPLORER / {String(lesson.index).padStart(2, '0')}</span><strong>{lesson.title}</strong><small>{lesson.subtitle}</small></div>
                   <div className="stage-zoom" role="group" aria-label="舞台缩放">
                     <button type="button" aria-label="缩小" onClick={() => setZoom(value => Math.max(0.7, value - 0.1))}>−</button>
                     <span>{Math.round(zoom * 100)}%</span>
@@ -232,6 +233,14 @@ export function AttentionPage() {
               />
             </ExplainableScope>
           </div>
+        )}
+
+        {mode === 'cheatsheet' && (
+          <CheatSheet onNavigate={(lessonId, stepId) => {
+            const nextLesson = lessons.findIndex(item => item.id === lessonId)
+            const nextStep = lessons[nextLesson]?.steps.findIndex(item => item.id === stepId) ?? -1
+            if (nextLesson >= 0 && nextStep >= 0) readRelatedStep(nextLesson, nextStep)
+          }} />
         )}
 
         {mode === 'figures' && (

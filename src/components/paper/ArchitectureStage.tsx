@@ -1,80 +1,48 @@
-import type { ExplainableId } from '../../data/papers/attention/explainables'
+import { Explainable } from './Explainable'
 import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
 
-const encoder: [ExplainableId, string, number, string][] = [
-  ['self', '编码器自注意力', 287, 'attn'],
-  ['residual', 'Add & Norm', 244, 'encoder'],
-  ['ffn', '逐位置 FFN', 201, 'encoder'],
-  ['residual', 'Add & Norm', 158, 'encoder'],
-]
-const decoder: [ExplainableId, string, number, string][] = [
-  ['mask', '掩码自注意力', 287, 'decoder'],
-  ['residual', 'Add & Norm', 244, 'decoder'],
-  ['cross', '跨序列注意力', 201, 'attn'],
-  ['residual', 'Add & Norm', 158, 'decoder'],
-  ['ffn', '逐位置 FFN', 115, 'decoder'],
-  ['residual', 'Add & Norm', 72, 'decoder'],
-]
-
 export function ArchitectureStage({ highlight }: StageProps) {
-  const encoderActive = highlight.has('encoder')
-  const decoderActive = highlight.has('decoder')
+  const enc = highlight.has('encoder')
+  const dec = highlight.has('decoder')
+  const out = highlight.has('linear') || highlight.has('softmax')
+  const cross = highlight.has('cross')
   return (
     <>
-      <StageSvg label="Fig. 1 · Transformer 编码器和解码器的教学重绘" height={456}>
-        <rect className="stage-lane lane-encoder" x={20} y={141} width={203} height={195} rx={9} />
-        <rect className="stage-lane lane-decoder" x={240} y={55} width={203} height={281} rx={9} />
-        <text className="stage-annotation" x={28} y={52}>源序列 ↑</text>
-        <text className="stage-annotation" x={548} y={70} textAnchor="middle">下一词元概率</text>
-
-        {[287, 201].map(y => (
-          <StageFlow key={y} d={`M120 ${y + 39}H35V${y - 26}H37`} active={encoderActive} branch
-            explanation="residual" label="编码器残差旁路"
-            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
-        ))}
-        {[287, 201, 115].map(y => (
-          <StageFlow key={y} d={`M339 ${y + 39}H254V${y - 26}H256`} active={decoderActive} branch
-            explanation="residual" label="解码器残差旁路"
-            example="教学示意 · 旁路把子层输入送回 Add & Norm。" />
-        ))}
-
-        <StageFlow d="M120 414V405M120 366V356M120 330V322M120 287V279M120 244V236M120 201V193M120 158V119"
-          active={encoderActive} explanation="encoder" label="编码器数据流"
-          example="教学示意 · 沿箭头观察源序列表示经过编码器子层的方向。" />
-        <StageFlow d="M339 414V405M339 366V356M339 330V322M339 287V279M339 244V236M339 201V193M339 158V150M339 115V107M339 72V58"
-          active={decoderActive} explanation="decoder" label="解码器数据流"
-          example="教学示意 · 沿箭头观察右移目标序列到下一词元概率的方向。" />
-        <StageFlow d="M207 97H230V218H253" active={highlight.has('cross')} branch
-          explanation="cross" label="编码器到解码器的跨序列连接"
-          example="教学示意 · 解码器查询编码器输出中的源序列表示。" />
-        <StageFlow d="M424 44H453V164H478" active={highlight.has('linear') || highlight.has('softmax')}
-          explanation="linear" label="解码器到词表线性投影"
-          example="教学示意 · 解码器输出经过线性变换，得到词表候选的分数。" />
-        <StageFlow d="M548 148V122" active={highlight.has('softmax')}
-          explanation="softmax" label="线性投影到输出 Softmax"
-          example="教学示意 · 输出 Softmax 将词表分数转换成下一词元的预测概率。" />
-        <StageBlock id="embedding" kind="architecture-node" text="输入嵌入" x={37} y={367} w={166} h={38} active={encoderActive} />
-        <StageBlock id="position" kind="architecture-node" text="+ 位置编码" x={37} y={329} w={166} h={29} active={encoderActive} />
-        {encoder.map(([id, text, y, tone]) => (
-          <StageBlock key={y} id={id} kind="architecture-node" text={text} x={37} y={y} w={166} tone={tone} active={encoderActive} />
-        ))}
-        <StageBlock id="encoder" kind="architecture-node" text="编码器输出" caption="N = 6 · d_model = 512"
-          x={37} y={76} w={170} h={42} tone="encoder" active={encoderActive} />
-
-        <StageBlock id="embedding" kind="architecture-node" text="输出嵌入" x={256} y={367} w={166} h={38} active={decoderActive} />
-        <StageBlock id="position" kind="architecture-node" text="+ 位置编码" x={256} y={329} w={166} h={29} active={decoderActive} />
-        {decoder.map(([id, text, y, tone]) => (
-          <StageBlock key={y} id={id} kind="architecture-node" text={text} x={256} y={y} w={166} tone={tone} active={decoderActive} />
-        ))}
-        <StageBlock id="decoder" kind="architecture-node" text="解码器输出" caption="N = 6 · d_model = 512"
-          x={256} y={10} w={168} h={46} tone="decoder" active={decoderActive} />
-        <text className="stage-annotation" x={120} y={433} textAnchor="middle">源词元 ↑</text>
-        <text className="stage-annotation" x={339} y={433} textAnchor="middle">右移的目标词元 ↑</text>
-        <StageBlock id="linear" kind="architecture-node" text="词表线性投影" x={478} y={148} w={142} active={highlight.has('linear')} />
-        <StageBlock id="softmax" kind="architecture-node" text="Softmax" x={478} y={88} w={142} active={highlight.has('softmax')} />
-        <text className="stage-annotation" x={549} y={204} textAnchor="middle">词表分数 → 概率</text>
+      <StageSvg label="Fig. 1 · Transformer 编码器与解码器架构重绘" height={570}>
+        <rect className="stage-lane lane-encoder" x={101} y={254} width={169} height={218} rx={14} />
+        <rect className="stage-lane lane-decoder" x={353} y={142} width={169} height={330} rx={14} />
+        <text className="diagram-label" x={84} y={364} textAnchor="end">N×</text>
+        <text className="diagram-label" x={539} y={308}>N×</text>
+        <text className="diagram-label" x={437} y={22} textAnchor="middle">输出概率</text>
+        <StageFlow d="M185 545V527M185 493V487M185 471V435M185 397V385M185 363V350M185 314V301M185 278V246" active={enc} explanation="encoder" label="编码器主数据流" />
+        <StageFlow d="M437 545V527M437 493V487M437 471V435M437 397V363M437 340V314M437 279V265M437 242V229M437 195V181M437 158V92M437 68V55M437 33V25" active={dec || out} explanation="decoder" label="解码器与输出主数据流" />
+        <StageFlow d="M185 445H120V374H125M185 340H120V290H125" active={enc} branch explanation="residual" label="编码器残差旁路" />
+        <StageFlow d="M437 445H372V374H377M437 340H372V290H377M437 239H372V205H377" active={dec} branch explanation="residual" label="解码器残差旁路" />
+        <StageFlow d="M185 246V239H321V332H377" active={cross || dec} explanation="cross" label="编码器输出至解码器跨注意力" />
+        <StageBlock id="softmax" text="Softmax" x={380} y={33} w={114} h={22} tone="encoder" active={out} />
+        <StageBlock id="linear" text="Linear" x={380} y={68} w={114} h={24} tone="decoder" active={out} />
+        <StageBlock id="residual" text="Add & Norm" x={377} y={158} w={120} h={23} tone="encoder" active={dec} />
+        <StageBlock id="ffn" text="Feed Forward" x={377} y={195} w={120} h={34} tone="decoder" active={dec} />
+        <StageBlock id="residual" text="Add & Norm" x={377} y={242} w={120} h={23} tone="encoder" active={dec} />
+        <StageBlock id="cross" text="Multi-Head" caption="Attention" x={377} y={279} w={120} h={35} tone="train" active={dec || cross} />
+        <StageBlock id="residual" text="Add & Norm" x={377} y={340} w={120} h={23} tone="encoder" active={dec} />
+        <StageBlock id="mask" text="Masked Multi-Head" caption="Attention" x={377} y={397} w={120} h={38} tone="train" active={dec} />
+        <StageBlock id="residual" text="Add & Norm" x={125} y={278} w={120} h={23} tone="encoder" active={enc} />
+        <StageBlock id="ffn" text="Feed Forward" x={125} y={314} w={120} h={36} tone="decoder" active={enc} />
+        <StageBlock id="residual" text="Add & Norm" x={125} y={363} w={120} h={22} tone="encoder" active={enc} />
+        <StageBlock id="self" text="Multi-Head" caption="Attention" x={125} y={397} w={120} h={38} tone="train" active={enc} />
+        <StageBlock id="embedding" text="Input Embedding" x={125} y={493} w={120} h={34} tone="attn" active={enc} />
+        <StageBlock id="embedding" text="Output Embedding" x={377} y={493} w={120} h={34} tone="attn" active={dec} />
+        {[185, 437].map((x, i) => <Explainable key={x} as="g" explanation="position" kind="position-encoding" label={i ? '输出位置编码' : '输入位置编码'} className="position-symbol">
+          <circle cx={x} cy={479} r={8} /><text x={x} y={479}>+</text>
+          <path d={`M${x - 8} 479h-15`} /><circle cx={x - 37} cy={479} r={14} /><path d={`M${x - 49} 479q6 -10 12 0t12 0`} />
+        </Explainable>)}
+        <text className="diagram-note" x={111} y={478} textAnchor="end">位置编码</text>
+        <text className="diagram-note" x={528} y={478}>位置编码</text>
+        <text className="diagram-label" x={185} y={563} textAnchor="middle">输入</text>
+        <text className="diagram-label" x={437} y={563} textAnchor="middle">输出（右移）</text>
       </StageSvg>
-      <p className="stage-caption"><strong>Fig. 1 · PDF p. 3</strong><span>实线表示主数据流，虚线表示残差或跨序列连接。</span></p>
+      <p className="stage-caption"><strong>FIG. 1 · PDF P. 3</strong><span>编码器与解码器各重复 N = 6 层。点击模块查看解释。</span></p>
     </>
   )
 }

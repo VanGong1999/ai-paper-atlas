@@ -256,6 +256,7 @@ export const timeline: TimelineEvent[] = [
     blurb: '像操作系统分页一样管理 KV Cache，减少碎片，大幅提升并发吞吐。',
     why: '推理服务 Infra 的分水岭：同样硬件能塞进更多请求。',
     url: 'https://arxiv.org/abs/2309.06180',
+    visual: '/papers/pagedattention',
     related: ['flashattention-2022', 'mooncake-2024'],
   },
   {

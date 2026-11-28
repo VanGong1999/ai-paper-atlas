@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { ExplainableId } from '../../data/papers/attention/explainables'
 import { attentionSoftmaxExplainable } from './attentionSoftmaxExplainable'
 import { Explainable } from './Explainable'
 import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
@@ -12,57 +11,27 @@ const weights = [
   [0.05, 0.15, 0.25, 0.55],
 ]
 
-const variables: { id: ExplainableId; text: string; x: number; w: number; label?: string }[] = [
-  { id: 'softmax', text: 'softmax', x: 109, w: 115 },
-  { id: 'query', text: 'Q', x: 258, w: 42 },
-  { id: 'key', text: 'Kᵀ', x: 303, w: 43, label: 'Kᵀ · 键矩阵转置' },
-  { id: 'scale', text: '√dₖ', x: 380, w: 64, label: '√dₖ · 缩放因子' },
-  { id: 'value', text: 'V', x: 477, w: 43 },
-]
-
 export function AttentionMatrixStage({ highlight, showHeatmap }: StageProps & { showHeatmap: boolean }) {
+  const active = highlight.has('scale') || highlight.has('weights') || highlight.has('query')
   return (
     <>
-      <StageSvg label="Fig. 2 · 缩放点积注意力流水线" height={258}>
-        <text className="stage-annotation" x={24} y={27}>输入</text>
-        <text className="stage-annotation" x={160} y={27}>相似度</text>
-        <text className="stage-annotation" x={333} y={27}>沿键归一化</text>
-        <text className="stage-annotation" x={499} y={27}>汇总对应的值</text>
-        <StageBlock id="query" kind="qkv" text="Q · 查询" x={24} y={47} w={102} tone="encoder" active={highlight.has('query')} />
-        <StageBlock id="key" kind="qkv" text="K · 键" x={24} y={101} w={102} tone="encoder" active={highlight.has('key')} />
-        <StageBlock id="value" kind="qkv" text="V · 值" x={24} y={155} w={102} tone="decoder" active={highlight.has('value')} />
-        <StageFlow d="M126 65H140V80H158" active={highlight.has('query') || highlight.has('scale')}
-          explanation="query" label="Q → 缩放分数" example="教学示意 · Q → 缩放分数：每行查询与各键做点积。" />
-        <StageFlow d="M126 119H140V94H158" active={highlight.has('key') || highlight.has('scale')}
-          explanation="key" label="K → 缩放分数" example="教学示意 · K → 缩放分数：每个键贡献一列匹配分数。" />
-        <StageFlow d="M306 87H330" active={highlight.has('scale') || highlight.has('weights')}
-          explanation="scale" content={attentionSoftmaxExplainable} label="缩放分数 → Softmax"
-          example="教学示意 · 缩放分数 → Softmax：沿键所在的维度归一化。" />
-        <StageFlow d="M469 87H497" active={highlight.has('weights')} branch
-          explanation="value" label="注意力权重 → 加权求和" example="教学示意 · 注意力权重 → 加权求和：每行权重给出对应值的系数。" />
-        <StageFlow d="M126 173H565V115" active={highlight.has('value') || highlight.has('weights')} branch
-          explanation="value" label="V → 加权求和" example="教学示意 · V → 加权求和：将各位置的值按权重相加。" />
-        <StageBlock id="scale" text="QKᵀ / √dₖ" caption="缩放分数" x={158} y={63} w={148} h={50} tone="attn" active={highlight.has('scale')} />
-        <StageBlock id="softmax" text="Softmax" caption="注意力权重 · 每行和为 1" x={330} y={63} w={139} h={50} tone="attn"
-          content={attentionSoftmaxExplainable} identity="attention-softmax" active={highlight.has('softmax')} />
-        <StageBlock id="value" text="加权求和" caption="输出表示" x={497} y={63} w={119} h={50} tone="decoder" active={highlight.has('weights')} />
-        <rect className="stage-lane" x={24} y={202} width={592} height={44} rx={7} />
-        <text className="stage-annotation" x={39} y={230}>式 (1)</text>
-        {variables.map(({ id, text, x, w, label }) => (
-          <Explainable key={text} as="g" explanation={id} kind="formula-variable" label={label ?? text}
-            content={id === 'softmax' ? attentionSoftmaxExplainable : undefined}
-            identity={id === 'softmax' ? 'attention-softmax' : undefined}
-            className="stage-node formula-token" >
-            <rect x={x} y={209} width={w} height={30} rx={4} />
-            <text x={x + w / 2} y={224}>{text}</text>
-          </Explainable>
-        ))}
-        <text className="stage-operator" x={241} y={225}>(</text>
-        <text className="stage-operator" x={363} y={225}>/</text>
-        <text className="stage-operator" x={460} y={225}>)</text>
+      <StageSvg label="Fig. 2 左 · 缩放点积注意力原图重绘" height={430}>
+        <text className="diagram-title" x={320} y={35} textAnchor="middle">Scaled Dot-Product Attention</text>
+        <text className="diagram-subtitle" x={320} y={58} textAnchor="middle">缩放点积注意力</text>
+        <StageFlow d="M263 353V329H274V304M320 353V329H306V304M290 274V257M290 227V210M290 180V163M290 133V116M290 86V71" active={active} explanation="scale" label="注意力计算主数据流" />
+        <StageFlow d="M377 383V104H348" active={highlight.has('value') || highlight.has('weights')} explanation="value" label="值 V 到加权求和" />
+        <StageBlock id="value" text="MatMul · 加权求和" x={232} y={86} w={116} h={30} tone="attn" active={highlight.has('weights')} />
+        <StageBlock id="softmax" text="Softmax" x={232} y={133} w={116} h={30} tone="encoder" content={attentionSoftmaxExplainable} active={active} />
+        <StageBlock id="mask" text="Mask（可选）" x={232} y={180} w={116} h={30} tone="attn" active={active} />
+        <StageBlock id="scale" text="Scale · ÷ √dₖ" x={232} y={227} w={116} h={30} tone="train" active={active} />
+        <StageBlock id="scale" text="MatMul · QKᵀ" x={232} y={274} w={116} h={30} tone="attn" active={active || highlight.has('query')} />
+        <StageBlock id="query" text="Q" x={242} y={353} w={42} h={30} tone="decoder" active={highlight.has('query')} />
+        <StageBlock id="key" text="K" x={299} y={353} w={42} h={30} tone="decoder" active={highlight.has('key')} />
+        <StageBlock id="value" text="V" x={356} y={353} w={42} h={30} tone="decoder" active={highlight.has('value')} />
+        <text className="diagram-note" x={320} y={416} textAnchor="middle">先计算权重，再用权重汇总 V</text>
       </StageSvg>
       {showHeatmap && <TeachingHeatmap />}
-      <p className="stage-caption"><strong>Fig. 2 · 式 (1) · PDF p. 4</strong><span>查询和键决定权重，值提供被汇总的内容。</span></p>
+      <p className="stage-caption"><strong>FIG. 2 · 式 (1) · PDF P. 4</strong><span>Mask 仅在需要屏蔽位置时使用；点击模块查看解释。</span></p>
     </>
   )
 }

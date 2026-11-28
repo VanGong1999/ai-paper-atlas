@@ -1,7 +1,8 @@
 import { useRef, type KeyboardEvent } from 'react'
 
 const modes = [
-  { id: 'learn', label: 'Learn' },
+  { id: 'learn', label: '交互导读' },
+  { id: 'cheatsheet', label: '速查表' },
   { id: 'figures', label: 'Figures' },
   { id: 'fulltext', label: '全文中译' },
   { id: 'pdf', label: 'PDF' },
