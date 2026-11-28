@@ -27,7 +27,7 @@ export function KDScene({ scene, playing, onHover }: SceneProps & { scene: strin
   if (scene === 'history') return <HistoryScene onHover={onHover} />
   if (scene === 'compression-map') return <CompressionMapScene onHover={onHover} />
   if (scene === 'metrics') return <MetricsScene onHover={onHover} />
-  if (['transfer-details', 'mnist-edge', 'speech-detail', 'jft-details', 'jft-results'].includes(scene)) return <DetailedEvidenceScene scene={scene} onHover={onHover} />
+  if (['transfer-details', 'mnist-edge', 'mnist-setup', 'speech-detail', 'asr-objective', 'jft-details', 'jft-objective', 'jft-results'].includes(scene)) return <DetailedEvidenceScene scene={scene} onHover={onHover} />
   return <OverviewScene playing={playing} onHover={onHover} />
 }
 
@@ -197,8 +197,11 @@ function DetailedEvidenceScene({ scene, onHover }: { scene: string; onHover: (id
   const content: Record<string, { title: string; subtitle: string; items: Array<[string, string, string]> }> = {
     'transfer-details': { title: 'SOFT TARGETS / 信息密度', subtitle: '同一个输入，Teacher 输出一整份分布', items: [['算术/几何平均', '多个 Teacher 的互补判断合成一个目标。', 'arithmetic-mean'], ['高熵目标', '更多非正确类保留非零概率，梯度方差更低。', 'high-entropy-target'], ['未标注 transfer set', '只要能询问 Teacher，不一定必须有人工标签。', 'transfer-set']] },
     'mnist-edge': { title: 'MNIST / MISSING CLASS', subtitle: '没有见过 3，也可能学会 3', items: [['原始结果', '206 errors，其中 133 个发生在 1010 个数字 3 上。', 'mythical-class'], ['调高 3 的 bias', 'bias +3.5 后总错误降到 109，3 的识别率达到 98.6%。', 'mythical-class'], ['只用 7/8', '47.3% test errors → 调低 bias 7.6 后为 13.2%。', 'mythical-class']] },
+    'mnist-setup': { title: 'MNIST / EXPERIMENT SETUP', subtitle: '先看模型规模、正则化与温度扫描', items: [['Teacher', '2 个隐藏层 × 1200 ReLU；dropout、weight constraints、±2 像素 jitter。', 'dropout-ensemble'], ['Student', '2 个隐藏层 × 800 ReLU；直接 hard label 训练时 146 errors。', 'student'], ['温度结果', '800 单元/层时 T≥8 近似；30 单元/层时 T=2.5–4 更好。', 'temperature-sweep']] },
     'speech-detail': { title: 'SPEECH / ACOUSTIC MODEL', subtitle: '局部帧分类如何连接到最终 WER', items: [['输入', '26 帧 × 40 维 Mel filter-bank，预测第 21 帧。', 'speech-acoustic-model'], ['模型', '8 层 × 2560 ReLU，14,000 HMM labels，约 85M 参数。', 'speech-acoustic-model'], ['结果', 'Baseline 58.9% / 10.9% WER；Distilled 60.8% / 10.7% WER。', 'wer-mismatch']] },
+    'asr-objective': { title: 'ASR / FORCED ALIGNMENT', subtitle: '训练目标与最终解码目标并不完全相同', items: [['声学模型', 'P(hₜ | sₜ; θ) 把短时波形特征映射到 HMM 状态概率。', 'asr-hmm'], ['训练标签', '用真实词序列的 forced alignment 得到每帧 HMM 状态 hₜ。', 'forced-alignment'], ['系统解码', 'decoder 同时考虑声学概率、HMM 路径和 language model，最终看 WER。', 'wer-mismatch']] },
     'jft-details': { title: 'JFT / SPECIALIST PIPELINE', subtitle: 'generalist 选路，specialist 解决局部难点', items: [['数据', '约 1 亿标注图像、15,000 labels。', 'jft-dataset'], ['训练', '61 个 specialist，每个约 300 类 + dustbin；从 generalist 初始化。', 'specialist-initialization'], ['推理', 'generalist top-1 → active specialists → 联合 KL 优化全类分布。', 'specialist-inference']] },
+    'jft-objective': { title: 'JFT / EQUATION (5)', subtitle: 'specialist 与 generalist 如何合成全类别分布', items: [['联合目标', 'min_q KL(p_g, q) + Σₘ∈Aₖ KL(pₘ, q)。', 'specialist-objective'], ['dustbin 修正', 'specialist 类别被过采样时，把 dustbin logit 加上 oversampling 比例的 log。', 'dustbin-correction'], ['计算方式', '令 q=softmax(z)，T=1；每张图用梯度下降优化 logits z。', 'specialist-inference']] },
     'jft-results': { title: 'RESULTS / REGULARIZATION / MoE', subtitle: '论文结论与边界放在同一张卡片上', items: [['JFT', 'overall top-1 43.1% → 45.9%；conditional 25.0% → 26.1%。', 'specialist-results'], ['3% 数据', 'hard 44.5% test frame accuracy；soft 57.0%，无需 early stopping。', 'soft-regularizer'], ['边界', '论文尚未证明 specialist 知识已经回蒸到单个大模型。', 'discussion-limit']] },
   }
   const data = content[scene]
