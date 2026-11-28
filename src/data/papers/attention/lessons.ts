@@ -190,6 +190,34 @@ const definitions: LessonDefinition[] = [
     nodes: [node('conclusion', '后续研究', 135, 145, 'io'), node('complexity', '局部注意力', 390, 145, 'attn')],
     edges: [['conclusion', 'complexity']],
   },
+  {
+    id: 'math-lab', title: '公式实验室', subtitle: '把缩放、掩码和 softmax 变成可观察过程', minutes: 6, stage: 'attention',
+    steps: [
+      step('variance', 'variance', ['figure-2'], ['query', 'key', 'softmax'], 'Var(qᵀk) ≈ dₖ  →  divide by √dₖ  →  Var(score) ≈ 1'),
+      step('causal', 'causal', ['figure-1'], ['mask', 'softmax'], 'softmax((QKᵀ / √dₖ) + mask)V'),
+    ],
+    nodes: [
+      node('query', 'Q', 45, 70, 'attn'), node('key', 'K', 45, 145, 'attn'),
+      node('variance', '方差随 dₖ 增长', 240, 105, 'attn'), node('scale', '÷ √dₖ', 430, 105, 'attn'),
+      node('causal', '因果 mask', 240, 240, 'decoder'), node('softmax', 'Softmax', 430, 240, 'io'),
+    ],
+    edges: [['query', 'variance'], ['key', 'variance'], ['variance', 'scale'], ['scale', 'softmax'], ['causal', 'softmax']],
+  },
+  {
+    id: 'training-recipe', title: '训练配方', subtitle: '数据、优化器、正则化与解码设置', minutes: 5, stage: 'training',
+    steps: [
+      step('optimizer-detail', 'optimizerDetail', ['table-3'], ['hardware', 'batch']),
+      step('label-detail', 'labelDetail', ['table-2'], ['smoothing', 'softmax']),
+      step('checkpoint', 'checkpoint', ['table-2', 'table-3'], ['bleu']),
+      step('beam-detail', 'beamDetail', ['table-2'], ['bleu']),
+    ],
+    nodes: [
+      node('batch', '25000 tokens / batch', 25, 80, 'train'), node('optimizerDetail', 'Adam + warmup', 225, 80, 'train'),
+      node('labelDetail', 'label smoothing', 425, 80, 'train'), node('checkpoint', 'checkpoint avg', 225, 205, 'train'),
+      node('beamDetail', 'beam + length penalty', 425, 205, 'train'),
+    ],
+    edges: [['batch', 'optimizerDetail'], ['optimizerDetail', 'labelDetail'], ['labelDetail', 'checkpoint'], ['checkpoint', 'beamDetail']],
+  },
 ]
 
 export const lessons: Lesson[] = definitions.map((lesson, index) => {
