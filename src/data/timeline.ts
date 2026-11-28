@@ -194,6 +194,7 @@ export const timeline: TimelineEvent[] = [
     blurb: '把 Thought / Action / Observation 交错：推理与工具调用写成可调试轨迹。',
     why: '现代 Agent「循环」的名字源头——看轨迹就能懂模型在干什么。',
     url: 'https://arxiv.org/abs/2210.03629',
+    visual: '/papers/react',
     related: ['toolformer-2023', 'function-calling-2023'],
   },
   {

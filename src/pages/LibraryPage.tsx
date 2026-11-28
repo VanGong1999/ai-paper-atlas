@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getCatalog, hasInteractivePage } from '../data/papers/catalog'
+import { getCatalog } from '../data/papers/catalog'
 import type { Topic } from '../data/timeline'
 import { TOPICS } from '../data/timeline'
 import '../styles/library.css'
@@ -32,7 +32,7 @@ export function LibraryPage() {
             已收录论文
             <span>.</span>
           </h1>
-          <p>浏览图谱中已整理的论文与开源节点。有可视化的可进入驾驶舱；其余可查看中文摘要与原文链接。</p>
+          <p>这里列出当前已经完成交互式可视化的论文；点击卡片直接进入对应的学习工作台。</p>
         </div>
         <div className="library-count">
           <strong>{String(list.length).padStart(2, '0')}</strong>
@@ -71,8 +71,7 @@ export function LibraryPage() {
 
       <div className="library-grid">
         {list.map((paper) => {
-          const interactive = hasInteractivePage(paper)
-          const to = interactive && paper.visual ? paper.visual : `/library/${paper.id}`
+          const to = paper.visual ?? `/library/${paper.id}`
           return (
             <Link key={paper.id} to={to} className="library-card">
               <div className="library-card-top">
@@ -89,9 +88,7 @@ export function LibraryPage() {
                   </span>
                 ))}
               </div>
-              <div className="library-card-foot">
-                {interactive ? '进入可视化 →' : '查看详情 →'}
-              </div>
+              <div className="library-card-foot">进入可视化 →</div>
             </Link>
           )
         })}

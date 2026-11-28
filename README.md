@@ -1,6 +1,6 @@
 # ORBIT / AI 研究图谱
 
-高密度交互式研究图谱，包含力导向网络、弯曲时间线和《Attention Is All You Need》论文工作台。
+高密度交互式研究图谱，包含力导向网络、弯曲时间线和论文可视化工作台。
 
 技术栈：Vite + React + TypeScript + Framer Motion + react-force-graph-2d。
 
@@ -47,10 +47,23 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 | 路径 | 说明 |
 |------|------|
 | `/` | 力导向研究网络（主）/ 弯曲时间线（可切换）；顶部筛选、侧栏动态卡片、底部事件列表 |
-| `/library` | 已收录论文库；点击进入详情或可视化 |
+| `/library` | 已收录论文库；只展示已经完成交互式可视化的论文 |
 | `/library/:id` | 单篇摘要详情（无可视化时） |
 | `/papers/attention` | 《Attention Is All You Need》工作台 |
 | `/papers/pagedattention` | PagedAttention / vLLM 工作台 |
+| `/papers/distillation` | Knowledge Distillation 工作台 |
+| `/papers/react` | ReAct: Synergizing Reasoning and Acting 工作台 |
+
+## 当前已收录论文
+
+`/library` 当前只列出已经接入交互式可视化页面的 4 篇论文：
+
+1. **Attention Is All You Need** — `/papers/attention`
+2. **PagedAttention / vLLM** — `/papers/pagedattention`
+3. **Distilling the Knowledge in a Neural Network** — `/papers/distillation`
+4. **ReAct: Synergizing Reasoning and Acting in Language Models** — `/papers/react`
+
+时间线中尚未完成可视化的论文、开源权重和研究节点不会出现在“已收录论文”列表中；它们仍保留在首页研究时间线中，等待后续接入。
 
 ## Attention 论文工作台
 
