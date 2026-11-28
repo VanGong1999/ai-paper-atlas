@@ -1,8 +1,10 @@
 import { cheatSheet } from '../../data/papers/attention/cheatsheet'
+import { PaperCoveragePanel } from './PaperCoveragePanel'
+import type { CoverageItem } from '../../data/papers/coverage'
 
-type Props = { onNavigate: (lessonId: string, stepId: string) => void }
+type Props = { onNavigate: (lessonId: string, stepId: string) => void; coverage?: CoverageItem[] }
 
-export function CheatSheet({ onNavigate }: Props) {
+export function CheatSheet({ onNavigate, coverage }: Props) {
   return (
     <div className="cheatsheet">
       <div className="cheatsheet-inner">
@@ -26,6 +28,7 @@ export function CheatSheet({ onNavigate }: Props) {
             </article>
           ))}
         </div>
+        <PaperCoveragePanel paper="attention" items={coverage} onNavigate={item => onNavigate(item.relatedLessonId!, item.relatedStepId!)} />
         <div className="cheatsheet-footer">ATTENTION IS ALL YOU NEED <span>·</span> 从概念出发，回到论文原文。</div>
       </div>
     </div>

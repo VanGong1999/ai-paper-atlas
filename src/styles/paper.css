@@ -1462,6 +1462,25 @@
 .cheat-card button:hover span { transform: translate(3px, -3px); }
 .cheatsheet-footer { padding-top: 28px; color: var(--muted-2); font: 10px var(--font-mono); letter-spacing: .06em; }
 .cheatsheet-footer span { margin: 0 6px; }
+
+.paper-coverage { margin-top: 44px; padding: 26px; border: 1px solid var(--line); border-radius: 18px; background: color-mix(in srgb, var(--panel) 82%, transparent); }
+.paper-coverage-head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 22px; }
+.paper-coverage-head h2 { margin: 6px 0 8px; }
+.paper-coverage-head p { max-width: 620px; margin: 0; color: var(--muted); line-height: 1.7; }
+.paper-coverage-meter { display: grid; gap: 3px; min-width: 86px; text-align: right; }
+.paper-coverage-meter strong { font: 22px var(--font-mono); color: var(--accent); }
+.paper-coverage-meter span { color: var(--muted-2); font-size: 11px; }
+.paper-coverage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.paper-coverage-card { min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.paper-coverage-card-top, .paper-coverage-source { display: flex; justify-content: space-between; gap: 8px; align-items: center; color: var(--muted-2); font: 10px var(--font-mono); }
+.paper-coverage-card-top span { color: var(--accent); text-transform: uppercase; }
+.paper-coverage-card h3 { margin: 10px 0 7px; font-size: 15px; }
+.paper-coverage-card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.paper-coverage-source { justify-content: flex-start; flex-wrap: wrap; }
+.paper-coverage-source em { padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; font-style: normal; }
+.paper-coverage-card button { margin-top: 12px; padding: 0; border: 0; background: none; color: var(--accent); font: 11px var(--font-mono); cursor: pointer; }
+@media (max-width: 900px) { .paper-coverage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .paper-coverage { padding: 18px; } .paper-coverage-head { display: block; } .paper-coverage-meter { margin-top: 15px; text-align: left; } .paper-coverage-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .cheatsheet-hero-art > span { animation: none; } .cheat-card, .cheat-card button span { transition: none; } }
 
 /* Original-paper diagrams */

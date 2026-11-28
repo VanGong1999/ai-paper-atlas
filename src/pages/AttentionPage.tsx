@@ -14,6 +14,7 @@ import { figures } from '../data/papers/attention/figures'
 import { fulltextZh } from '../data/papers/attention/fulltext-zh'
 import { lessons } from '../data/papers/attention/lessons'
 import { pdfAsset } from '../data/papers/attention/originals-en'
+import { getCoverageForPaper } from '../data/papers/coverage'
 import '../styles/paper.css'
 
 type ReadingPosition = {
@@ -56,6 +57,7 @@ export function AttentionPage() {
   const step = lesson.steps[stepIndex]
   const section = fulltextZh.find(entry => entry.id === (translationId ?? step.originalId)) ?? fulltextZh[0]
   const stepFigures = figures.filter(figure => step.figureIds.includes(figure.id))
+  const attentionCoverage = getCoverageForPaper('attention')
   const canPrev = lessonIndex > 0 || stepIndex > 0
   const canNext = lessonIndex < lessons.length - 1 || stepIndex < lesson.steps.length - 1
 
@@ -236,7 +238,7 @@ export function AttentionPage() {
         )}
 
         {mode === 'cheatsheet' && (
-          <CheatSheet onNavigate={(lessonId, stepId) => {
+              <CheatSheet coverage={attentionCoverage.items} onNavigate={(lessonId, stepId) => {
             const nextLesson = lessons.findIndex(item => item.id === lessonId)
             const nextStep = lessons[nextLesson]?.steps.findIndex(item => item.id === stepId) ?? -1
             if (nextLesson >= 0 && nextStep >= 0) readRelatedStep(nextLesson, nextStep)
