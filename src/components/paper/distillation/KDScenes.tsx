@@ -12,12 +12,14 @@ const softmax = (xs: number[], temperature: number) => {
 export function KDScene({ scene, playing, onHover }: SceneProps & { scene: string }) {
   if (scene === 'temperature') return <TemperatureScene onHover={onHover} />
   if (scene === 'loss' || scene === 't2') return <LossScene onHover={onHover} />
+  if (scene === 'calculation') return <CalculationScene onHover={onHover} />
   if (scene === 'match') return <MatchScene onHover={onHover} />
   if (scene === 'numbers') return <MNISTScene onHover={onHover} />
   if (scene === 'confusable') return <SpecialistScene onHover={onHover} />
   if (scene === 'speech-results') return <SpeechScene onHover={onHover} />
   if (scene === 'pytorch') return <FlowScene playing={playing} onHover={onHover} />
   if (scene === 'bmw') return <FlowScene playing={playing} onHover={onHover} />
+  if (scene === 'convergence') return <ConvergenceScene playing={playing} onHover={onHover} />
   return <OverviewScene playing={playing} onHover={onHover} />
 }
 
@@ -61,6 +63,26 @@ function LossScene({ onHover }: { onHover: (id: string) => void }) {
   </div>
 }
 
+function CalculationScene({ onHover }: { onHover: (id: string) => void }) {
+  const [temperature, setTemperature] = useState(3)
+  const [alpha, setAlpha] = useState(.7)
+  const student = [-5, 2, 7, 9]
+  const teacher = [-10, 0, 3, 12]
+  const classes = ['猫', '狗', '驴', '马']
+  const studentT1 = softmax(student, 1)
+  const studentT = softmax(student, temperature)
+  const teacherT = softmax(teacher, temperature)
+  const hard = -Math.log(studentT1[3])
+  const soft = -teacherT.reduce((sum, value, index) => sum + value * Math.log(Math.max(studentT[index], 1e-9)), 0) * temperature * temperature
+  return <div className="kd-sandbox kd-calculation" onMouseLeave={() => onHover('')}>
+    <div className="kd-sandbox-title"><strong>WORKED EXAMPLE / 逐项计算</strong><span>Student logits vs Teacher logits</span></div>
+    <div className="kd-calc-controls"><label>T <b>{temperature}</b><input type="range" min="1" max="10" step="1" value={temperature} onChange={event => setTemperature(Number(event.target.value))} /></label><label>α <b>{alpha.toFixed(2)}</b><input type="range" min="0" max="1" step=".05" value={alpha} onChange={event => setAlpha(Number(event.target.value))} /></label></div>
+    <div className="kd-calc-columns"><div><header><b>Student logits</b><span onMouseEnter={() => onHover('student-logit')}>[-5, 2, 7, 9]</span></header><div className="kd-calc-row kd-calc-head"><span>class</span><span>T=1</span><span>T={temperature}</span></div>{classes.map((name, index) => <div className="kd-calc-row" key={name}><span>{name}</span><button type="button" onMouseEnter={() => onHover('student-logit')}>{studentT1[index].toFixed(4)}</button><button type="button" onMouseEnter={() => onHover('soft-predictions')}>{studentT[index].toFixed(4)}</button></div>)}</div><div><header><b>Teacher logits</b><span onMouseEnter={() => onHover('teacher-logit')}>[-10, 0, 3, 12]</span></header><div className="kd-calc-row kd-calc-head"><span>class</span><span>T={temperature}</span><span>soft target</span></div>{classes.map((name, index) => <div className="kd-calc-row" key={name}><span>{name}</span><button type="button" onMouseEnter={() => onHover('teacher-logit')}>{teacherT[index].toFixed(4)}</button><button type="button" onMouseEnter={() => onHover('soft-targets')}>{(teacherT[index] * 100).toFixed(1)}%</button></div>)}</div></div>
+    <div className="kd-calc-losses"><button type="button" onMouseEnter={() => onHover('hard-ce')}><span>hard CE = −log(Student<sub>T=1</sub>[马])</span><b>{hard.toFixed(3)}</b></button><button type="button" onMouseEnter={() => onHover('soft-kl')}><span>soft KL ≈ −Σ Teacher<sub>T</sub>·log Student<sub>T</sub> × T²</span><b>{soft.toFixed(3)}</b></button><strong>L = α·soft + (1−α)·hard = {(alpha * soft + (1 - alpha) * hard).toFixed(3)}</strong></div>
+    <p className="kd-caption"><b>第一性原理：</b>T=1 只问“马的概率够不够”；T={temperature} 还问“驴是否比狗更像马”。蒸馏就是把后一个问题也交给 Student。</p>
+  </div>
+}
+
 function MatchScene({ onHover }: { onHover: (id: string) => void }) {
   const [temperature, setTemperature] = useState(1)
   const teacher = [4.5, 2.5, 1.5, .2]
@@ -90,4 +112,8 @@ function SpecialistScene({ onHover }: { onHover: (id: string) => void }) {
 
 function OverviewScene({ playing, onHover }: SceneProps) {
   return <div className="kd-sandbox kd-overview" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>KNOWLEDGE DISTILLATION</strong><span>{playing ? '● animated overview' : 'Ⅱ paused'}</span></div><div className="kd-overview-flow"><div onMouseEnter={() => onHover('ensemble')}><b>ENSEMBLE</b><span>质量高 / 成本高</span></div><i className={playing ? 'flowing' : ''}>soft targets</i><div onMouseEnter={() => onHover('student')}><b>STUDENT</b><span>质量近似 / 成本低</span></div></div><div className="kd-principles"><span>1. 暴露类间关系</span><span>2. soft + hard</span><span>3. T² 保持梯度</span></div></div>
+}
+
+function ConvergenceScene({ playing, onHover }: SceneProps) {
+  return <div className="kd-sandbox kd-convergence" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>CONVERGENCE SPACE / 函数收敛区域</strong><span>{playing ? '● guided by Teacher' : 'Ⅱ paused'}</span></div><div className="kd-convergence-map"><div className="kd-region teacher-region" onMouseEnter={() => onHover('teacher')}><b>Teacher convergence</b><span>大模型已经找到的高质量函数区域</span></div><div className={`kd-region guided-region ${playing ? 'pulse' : ''}`} onMouseEnter={() => onHover('knowledge-distillation')}><b>Teacher-guided Student</b><span>soft targets 把 Student 拉向更好的区域</span></div><div className="kd-region student-region" onMouseEnter={() => onHover('student')}><b>Student convergence</b><span>只用 hard labels 可能停留的区域</span></div></div><div className="kd-caption"><b>不是复制权重：</b>Teacher 提供方向，Student 仍用自己的参数空间完成收敛。</div></div>
 }
