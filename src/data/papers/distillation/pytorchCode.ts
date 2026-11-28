@@ -1,5 +1,5 @@
 export const pytorchCode = String.raw`"""
-Knowledge Distillation on MNIST
+Knowledge Distillation on MNIST — 教学实现，非原论文结果复现
 对应论文：Distilling the Knowledge in a Neural Network, Hinton et al.
 运行：python scripts/distillation_mnist_kd.py --epochs 3 --mode mix
 依赖：torch torchvision
@@ -14,7 +14,7 @@ from torchvision import datasets, transforms
 
 
 class TeacherCNN(nn.Module):
-    """容量更大的 Teacher：论文里它可以代表 dropout/ensemble 的高质量函数。"""
+    """教学用CNN Teacher；不同于论文2×1200 ReLU MLP，不能据此声称复现67 errors。"""
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
@@ -47,7 +47,7 @@ def distillation_loss(student_logits, teacher_logits, labels, temperature=4.0, a
     with torch.no_grad():
         teacher_prob = F.softmax(teacher_logits / temperature, dim=1)
     student_log_prob = F.log_softmax(student_logits / temperature, dim=1)
-    # KL 的梯度因两个 /T 约缩小到 1/T²，所以显式乘回 T²。
+    # 精确梯度(q_T-p_T)/T；高温时概率差也约按1/T缩小，合为约1/T²。
     loss_soft = F.kl_div(student_log_prob, teacher_prob, reduction="batchmean")
     loss_soft = loss_soft * (temperature ** 2)
     # hard target 保留真实标签的校准，避免无条件复制 Teacher 的错误。
@@ -108,7 +108,7 @@ def main():
     if args.teacher_checkpoint and args.teacher_checkpoint.exists():
         teacher.load_state_dict(torch.load(args.teacher_checkpoint, map_location=device))
     else:
-        # 最小可复现实验：先用 hard labels 预训练 Teacher。
+        # 教学流程：先用hard labels预训练Teacher；三轮训练不保证原论文性能。
         optimizer_t = torch.optim.Adam(teacher.parameters(), lr=1e-3)
         for _ in range(args.epochs):
             train_epoch(teacher, train_loader, optimizer_t, device)

@@ -11,6 +11,12 @@ export type StageKind =
   | 'ablation'
   | 'related'
   | 'appendix'
+  | 'prompts'
+  | 'trajectories'
+  | 'human-edit'
+  | 'training'
+  | 'freshness'
+  | 'combination'
 
 export type Evidence = {
   page: number

@@ -514,19 +514,19 @@
 .tip-pop {
   position: fixed;
   z-index: 60;
-  width: 288px;
+  width: 360px;
   max-width: calc(100vw - 16px);
   max-height: calc(100dvh - 16px);
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
-  padding: 8px 10px;
+  padding: 12px 14px;
   border-radius: 7px;
   background: var(--surface);
   border: 1px solid var(--hover-border);
   color: var(--text);
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.75;
   overflow-wrap: anywhere;
   pointer-events: auto;
   box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
@@ -566,8 +566,9 @@
 }
 
 .tip-detail {
-  font-weight: 650;
+  font-weight: 400;
 }
+.tip-section-label{display:block;font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--accent-ink);border-top:1px solid var(--line);padding-top:9px;margin-top:8px}
 
 .tip-pop small {
   display: block;
@@ -1410,7 +1411,7 @@
   background-size: 15px 15px;
 }
 .stage-scene { display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: 20px 16px 12px; }
-.stage-svg { flex: 0 0 auto; width: calc(62% * var(--stage-zoom, 1)); max-width: calc(480px * var(--stage-zoom, 1)); margin: auto; overflow: visible; }
+.stage-svg { flex: 0 0 auto; width: calc(94% * var(--stage-zoom, 1)); max-width: calc(760px * var(--stage-zoom, 1)); margin: auto; overflow: visible; }
 .stage-lane { fill: color-mix(in srgb, var(--surface-2) 78%, transparent); stroke: var(--line-strong); stroke-width: 1.2; }
 .lane-encoder { fill: color-mix(in srgb, var(--blue) 7%, var(--surface)); }
 .lane-decoder { fill: color-mix(in srgb, var(--violet) 7%, var(--surface)); }

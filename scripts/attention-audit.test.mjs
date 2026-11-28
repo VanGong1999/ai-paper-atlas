@@ -215,3 +215,16 @@ test('rejects flattened variable exponents in Table 1 complexity cells', () => {
     assert.ok(report.issues.some(issue => issue.startsWith('Table 1 (p. 6) row ' + row + ' ')), report.issues)
   }
 })
+
+for (const [description, mutation, issue] of [
+  ['invented language-specific beam', `explainables.beamDetail.detail = ['英德 beam=4；英法 beam=5。']`, /decoding.beam_size: explainable/],
+  ['incorrect checkpoint count', `explainables.checkpoint.paperFact = explainables.checkpoint.paperFact.replace('最后 20 个', '最后 10 个')`, /checkpoint.big_count: explainable/],
+  ['changed variance teaching formula', `lessons.find(x => x.id === 'math-lab').steps[0].formula = 'Var(qᵀk) = 1'`, /math-lab\/variance: teaching formula/],
+  ['changed causal teaching formula', `lessons.find(x => x.id === 'math-lab').steps[1].formula = 'softmax(QKᵀ)V'`, /math-lab\/causal: teaching formula/],
+]) {
+  test(`rejects ${description}`, () => {
+    const { status, report } = auditMutation(mutation)
+    assert.equal(status, 1)
+    assert.match(report.issues.join('\n'), issue)
+  })
+}

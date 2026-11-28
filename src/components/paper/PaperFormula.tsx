@@ -2,6 +2,7 @@ import type { ExplainableId } from '../../data/papers/attention/explainables'
 import type { LessonStep } from '../../data/papers/attention/lessons'
 import { Explainable } from './Explainable'
 import { attentionSoftmaxExplainable } from './attentionSoftmaxExplainable'
+import { splitFormulaTerms } from './formulaTokens'
 
 const tokens: Record<string, ExplainableId> = {
   Q: 'query', K: 'key', 'Kᵀ': 'key', V: 'value', '√dₖ': 'scale', softmax: 'softmax',
@@ -11,13 +12,11 @@ const tokens: Record<string, ExplainableId> = {
   LayerNorm: 'residual', Sublayer: 'residual',
 }
 
-const pattern = /(Kᵀ|√dₖ|softmax|[QKV]|pos|d_model|sin|cos|10000|2i\+1|2i|θ|PE|FFN|W[₁₂]|b[₁₂]|max|x|LayerNorm|Sublayer)/g
-
 export function PaperFormula({ step }: { step: LessonStep }) {
   if (!step.formula) return null
   return (
     <div className="formula-box">
-      {step.formula.split(pattern).map((part, index) => {
+      {splitFormulaTerms(step.formula).map((part, index) => {
         const explanation = tokens[part]
         return index % 2 && explanation
           ? <Explainable key={index} as="button" explanation={part === 'x' && step.id === 'res' ? 'residual' : explanation}

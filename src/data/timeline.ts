@@ -323,6 +323,20 @@ export const timeline: TimelineEvent[] = [
     url: 'https://arxiv.org/abs/2401.02954',
   },
   {
+    id: 'deepseek-moe-2024',
+    date: '2024-01',
+    year: 2024,
+    title: 'DeepSeekMoE: Towards Ultimate Expert Specialization',
+    org: 'DeepSeek',
+    topics: ['模型架构', 'AI Infra'],
+    kind: '论文',
+    blurb: '通过细粒度专家切分与共享专家隔离，让 MoE 在相同计算预算下获得更强的专家专业化。',
+    why: 'DeepSeekMoE 2B、16B 与 145B 实验系统验证了稀疏专家架构的容量、计算与专业化权衡。',
+    url: 'https://arxiv.org/abs/2401.06066',
+    visual: '/papers/deepseek-moe',
+    related: ['deepseek-llm-2023', 'deepseek-v2-2024'],
+  },
+  {
     id: 'langgraph-2024',
     date: '2024-01',
     year: 2024,
@@ -369,6 +383,7 @@ export const timeline: TimelineEvent[] = [
     blurb: '引入 MLA（多头潜变量注意力）与 DeepSeekMoE，降低推理 KV 成本。',
     why: 'Infra 级架构创新：用共享低维 latent 压缩 KV Cache。',
     url: 'https://arxiv.org/abs/2405.04434',
+    visual: '/papers/deepseek-v2',
     related: ['vllm-2023', 'deepseek-v3-2024'],
   },
   {

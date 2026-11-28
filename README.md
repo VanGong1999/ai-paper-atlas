@@ -53,15 +53,17 @@ Workflow 会自动设置 `/ai-paper-atlas/` 资源前缀，并生成 `404.html` 
 | `/papers/pagedattention` | PagedAttention / vLLM 工作台 |
 | `/papers/distillation` | Knowledge Distillation 工作台 |
 | `/papers/react` | ReAct: Synergizing Reasoning and Acting 工作台 |
+| `/papers/deepseek-v2` | DeepSeek-V2 三栏交互精读，支持亮暗主题 |
 
 ## 当前已收录论文
 
-`/library` 当前只列出已经接入交互式可视化页面的 4 篇论文：
+`/library` 当前列出已接入交互式可视化页面的论文：
 
 1. **Attention Is All You Need** — `/papers/attention`
 2. **PagedAttention / vLLM** — `/papers/pagedattention`
 3. **Distilling the Knowledge in a Neural Network** — `/papers/distillation`
 4. **ReAct: Synergizing Reasoning and Acting in Language Models** — `/papers/react`
+5. **DeepSeek-V2** — `/papers/deepseek-v2`
 
 时间线中尚未完成可视化的论文、开源权重和研究节点不会出现在“已收录论文”列表中；它们仍保留在首页研究时间线中，等待后续接入。
 
@@ -116,12 +118,53 @@ bash "$s/task-5-run-browser.sh" \
 
 [Task 5 验收报告](.superpowers/sdd/2026-11-26-attention-workbench/task-5-report.md) 记录了 Chrome 浏览器矩阵与复跑命令。
 
-## 数据维护
+## DeepSeek-V2 交互精读
+
+入口：`/papers/deepseek-v2`。也已接入研究时间线与已收录论文列表。
+
+- 19 章、76 个讲解步骤，三栏工作台支持目录/详解折叠、拖动调宽、概念悬停与固定解释。
+- 亮色与暗色覆盖公式、SVG、图表和控件；右上角切换并自动记忆。
+- 架构图支持 100%–300% 缩放和滚动查看；手机端可展开目录与讲解抽屉。
+- 数值模拟：矩阵乘法、多头因果 Attention（自定义输入及 Q/K/V 投影）、KV 缓存预算、MLA 低秩投影、RoPE、矩阵吸收等价性、专家 Top-K 与设备限制路由、均衡损失、GRPO 组内优势。
+- 原文证据：arXiv **2405.04434v5** 的 **47 个编号公式、37 张原始表格**；表 2 八个核心指标提供模型筛选与排序，数值原表支持通用绘图；附录提示模板按原表阅读。
+- 原论文 PDF 使用项目已有的 `public/article/deepseek/2405.04434.pdf`；公式与表格来源索引由 arXiv v5 HTML 生成，包含源 HTML 的 SHA-256。
+- 学习进度只保存在当前浏览器。URL 支持 `?chapter=mla&step=1`（步骤从 0 编号）。键盘 `←` / `→` 切步，`Space` 播放，`R` 重放，`⌘/Ctrl K` 搜索。
+
+教学模拟使用确定性小矩阵，不运行 236B 模型，不在网页执行 PyTorch。完整模型配置、公开 HF 展开 K/V 的参考实现与论文内部优化推理路径分别说明。论文吞吐比较包含 FP8 权重和平均 6-bit KV 量化，不能用理论缓存比例推算速度。
+
+```sh
+node --test scripts/deepseek-v2-math.test.mjs scripts/deepseek-v2-content.test.mjs
+npm run build
+# 从下载的原文 HTML 重新提取，要求 47 式 / 37 表完整：
+python3 scripts/deepseek-v2-source-inventory.py /path/to/2405.04434v5.html
+```
+
+浏览器验收函数位于 `scripts/deepseek-v2-browser.js`，使用 Playwright CLI 的 `run-code` 执行；开发服务需在 `http://127.0.0.1:5184`。截图与验收输出保存在忽略提交的 `output/` 目录。
+
+## 全站论文原文复核与图解
+
+现有五篇课程（Attention、PagedAttention、Knowledge Distillation、ReAct、DeepSeekMoE）已补充原文覆盖核对、重点事实修正及计算图讲解。DeepSeek-V2 中栏的重复章节标题区已移除。论文报告、逐节覆盖、已知边界与浏览器截图保存在本地 `output/other-papers-review.md` 及各篇 `*-source-review.md`。
+
+- DeepSeekMoE 使用真实可计算的小维路由、FFN 聚合、共享预算和专家/设备负载；原文 17 式、10 表、33 页可以直接查阅。
+- ReAct 补充 33 页原文档案，保留原始规模图，提供 Thought/Action/Observation 上下文轨迹和实际回退条件实验。
+- 蒸馏支持真实 softmax、CE/KL、混合损失及梯度/T² 计算；PagedAttention 支持可操作页表和 COW；Attention 增加缩放、因果掩码和 FFN/训练流程。
+- 教学权重、原文报告值和未验证设想有明确区分；原文可达不等于所有内容均有独立仿真。
+
+```sh
+# PDF 审计所用 Python 需安装 pdfplumber、pypdfium2 和 Pillow。
+PDF_PYTHON=/path/to/pdf-enabled/python PATH=/path/to/pdf-enabled/bin:$PATH node --test scripts/*.test.mjs
+npm run build
+```
+
+整站浏览器验收函数 `scripts/other-papers-browser.js` 检查 1440、715、390 三种宽度与两种主题；同样通过 Playwright CLI `run-code` 执行，使用端口 5184。
+
+## 数据维护索引
 
 - 首页事件：`src/data/timeline.ts`
 - 论文课程：`src/data/papers/attention/lessons.ts`
 - 中译正文：`src/data/papers/attention/fulltext-zh.ts`
 - 英文对照：`src/data/papers/attention/originals-en.ts` 管理来源映射，`scripts/attention-reader-assets.py` 从 PDF 生成正文和原图预览。
+- DeepSeek 论文原文：`public/article/deepseek/`，清单见 `public/article/deepseek/manifest.json`；当前已拉取 13 篇，后续可按 arXiv ID 接入论文可视化。
 
 ## 说明
 

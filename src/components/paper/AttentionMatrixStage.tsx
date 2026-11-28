@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { attentionSoftmaxExplainable } from './attentionSoftmaxExplainable'
+import { attentionSoftmaxExplainable, normalizeAttentionScores } from './attentionSoftmaxExplainable'
 import { Explainable } from './Explainable'
 import { StageBlock, StageFlow, StageSvg, type StageProps } from './StageDrawing'
 
@@ -89,4 +89,50 @@ function TeachingHeatmap() {
       )}
     </div>
   )
+}
+
+
+// Toy scores make the effects of dimension scaling and masking inspectable.
+// No trained attention tensors are loaded by this demonstration.
+const toyScores = [0.2, 1.0, -0.4, 0.6]
+export function AttentionMathStage({ causal, onClearSelection }: { causal: boolean; onClearSelection: () => void }) {
+  const [dimension, setDimension] = useState(64)
+  const [queryRow, setQueryRow] = useState(1)
+  const raw = toyScores.map(value => value * Math.sqrt(dimension))
+  const unscaled = normalizeAttentionScores(raw)
+  const scaled = normalizeAttentionScores(toyScores)
+  const masked = normalizeAttentionScores(toyScores, queryRow)
+  const display = causal ? masked : scaled
+  return <>
+    <StageSvg label={causal ? '因果掩码逐行归一化教学实验' : '维度缩放前后注意力权重教学实验'} height={365}>
+      <text className="diagram-title" x={320} y={30} textAnchor="middle">{causal ? '先屏蔽未来，再逐行 Softmax' : '同一组基础分数，比较缩放前后'}</text>
+      <text className="diagram-subtitle" x={320} y={55} textAnchor="middle">教学计算 · 4 个键 · {causal ? `当前查询位置 i = ${queryRow + 1}` : `dₖ = ${dimension}`}</text>
+      <text className="diagram-label" x={24} y={94}>键位置</text>
+      {toyScores.map((_, column) => <text className="diagram-label" key={column} x={225 + column * 104} y={94} textAnchor="middle">K{column + 1}</text>)}
+      {[0, 1].map(row => <g key={row}>
+        <text className="diagram-note" x={24} y={148 + row * 74}>{causal ? row === 0 ? '缩放分数 + mask' : '归一化权重' : row === 0 ? '未缩放 Softmax' : '÷ √dₖ 后 Softmax'}</text>
+        {toyScores.map((score, column) => {
+          const blocked = causal && column > queryRow
+          const value = causal ? row === 0 ? score : masked[column] : row === 0 ? unscaled[column] : scaled[column]
+          const text = causal && row === 0 && blocked ? '−∞' : value.toFixed(3)
+          return <StageBlock key={column} id={causal ? 'causal' : 'variance'} text={text}
+            x={181 + column * 104} y={116 + row * 74} w={88} h={48}
+            tone={blocked ? 'io' : 'attn'} active={!blocked && row === 1}
+            example={causal ? `查询 ${queryRow + 1} → 键 ${column + 1}：${blocked ? '未来键，分数设为 −∞，权重严格为 0。' : `合法连接，缩放分数 ${score}，权重 ${masked[column].toFixed(4)}。`}`
+              : `键 ${column + 1}：原始分数 ${raw[column].toFixed(3)}，除以 √${dimension} 后为 ${score}；${row === 0 ? '未缩放' : '缩放后'}权重 ${value.toFixed(4)}。`} />
+        })}
+      </g>)}
+      <text className="diagram-note" x={320} y={282} textAnchor="middle">{causal ? '每行只在合法键之间重新归一化；不是归一化后再删列' : '缩放后恢复基础分数；未缩放分数随 √dₖ 放大'}</text>
+      <text className="diagram-note" x={320} y={310} textAnchor="middle">输出 = {display.map((weight, i) => `${weight.toFixed(3)} V${i + 1}`).join(' + ')}</text>
+      <text className="diagram-note" x={320} y={340} textAnchor="middle">输入 1×4 分数 → 权重 1×4 → 与 V(4×dᵥ) 相乘得 1×dᵥ</text>
+    </StageSvg>
+    <div className="workbench-stage-controls position-controls">
+      {causal ? <label><span>选择查询位置 <output>i = {queryRow + 1}</output></span>
+        <input type="range" aria-label="因果掩码查询位置" min={0} max={3} value={queryRow} onChange={event => { setQueryRow(event.currentTarget.valueAsNumber); onClearSelection() }} />
+      </label> : <label><span>键 / 查询维度 <output>dₖ = {dimension}</output></span>
+        <input type="range" aria-label="缩放实验维度" min={1} max={256} value={dimension} onChange={event => { setDimension(event.currentTarget.valueAsNumber); onClearSelection() }} />
+      </label>}
+    </div>
+    <p className="stage-caption"><strong>{causal ? '§3.2.3 · PDF P. 5' : '§3.2.1 · 脚注 4 · PDF P. 4'}</strong><span>{causal ? '目标输入右移后，当前输入位置也可见；预测只依赖已知输出。' : '固定教学分数 [0.2, 1, −0.4, 0.6]；非模型实测，方差推导依赖独立、零均值、单位方差假设。'}</span></p>
+  </>
 }

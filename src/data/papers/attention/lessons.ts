@@ -199,17 +199,17 @@ const definitions: LessonDefinition[] = [
     nodes: [
       node('query', 'Q', 45, 70, 'attn'), node('key', 'K', 45, 145, 'attn'),
       node('variance', '方差随 dₖ 增长', 240, 105, 'attn'), node('scale', '÷ √dₖ', 430, 105, 'attn'),
-      node('causal', '因果 mask', 240, 240, 'decoder'), node('softmax', 'Softmax', 430, 240, 'io'),
+      node('causal', '因果 mask', 240, 240, 'decoder'), node('mask', '可见位置', 40, 240, 'decoder'), node('softmax', 'Softmax', 430, 240, 'io'),
     ],
     edges: [['query', 'variance'], ['key', 'variance'], ['variance', 'scale'], ['scale', 'softmax'], ['causal', 'softmax']],
   },
   {
     id: 'training-recipe', title: '训练配方', subtitle: '数据、优化器、正则化与解码设置', minutes: 5, stage: 'training',
     steps: [
-      step('optimizer-detail', 'optimizerDetail', ['table-3'], ['hardware', 'batch']),
-      step('label-detail', 'labelDetail', ['table-2'], ['smoothing', 'softmax']),
-      step('checkpoint', 'checkpoint', ['table-2', 'table-3'], ['bleu']),
-      step('beam-detail', 'beamDetail', ['table-2'], ['bleu']),
+      step('optimizer-detail', 'optimizerDetail', ['table-3'], ['batch']),
+      step('label-detail', 'labelDetail', ['table-2']),
+      step('checkpoint', 'checkpoint', ['table-2', 'table-3']),
+      step('beam-detail', 'beamDetail', ['table-2']),
     ],
     nodes: [
       node('batch', '25000 tokens / batch', 25, 80, 'train'), node('optimizerDetail', 'Adam + warmup', 225, 80, 'train'),

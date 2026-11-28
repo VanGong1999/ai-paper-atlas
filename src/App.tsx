@@ -31,11 +31,11 @@ export default function App() {
         <button
           type="button"
           className="chip theme-toggle"
-          aria-label="亮色主题"
+          aria-label={theme === 'light' ? '切换为暗色主题' : '切换为亮色主题'}
           aria-pressed={theme === 'light'}
           onClick={() => setTheme(current => current === 'light' ? 'dark' : 'light')}
         >
-          亮色
+          {theme === 'light' ? '☾ 暗色' : '☼ 亮色'}
         </button>
       </div>
       <main className="app-main">

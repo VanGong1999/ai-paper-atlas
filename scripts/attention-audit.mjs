@@ -83,6 +83,14 @@ const positionFormula = 'θ = pos / 10000^(2i/d_model)，PE(pos,2i) = sin θ，P
 // value is checked in the registered explainable and in its generated Learn
 // step, with the exact source section/page/originalId checked below.
 const trainingFacts = [
+  { id: 'checkpoint', step: 'training-recipe/checkpoint', section: 'sec6-1', page: 8, locator: 'For the base models', fields: [
+    ['checkpoint.base_count', 'paperFact', /基础模型取最后 5 个/], ['checkpoint.big_count', 'paperFact', /大模型取最后 20 个/],
+    ['checkpoint.ablation', 'paperFact', /§6.2.*不做平均/],
+  ] },
+  { id: 'beamDetail', step: 'training-recipe/beam-detail', section: 'sec6-1', page: 8, locator: 'beam size of 4', fields: [
+    ['decoding.beam_size', 'detail', /^§6.1 使用 beam size=4、length penalty α=0.6；这些设置经开发集实验选定。$/],
+    ['decoding.max_length', 'paperFact', /输入长度加 50/],
+  ] },
   { id: 'batch', step: 'train/batch', section: 'sec5-1', page: 7, locator: '5.1 Training Data', fields: [
     ['corpus.en-de', 'detail', /英德约 450 万句对.*37000/], ['corpus.en-fr', 'detail', /英法为 3600 万句.*32000/],
     ['batch.source_tokens', 'paperFact', /25000 个源词元/], ['batch.target_tokens', 'paperFact', /25000 个目标词元/],
@@ -205,6 +213,17 @@ export function audit() {
   const learnFormulas = new Set(formulas.flatMap(([, , , id]) => id ? [id] : []))
   check(steps.get('posenc/sin')?.formula === positionFormula, 'posenc/sin: Learn phase formula differs from PDF p. 6')
   learnFormulas.add('posenc/sin')
+  // Derived teaching notation is checked separately from verbatim paper formulas.
+  // Footnote 4 gives variance d_k; §3.2.3 specifies -infinity before softmax.
+  for (const [id, expected, page, evidence] of [
+    ['math-lab/variance', 'Var(qᵀk) ≈ dₖ  →  divide by √dₖ  →  Var(score) ≈ 1', 4, /mean 0 and variance d/],
+    ['math-lab/causal', 'softmax((QKᵀ / √dₖ) + mask)V', 5, /setting to −∞/],
+  ]) {
+    check(steps.get(id)?.formula === expected && evidence.test(plain(pages[page - 1])),
+      `${id}: teaching formula differs from its PDF-grounded derivation on p. ${page}`)
+    learnFormulas.add(id)
+  }
+
 
   const missingPreviews = []
   const tableResults = []

@@ -62,7 +62,7 @@ export function TooltipPop({ id, content, example, element, pointer, onCardEnter
       const leftSpace = Math.max(1, (compactTrigger ? anchor.left - minX : x - minX) - gap)
       const lowerSpace = Math.max(1, (compactTrigger ? maxY - anchor.bottom : maxY - y) - gap)
       const upperSpace = Math.max(1, (compactTrigger ? anchor.top - minY : y - minY) - gap)
-      const preferredWidth = Math.min(288, Math.max(rightSpace, leftSpace))
+      const preferredWidth = Math.min(360, Math.max(rightSpace, leftSpace))
       const preferredHeight = Math.max(1, Math.max(lowerSpace, upperSpace))
       tip.style.maxWidth = `${preferredWidth}px`
       // A short viewport still has room beside the focused trigger.
@@ -108,8 +108,9 @@ export function TooltipPop({ id, content, example, element, pointer, onCardEnter
     >
       <strong className="tip-title">{content.title}</strong>
       <p>{content.plain} {content.role}</p>
-      {!pointer && <span className="tip-key-hint">↑ ↓ / PgUp PgDn 滚动 · Esc 关闭</span>}
+      <span className="tip-key-hint">可滚动阅读 · 点击图中元素固定到详解 · Esc 关闭</span>
       {example && <p className="tip-example"><strong>{example}</strong></p>}
+      <span className="tip-section-label">计算、维度与含义</span>
       {content.detail.map(line => <p className="tip-detail" key={line}>{line}</p>)}
       <p><strong>论文事实 · {content.paperFact}</strong></p>
       <p className="tip-teaching"><strong>教学解释 · </strong>{content.teachingExplanation}</p>

@@ -1,0 +1,5561 @@
+{
+  "source": "https://arxiv.org/html/2401.06066v1",
+  "sha256": "bcf99a7dbd37f13b34b15a6c5c59ef8363e8b6d1b31283e5be71d66bbc6ad521",
+  "formulas": [
+    {
+      "number": 1,
+      "anchor": "S2.E1",
+      "latex": "\\displaystyle\\mathbf{u}_{1:T}^{l}\\displaystyle=\\operatorname{Self-Att}\\left(\\mathbf{h}_{1:T}^{l-1}\\right)+\\mathbf{h}_{1:T}^{l-1},"
+    },
+    {
+      "number": 2,
+      "anchor": "S2.E2",
+      "latex": "\\displaystyle\\mathbf{h}_{t}^{l}\\displaystyle=\\operatorname{FFN}\\left(\\mathbf{u}_{t}^{l}\\right)+\\mathbf{u}_{t}^{l},"
+    },
+    {
+      "number": 3,
+      "anchor": "S2.E3",
+      "latex": "\\displaystyle\\mathbf{h}_{t}^{l}\\displaystyle=\\sum_{i=1}^{N}\\left({g_{i,t}\\operatorname{FFN}_{i}\\left(\\mathbf{u}_{t}^{l}\\right)}\\right)+\\mathbf{u}_{t}^{l},"
+    },
+    {
+      "number": 4,
+      "anchor": "S2.E4",
+      "latex": "\\displaystyle g_{i,t}\\displaystyle=\\begin{cases}s_{i,t},&s_{i,t}\\in\\operatorname{Topk}(\\{s_{j,t}|1\\leqslant j\\leqslant N\\},K),\\\\\n0,&\\text{otherwise},\\end{cases}"
+    },
+    {
+      "number": 5,
+      "anchor": "S2.E5",
+      "latex": "\\displaystyle s_{i,t}\\displaystyle=\\operatorname{Softmax}_{i}\\left({\\mathbf{u}_{t}^{l}}^{T}\\mathbf{e}_{i}^{l}\\right),"
+    },
+    {
+      "number": 6,
+      "anchor": "S3.E6",
+      "latex": "\\displaystyle\\mathbf{h}_{t}^{l}\\displaystyle=\\sum_{i=1}^{mN}\\left({g_{i,t}\\operatorname{FFN}_{i}\\left(\\mathbf{u}_{t}^{l}\\right)}\\right)+\\mathbf{u}_{t}^{l},"
+    },
+    {
+      "number": 7,
+      "anchor": "S3.E7",
+      "latex": "\\displaystyle g_{i,t}\\displaystyle=\\begin{cases}s_{i,t},&s_{i,t}\\in\\operatorname{Topk}(\\{s_{j,t}|1\\leqslant j\\leqslant mN\\},mK),\\\\\n0,&\\text{otherwise},\\end{cases}"
+    },
+    {
+      "number": 8,
+      "anchor": "S3.E8",
+      "latex": "\\displaystyle s_{i,t}\\displaystyle=\\operatorname{Softmax}_{i}\\left({\\mathbf{u}_{t}^{l}}^{T}\\mathbf{e}_{i}^{l}\\right),"
+    },
+    {
+      "number": 9,
+      "anchor": "S3.E9",
+      "latex": "\\displaystyle\\mathbf{h}_{t}^{l}\\displaystyle=\\sum_{i=1}^{K_{s}}{\\operatorname{FFN}_{i}\\left(\\mathbf{u}_{t}^{l}\\right)}+\\sum_{i=K_{s}+1}^{mN}\\left({g_{i,t}\\operatorname{FFN}_{i}\\left(\\mathbf{u}_{t}^{l}\\right)}\\right)+\\mathbf{u}_{t}^{l},"
+    },
+    {
+      "number": 10,
+      "anchor": "S3.E10",
+      "latex": "\\displaystyle g_{i,t}\\displaystyle=\\begin{cases}s_{i,t},&s_{i,t}\\in\\operatorname{Topk}(\\{s_{j,t}|K_{s}+1\\leqslant j\\leqslant mN\\},mK-K_{s}),\\\\\n0,&\\text{otherwise},\\end{cases}"
+    },
+    {
+      "number": 11,
+      "anchor": "S3.E11",
+      "latex": "\\displaystyle s_{i,t}\\displaystyle=\\operatorname{Softmax}_{i}\\left({\\mathbf{u}_{t}^{l}}^{T}\\mathbf{e}_{i}^{l}\\right)."
+    },
+    {
+      "number": 12,
+      "anchor": "S3.E12",
+      "latex": "\\displaystyle\\mathcal{L}_{\\mathrm{ExpBal}}\\displaystyle=\\alpha_{1}\\sum_{i=1}^{N^{\\prime}}{f_{i}P_{i}},"
+    },
+    {
+      "number": 13,
+      "anchor": "S3.E13",
+      "latex": "\\displaystyle f_{i}\\displaystyle=\\frac{N^{\\prime}}{K^{\\prime}T}\\sum_{t=1}^{T}{\\mathds{1}(\\text{Token $t$ selects Expert $i$})},"
+    },
+    {
+      "number": 14,
+      "anchor": "S3.E14",
+      "latex": "\\displaystyle P_{i}\\displaystyle=\\frac{1}{T}\\sum_{t=1}^{T}{s_{i,t}},"
+    },
+    {
+      "number": 15,
+      "anchor": "S3.E15",
+      "latex": "\\displaystyle\\mathcal{L}_{\\mathrm{DevBal}}\\displaystyle=\\alpha_{2}\\sum_{i=1}^{D}{f_{i}^{\\prime}P_{i}^{\\prime}},"
+    },
+    {
+      "number": 16,
+      "anchor": "S3.E16",
+      "latex": "\\displaystyle f_{i}^{\\prime}\\displaystyle=\\frac{1}{|\\mathcal{E}_{i}|}\\sum_{j\\in\\mathcal{E}_{i}}{f_{j}},"
+    },
+    {
+      "number": 17,
+      "anchor": "S3.E17",
+      "latex": "\\displaystyle P_{i}^{\\prime}\\displaystyle=\\sum_{j\\in\\mathcal{E}_{i}}{P_{j}},"
+    }
+  ],
+  "tables": [
+    {
+      "number": 1,
+      "anchor": "S4.T1",
+      "caption": "Table 1: Evaluation results for validation experiments. Bold font indicates the best. Compared with other MoE architectures, DeepSeekMoE exhibits a substantial performance advantage.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Dense",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Hash Layer",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Switch",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.0B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.0B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.0B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.0B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.3B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.3B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 2K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.9T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.9T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.9T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (Loss)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.060",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.932",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.881",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.867",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "66.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "68.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "41.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "28.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "44.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "29.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "8.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "10.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 2,
+      "anchor": "S4.T2",
+      "caption": "Table 2: Comparisons among DeepSeekMoE, larger GShard models, and larger dense models. In the line of “# Experts”, a + b denotes a shared experts and b routed experts. In the line of “# Activated Experts”, a + b denotes a activated shared experts and b activated routed experts. DeepSeekMoE achieves comparable performance with a GShard model containing 1.5 times expert parameters and computation. In addition, DeepSeekMoE nearly approaches the performance of a dense model with 16 times FFN parameters, which sets the upper bound for MoE models in terms of the model capacity.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard\\times 1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Dense\\times 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 63",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.83B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.35B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.24B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 2K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5.8T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "24.6T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (Loss)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.806",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "55.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "47.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "51.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "44.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 3,
+      "anchor": "S5.T3",
+      "caption": "Table 3: Comparison between DeepSeek 7B and DeepSeekMoE 16B. Bold font indicates the best or near the best. With only 40.5% of computations, DeepSeekMoE 16B achieves comparable performance with DeepSeek 7B.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeek 7B (Dense)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE 16B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.8B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 4K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "183.5T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "74.4T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (BPB)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.75",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.74",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "75.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "77.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "79.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "80.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "68.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "48.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "61.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "DROP (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "GSM8K (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "8-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "17.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "18.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MATH (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "59.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "22.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "25.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "48.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "WinoGrande (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CLUEWSC (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "73.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CEval (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CMMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "47.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CHID (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "89.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "89.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 4,
+      "anchor": "S5.T4",
+      "caption": "Table 4: Comparison between LLaMA2 7B and DeepSeekMoE 16B. With only 39.6% of computations, DeepSeekMoE 16B outperforms LLaMA2 7B on the majority of benchmarks.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "LLaMA2 7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE 16B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.8B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 4K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "187.9T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "74.4T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (BPB)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.76",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.74",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "75.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "77.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "78.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "80.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "68.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "60.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "61.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "DROP (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "GSM8K (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "8-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "18.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MATH (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "14.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "21.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "25.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "25.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "WinoGrande (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CLUEWSC (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CEval (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CMMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CHID (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "37.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "89.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "anchor": "S6.T5",
+      "caption": "Table 5: Comparison among LLaMA2 SFT 7B, DeepSeek Chat 7B and DeepSeekMoE Chat 16B, with all of these three models fine-tuned on the same SFT data. Compared with both 7B dense models, DeepSeekMoE Chat 16B still achieves comparable or better performance on the majority of benchmarks with only 40% of computations.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "LLaMA2 SFT 7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeek Chat 7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE Chat 16B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.7B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.8B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 4K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "187.9T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "183.5T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "74.4T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "76.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "78.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "79.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "BBH (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "66.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "DROP (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "41.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "GSM8K (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "62.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "62.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MATH (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "13.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "14.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "35.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "27.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "60.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "59.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "35.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "35.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "47.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "WinoGrande (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "65.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "68.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CLUEWSC (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "48.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "66.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "68.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CEval (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "35.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "44.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CMMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "36.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "51.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 6,
+      "anchor": "S7.T6",
+      "caption": "Table 6: Comparison among DeepSeek 67B (Dense) and MoE models at the scale of about 140B total parameters. In the lines of “# Experts” and “# Activated Experts”, a + b denotes a shared experts and b routed experts, respectively. Bold font indicates the best or near the best performance excluding the last column. DeepSeekMoE 145B, and even DeepSeekMoE 142B (Half Activated) that has only a half of activated expert parameters, outperform GShard 137B by a large margin. Moreover, with 28.5% of computations, DeepSeekMoE 145B achieves comparable performance with DeepSeek 67B.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeek 67B (Dense)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard 137B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE 145B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE 142B (Half Activated)",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "136.5B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "144.6B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "142.3B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "21.6B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "22.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "12.2B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.125",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.125",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4 + 128",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2 + 128",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4 + 12",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2 + 6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "FLOPs per 4K Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2057.5T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "572.7T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "585.6T",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "374.6T",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "245B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "245B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "245B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "245B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (Loss.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.905",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.961",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.876",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.888",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "74.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "75.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "74.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "79.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "77.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "80.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "80.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "48.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "59.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "62.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "59.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "DROP (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "27.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "21.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "27.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "28.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "GSM8K (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "8-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "11.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "12.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "13.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MATH (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "23.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "17.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "19.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "23.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "27.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "57.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "52.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "61.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "59.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "22.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "19.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "25.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "23.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "45.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "37.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "WinoGrande (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CLUEWSC (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "65.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CEval (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "26.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "37.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CMMLU (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "40.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "25.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "35.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "CHID (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "88.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "86.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "90.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "88.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 7,
+      "anchor": "A1.T7",
+      "caption": "Table 7: Overview of hyper-parameters for DeepSeekMoE across various sizes. The relative expert size is in comparison to a standard FFN.",
+      "rows": [
+        [
+          {
+            "text": "# Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Layers",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Hidden Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Attn Heads",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shared Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Routed Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Sequence Length",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Batch Size (Sequence)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Learning Rate",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "2.0B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1280",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "10",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "63 (7 activated)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2048",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2048",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.08e-3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "16.4B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "28",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2048",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "64 (6 activated)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4096",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4608",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.2e-4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "144.6B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "62",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4096",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "128 (12 activated)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.125",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4096",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4608",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.0e-4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 8,
+      "anchor": "A2.T8",
+      "caption": "Table 8: Comparison between DeepSeekMoE and larger GShard models.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard\\times 1.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard\\times 1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 63",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.3B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.8B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.28B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.35B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.24B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (Loss)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.824",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "53.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "47.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "44.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "32.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 9,
+      "anchor": "A2.T9",
+      "caption": "Table 9: Comparison between DeepSeekMoE and larger dense baselines.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Dense\\times 4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "Dense\\times 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 63",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16 + 0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.47B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.47B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.89B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.24B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Pile (Loss)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.908",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.806",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.808",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "47.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "55.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "54.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "70.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "71.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "72.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "43.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "51.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "49.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "34.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "42.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "46.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "44.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "30.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "33.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "31.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "4.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "9.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "16.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    },
+    {
+      "number": 10,
+      "anchor": "A2.T10",
+      "caption": "Table 10: Comparison between DeepSeekMoE and larger GShard models at a larger scale.",
+      "rows": [
+        [
+          {
+            "text": "Metric",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "# Shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard\\times 1.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "GShard\\times 1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "DeepSeekMoE",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "Relative Expert Size",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0.25",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 16",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 63",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Experts",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0 + 2",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "1 + 7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Total Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "15.9B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "19.8B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "13.3B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Activated Expert Params",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.37B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.82B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "2.05B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "# Training Tokens",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "N/A",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "100B",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HellaSwag (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "66.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "67.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "69.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "PIQA (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "75.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "76.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "75.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-easy (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "56.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "56.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "58.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "ARC-challenge (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "39.9",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "37.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-middle (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "51.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "50.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "52.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "RACE-high (Acc.)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "37.4",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "36.3",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "HumanEval (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "0-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "6.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "9.8",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "MBPP (Pass@1)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "3-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "7.0",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "11.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "10.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "TriviaQA (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "36.5",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "36.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "38.2",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ],
+        [
+          {
+            "text": "NaturalQuestions (EM)",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "5-shot",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "12.6",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "12.1",
+            "colSpan": 1,
+            "rowSpan": 1
+          },
+          {
+            "text": "13.7",
+            "colSpan": 1,
+            "rowSpan": 1
+          }
+        ]
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "anchor": "S0.F1",
+      "caption": "Figure 1: Comparison between DeepSeekMoE 16B and open source models on the Open LLM Leaderboard. The red dashed line is linearly fitted from data points of all models except DeepSeekMoE 16B. DeepSeekMoE 16B consistently outperforms models with a similar number of activated parameters by a large margin, and achieves comparable performance with LLaMA2 7B, which has approximately 2.5 times the activated parameters.",
+      "images": []
+    },
+    {
+      "anchor": "S2.F2",
+      "caption": "Figure 2: Illustration of DeepSeekMoE. Subfigure (a) showcases an MoE layer with the conventional top-2 routing strategy. Subfigure (b) illustrates the fine-grained expert segmentation strategy. Subsequently, subfigure (c) demonstrates the integration of the shared expert isolation strategy, constituting the complete DeepSeekMoE architecture. It is noteworthy that across these three architectures, the number of expert parameters and computational costs remain constant.",
+      "images": []
+    },
+    {
+      "anchor": "S4.F3",
+      "caption": "Figure 3: Ablation studies for DeepSeekMoE. The performance is normalized by the best performance for clarity in presentation. All compared models have the same number of parameters and activated parameters. We can find that fine-grained expert segmentation and shared expert isolation both contribute to stronger overall performance.",
+      "images": []
+    },
+    {
+      "anchor": "S4.F4",
+      "caption": "Figure 4: Pile loss with regard to different ratios of disabled top routed experts. Notably, DeepSeekMoE exhibits greater sensitivity to the ratio of disabled top routed experts, indicating lower redundancy among routed experts in DeepSeekMoE.",
+      "images": []
+    },
+    {
+      "anchor": "S4.F5",
+      "caption": "Figure 5: Pile loss with regard to different numbers of activated routed experts in DeepSeekMoE. With only 4 routed experts activated, DeepSeekMoE achieves a Pile loss comparable with GShard.",
+      "images": []
+    },
+    {
+      "anchor": "S4.F6",
+      "caption": "Figure 6: Comparison between GShard and DeepSeekMoE with half the activated experts (trained from scratch). With the same total expert parameters and only half of the activated expert parameters, DeepSeekMoE still outperforms GShard.",
+      "images": []
+    },
+    {
+      "anchor": "A3.F7",
+      "caption": "Figure 7: Benchmark curves during training of DeepSeekMoE 16B and DeepSeek 7B (Dense).",
+      "images": []
+    }
+  ]
+}

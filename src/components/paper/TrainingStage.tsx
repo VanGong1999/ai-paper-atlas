@@ -71,3 +71,23 @@ export function TrainingStage({ highlight, onClearSelection }: StageProps & { on
     </>
   )
 }
+
+export function TrainingRecipeStage({ highlight }: StageProps) {
+  return <>
+    <StageSvg label="训练与评估设置：参数更新、参数平均、翻译搜索" height={370}>
+      <text className="diagram-title" x={320} y={32} textAnchor="middle">从训练参数到最终译文</text>
+      <text className="diagram-subtitle" x={320} y={57} textAnchor="middle">§5.3–5.4 · §6.1 · 三个不同阶段</text>
+      <text className="diagram-label" x={30} y={105}>训练</text>
+      <StageFlow d="M211 149H233M409 149H431" explanation="optimizerDetail" label="组批、优化器与正则化设置" />
+      <StageBlock id="batch" text="语料与组批" caption="源 / 目标各约 25000" x={31} y={123} w={180} h={52} tone="train" active={highlight.has('batch')} />
+      <StageBlock id="optimizerDetail" text="Adam + warmup" caption="4000 步转入衰减" x={233} y={123} w={176} h={52} tone="train" active={highlight.has('optimizerDetail')} />
+      <StageBlock id="labelDetail" text="标签平滑" caption="ε_ls = 0.1" x={431} y={123} w={178} h={52} tone="train" active={highlight.has('labelDetail')} />
+      <text className="diagram-label" x={30} y={220}>评估</text>
+      <StageFlow d="M300 270H338" explanation="checkpoint" label="用平均后的单一模型进行搜索" />
+      <StageBlock id="checkpoint" text="检查点参数平均" caption="base 末 5 个 · big 末 20 个" x={31} y={241} w={269} h={56} tone="encoder" active={highlight.has('checkpoint')} />
+      <StageBlock id="beamDetail" text="翻译束搜索" caption="beam 4 · α 0.6 · 最长输入 + 50" x={338} y={241} w={271} h={56} tone="decoder" active={highlight.has('beamDetail')} />
+      <text className="diagram-note" x={320} y={337} textAnchor="middle">表 3 开发集模型变体不做检查点平均；勿与表 2 测试设置混用</text>
+    </StageSvg>
+    <p className="stage-caption"><strong>训练 P. 7–8 · 评估 P. 8–9</strong><span>训练更新参数，参数平均产生单一模型，搜索再使用模型的下一词概率生成候选译文。</span></p>
+  </>
+}

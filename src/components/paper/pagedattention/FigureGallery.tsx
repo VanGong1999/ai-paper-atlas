@@ -11,7 +11,7 @@ export function FigureGallery({ figures, activeId, onSelect }: { figures: PagedF
     </div>
     <article className="figure-detail">
       <div className="figure-detail-img"><img src={active.originalAsset} alt={`论文第 ${active.number} ${active.kind === 'table' ? '表' : '图'}原文页`} loading="eager" onError={event => { event.currentTarget.replaceWith(document.createTextNode('图像加载失败，请打开原文 PDF')) }} /></div>
-      <div><span className="pa-kicker">SOURCE {active.kind === 'table' ? 'TABLE' : 'FIGURE'} {String(active.number).padStart(2, '0')} · PAGE {active.page}</span><h3>{active.title}</h3><p><strong>这张图在说什么：</strong> {active.interpretation}</p><a className="pa-link" href={`/article/pagedattention/2309.06180v1.pdf#page=${active.page}`} target="_blank" rel="noreferrer">打开原文 PDF ↗</a></div>
+      <div><span className="pa-kicker">SOURCE {active.kind === 'table' ? 'TABLE' : 'FIGURE'} {String(active.number).padStart(2, '0')} · PAGE {active.page}</span><h3>{active.title}</h3><small className="pa-source-page-note">下方显示完整PDF第 {active.page} 页，保留原图、图注与周边正文；不是独立裁图。</small><p><strong>原图怎么读：</strong> {active.interpretation}</p><a className="pa-link" href={`/article/pagedattention/2309.06180v1.pdf#page=${active.page}`} target="_blank" rel="noreferrer">打开原文 PDF ↗</a></div>
     </article>
   </div>
 }

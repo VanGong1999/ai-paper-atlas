@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { Suspense } from 'react'
 import { getPaperPage } from '../data/papers/registry'
 
 export function PaperRouter() {
@@ -19,5 +20,5 @@ export function PaperRouter() {
     )
   }
 
-  return <Page />
+  return <Suspense fallback={<div role="status" style={{ padding: 24, color: 'var(--muted)' }}>正在载入论文交互工作台…</div>}><Page /></Suspense>
 }

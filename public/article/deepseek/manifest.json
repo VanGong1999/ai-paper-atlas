@@ -1,0 +1,19 @@
+{
+  "collection": "DeepSeek papers",
+  "source": "arXiv",
+  "papers": [
+    { "id": "2401.02954", "title": "DeepSeek LLM: Scaling Open-Source Language Models with Longtermism", "date": "2024-01", "file": "2401.02954.pdf", "summary": "7B/67B dense models and scaling law" },
+    { "id": "2401.06066", "title": "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models", "date": "2024-01", "file": "2401.06066.pdf", "summary": "Fine-grained MoE with shared experts" },
+    { "id": "2401.14196", "title": "DeepSeek-Coder: When the Large Language Model Meets Programming", "date": "2024-01", "file": "2401.14196.pdf", "summary": "Code-specialized foundation model" },
+    { "id": "2402.03300", "title": "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models", "date": "2024-02", "file": "2402.03300.pdf", "summary": "Mathematical reasoning and GRPO" },
+    { "id": "2405.04434", "title": "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model", "date": "2024-05", "file": "2405.04434.pdf", "summary": "MLA, DeepSeekMoE, and economical inference" },
+    { "id": "2406.11931", "title": "DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code Intelligence", "date": "2024-06", "file": "2406.11931.pdf", "summary": "Next-generation code intelligence" },
+    { "id": "2412.19437", "title": "DeepSeek-V3 Technical Report", "date": "2024-12", "file": "2412.19437.pdf", "summary": "671B MoE, 37B activated, auxiliary-loss-free balancing, MTP, FP8" },
+    { "id": "2501.12948", "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning", "date": "2025-01", "file": "2501.12948.pdf", "summary": "RL-activated reasoning, R1-Zero, and distillation" },
+    { "id": "2505.09343", "title": "Insights into DeepSeek-V3", "date": "2025-05", "file": "2505.09343.pdf", "summary": "Hardware/system perspective on MLA, MoE, and FP8 co-design" },
+    { "id": "2510.18234", "title": "DeepSeek-OCR: Contexts Optical Compression", "date": "2025-10", "file": "2510.18234.pdf", "summary": "Optical context compression" },
+    { "id": "2511.22570", "title": "DeepSeekMath-V2: Towards Self-Verifiable Mathematical Reasoning", "date": "2025-11", "file": "2511.22570.pdf", "summary": "Self-verifiable mathematical reasoning" },
+    { "id": "2512.02556", "title": "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models", "date": "2025-12", "file": "2512.02556.pdf", "summary": "DeepSeek-V3.2 and sparse attention directions" },
+    { "id": "2606.19348", "title": "DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence", "date": "2026-06", "file": "2606.19348.pdf", "summary": "Preview of the V4 series and million-token context intelligence" }
+  ]
+}
