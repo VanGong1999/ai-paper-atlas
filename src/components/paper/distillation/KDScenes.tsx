@@ -23,6 +23,8 @@ export function KDScene({ scene, playing, onHover }: SceneProps & { scene: strin
   if (scene === 'taxonomy') return <TaxonomyScene onHover={onHover} />
   if (scene === 'variants') return <VariantsScene onHover={onHover} />
   if (scene === 'history') return <HistoryScene onHover={onHover} />
+  if (scene === 'compression-map') return <CompressionMapScene onHover={onHover} />
+  if (scene === 'metrics') return <MetricsScene onHover={onHover} />
   return <OverviewScene playing={playing} onHover={onHover} />
 }
 
@@ -134,4 +136,14 @@ function VariantsScene({ onHover }: { onHover: (id: string) => void }) {
 function HistoryScene({ onHover }: { onHover: (id: string) => void }) {
   const points = [['1989–2006', '剪枝 / 压缩 / 伪数据', 'history-1989'], ['2014–2015', 'dark knowledge / soft targets', 'history-2014'], ['2018', 'Born-Again / feature hints', 'born-again'], ['2019+', '关系 / 零样本 / teacher-free', 'history-2019']]
   return <div className="kd-sandbox kd-history" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>RESEARCH TIMELINE / 扩展阅读</strong><span>核心论文与后续路线分开</span></div><div className="kd-history-line">{points.map(([year, label, id], index) => <button type="button" key={id} onMouseEnter={() => onHover(id)}><b>{year}</b><i className={index === 1 ? 'core' : ''} /><span>{label}</span></button>)}</div><p className="kd-caption"><b>边界：</b>2014/2015 是本页面论文的核心节点；其余是帮助理解“知识接口如何扩展”的后续研究线索。</p></div>
+}
+
+function CompressionMapScene({ onHover }: { onHover: (id: string) => void }) {
+  const lanes: Array<[string, Array<[string, string, string]>]> = [['结构', [['Pruning', '剪枝', 'pruning'], ['EfficientNet / MobileNet', '轻量架构', 'efficient-architecture'], ['Low-rank', '低秩分解', 'low-rank']]], ['数值与知识', [['Quantization', 'INT8 / 低 bit', 'quantization'], ['Knowledge Distillation', 'soft targets / dark knowledge', 'lightweight-map'], ['Attention Transfer', '迁移关注区域', 'attention-transfer']]], ['执行', [['NAS', '搜索精度-成本 Pareto', 'nas'], ['TensorRT / OpenVINO', '算子与 kernel', 'hardware-deploy'], ['Embedded / FPGA', '目标设备落地', 'hardware-deploy']]]]
+  return <div className="kd-sandbox kd-compression" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>LIGHTWEIGHT MODEL MAP / 轻量化神经网络</strong><span>结构 → 知识 → 硬件</span></div><div className="kd-compression-lanes">{lanes.map(([title, items]) => <section key={title}><h3>{title}</h3><div>{items.map(([label, desc, id]) => <button type="button" key={label} onMouseEnter={() => onHover(id)}><b>{label}</b><span>{desc}</span></button>)}</div></section>)}</div><div className="kd-compression-arrow">大模型 <b>→</b> 压缩 / 迁移 / 编译 <b>→</b> 可部署模型</div><p className="kd-caption"><b>与知识蒸馏的关系：</b>蒸馏主要迁移“知识”，剪枝和量化主要改变“载体”；工程上经常组合，而不是互相替代。</p></div>
+}
+
+function MetricsScene({ onHover }: { onHover: (id: string) => void }) {
+  const metrics = [['Params', '参数量', 'efficiency-metrics'], ['FLOPs / MACs', '计算量', 'efficiency-metrics'], ['Memory access', '访存量', 'efficiency-metrics'], ['Latency', '真实延迟', 'hardware-deploy'], ['Energy', '能耗 / 碳排', 'efficiency-metrics'], ['Accuracy', '任务精度', 'knowledge-distillation']]
+  return <div className="kd-sandbox kd-metrics" onMouseLeave={() => onHover('')}><div className="kd-sandbox-title"><strong>DEPLOYMENT SCORECARD / 轻量化不能只看参数</strong><span>目标设备上的 Pareto 权衡</span></div><div className="kd-metric-grid">{metrics.map(([label, desc, id], index) => <button type="button" key={label} onMouseEnter={() => onHover(id)}><span>{label}</span><i style={{ width: `${[45, 58, 72, 34, 28, 91][index]}%` }} /><small>{desc}</small></button>)}</div><p className="kd-caption"><b>第一性原理：</b>优化目标不是“最小模型”，而是在固定设备和延迟约束下，找到准确率、内存、吞吐、能耗的可接受平衡。</p></div>
 }

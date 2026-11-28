@@ -47,4 +47,8 @@ export const lessons: KDLesson[] = [
   { id: 'history', index: 12, title: '发展时间线', subtitle: '从模型压缩前史到教师自由与关系蒸馏', steps: [
     { id: 'history', title: '1989 → 2019+', eyebrow: '17 · HISTORY', fact: '知识蒸馏不是孤立技巧，而是一条持续扩展“知识接口”的研究路线。', explanation: '前史解决“如何变小”，2014/2015 解决“如何把 ensemble 的行为传给 Student”，2018/2019 以后又把知识扩展到中间特征、关系、无数据和自蒸馏。这里的后续节点是扩展阅读，不应误读成原论文的实验结果。', hotspots: [h('history-1989', '1989 → 2006', '剪枝、模型压缩与伪数据。'), h('history-2014', '2014/2015', 'Hinton 等人的暗知识蒸馏。'), h('history-2019', '2018/2019+', '关系、零样本与教师自由。')] },
   ] },
+  { id: 'lightweight', index: 13, title: '轻量化全景图', subtitle: '蒸馏、剪枝、量化、架构和硬件怎样协同', steps: [
+    { id: 'compression-map', title: '从大模型到可部署模型', eyebrow: '18 · LIGHTWEIGHT MAP', fact: '真正的轻量化不是单点技巧，而是“结构、数值、知识、硬件”四条链的协同。', explanation: '剪枝减少连接，量化减少每个数占的 bit，轻量架构从骨架上减少计算，低秩分解利用矩阵冗余，蒸馏负责把精度和泛化知识迁移回来，硬件部署则决定这些节省是否真的转化成延迟、能耗和内存收益。', formula: 'deployable efficiency = architecture + pruning + quantization + distillation + hardware', hotspots: [h('lightweight-map', '轻量化技术地图', '把多条压缩路线放进同一张系统图。'), h('pruning', 'Pruning', '删除冗余连接或结构。'), h('quantization', 'Quantization', '减少数值位宽。'), h('efficient-architecture', '轻量化架构', '设计更少计算的网络骨架。'), h('hardware-deploy', '硬件部署', '在目标设备上兑现收益。')] },
+    { id: 'metrics', title: '别只看参数量', eyebrow: '19 · DEPLOYMENT METRICS', fact: '参数少不等于快：必须同时观察 FLOPs、访存、延迟、能耗和精度。', explanation: '一个模型可能参数量很小，却因为算子不受硬件支持、访存不规则或 kernel 不友好而变慢。合理比较应该固定设备、batch 和精度，报告 accuracy 与 params、MACs、memory、latency、energy 的 Pareto 关系。', hotspots: [h('efficiency-metrics', '效率指标', '判断轻量化是否真实有效。'), h('nas', 'NAS', '为目标设备搜索更合适的架构。'), h('low-rank', '低秩分解', '把大矩阵换成小矩阵乘积。')] },
+  ] },
 ]
