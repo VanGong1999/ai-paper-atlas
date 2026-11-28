@@ -58,3 +58,23 @@ test('attention workbench exposes the coverage index without changing its modes'
   assert.match(page, /mode === 'figures'/)
   assert.match(page, /mode === 'fulltext'/)
 })
+
+test('pagedattention workbench exposes the coverage index and preserves its views', () => {
+  const page = fs.readFileSync(path.join(root, 'src/pages/PagedAttentionPage.tsx'), 'utf8')
+  assert.match(page, /PaperCoveragePanel/)
+  assert.match(page, /getCoverageForPaper\('pagedattention'\)/)
+  for (const mode of ['learn', 'cheatsheet', 'figures', 'fulltext', 'pdf']) assert.match(page, new RegExp(`mode === '${mode}'`))
+})
+
+test('cross-paper bridge is wired into both paper workbenches', () => {
+  const data = fs.readFileSync(path.join(root, 'src/data/papers/cross-paper.ts'), 'utf8')
+  const bridge = fs.readFileSync(path.join(root, 'src/components/paper/CrossPaperBridge.tsx'), 'utf8')
+  const attention = fs.readFileSync(path.join(root, 'src/components/paper/CheatSheet.tsx'), 'utf8')
+  const paged = fs.readFileSync(path.join(root, 'src/pages/PagedAttentionPage.tsx'), 'utf8')
+  assert.match(data, /attention math/i)
+  assert.match(data, /KV Cache/i)
+  assert.match(data, /block table/i)
+  assert.match(bridge, /CrossPaperBridge/)
+  assert.match(attention, /CrossPaperBridge/)
+  assert.match(paged, /CrossPaperBridge/)
+})
