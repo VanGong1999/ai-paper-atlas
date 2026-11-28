@@ -15,6 +15,7 @@ export function KDScene({ scene, playing, onHover }: SceneProps & { scene: strin
   if (scene === 'flow-detail') return <FlowDetailScene onHover={onHover} />
   if (scene === 'calculation') return <CalculationScene onHover={onHover} />
   if (scene === 'match') return <MatchScene onHover={onHover} />
+  if (scene === 'gradient-derivation') return <GradientDerivationScene onHover={onHover} />
   if (scene === 'numbers') return <MNISTScene onHover={onHover} />
   if (scene === 'confusable') return <SpecialistScene onHover={onHover} />
   if (scene === 'speech-results') return <SpeechScene onHover={onHover} />
@@ -119,6 +120,30 @@ function MatchScene({ onHover }: { onHover: (id: string) => void }) {
     <label className="kd-slider">T <b>{temperature}</b><input type="range" min="1" max="20" step="1" value={temperature} onChange={event => setTemperature(Number(event.target.value))} /></label>
     <div className="kd-match-grid"><div><span>Teacher probability</span>{p.map((v, i) => <i key={i} style={{ width: `${v * 100}%` }}>{v.toFixed(2)}</i>)}</div><div onMouseEnter={() => onHover('matching')}><span>Student probability</span>{q.map((v, i) => <i className={i === 0 ? 'student' : ''} key={i} style={{ width: `${v * 100}%` }}>{v.toFixed(2)}</i>)}</div></div>
     <div className="kd-logit-strip"><span>去均值 Teacher</span>{teacher.map((v, i) => <b key={i}>{(v - teacher.reduce((a, b) => a + b, 0) / teacher.length).toFixed(1)}</b>)}<em>≈</em><span>去均值 Student</span>{student.map((v, i) => <b key={i}>{(v - student.reduce((a, b) => a + b, 0) / student.length).toFixed(1)}</b>)}</div>
+  </div>
+}
+
+function GradientDerivationScene({ onHover }: { onHover: (id: string) => void }) {
+  const [temperature, setTemperature] = useState(5)
+  const student = [1.2, 0.4, -0.5, -1.1]
+  const teacher = [1.5, 0.1, -0.4, -1.2]
+  const q = softmax(student, temperature)
+  const p = softmax(teacher, temperature)
+  const i = 0
+  const exact = (q[i] - p[i]) / temperature
+  const approx = (student[i] - teacher[i]) / (student.length * temperature * temperature)
+  return <div className="kd-sandbox kd-gradient-derivation" onMouseLeave={() => onHover('')}>
+    <div className="kd-sandbox-title"><strong>§2.1 / EQUATIONS (2) → (3) → (4)</strong><span>高温近似可视化</span></div>
+    <label className="kd-slider">Temperature T <b>{temperature}</b><input type="range" min="1" max="20" step="1" value={temperature} onChange={event => setTemperature(Number(event.target.value))} /></label>
+    <div className="kd-derivation-chain">
+      <button type="button" onMouseEnter={() => onHover('gradient-eq2')}><span>式 (2) · 精确梯度</span><b>∂C/∂zᵢ = (qᵢ − pᵢ) / T</b><small>当前 i=0：{exact.toFixed(5)}</small></button>
+      <i>高温 T ≫ |z|, |v|</i>
+      <button type="button" onMouseEnter={() => onHover('high-temp-expansion')}><span>式 (3) · eˣ ≈ 1+x</span><b>qᵢ ≈ (1+zᵢ/T)/(N+Σzⱼ/T)</b><small>把 softmax 的指数展开到一阶</small></button>
+      <i>若 Σzⱼ = Σvⱼ = 0</i>
+      <button type="button" onMouseEnter={() => onHover('gradient-eq4')}><span>式 (4) · 去均值 logits</span><b>∂C/∂zᵢ ≈ (zᵢ − vᵢ)/(N T²)</b><small>当前近似：{approx.toFixed(5)}</small></button>
+    </div>
+    <div className="kd-derivation-legend"><button type="button" onMouseEnter={() => onHover('student-logit')}>zᵢ = Student logit</button><button type="button" onMouseEnter={() => onHover('teacher-logit')}>vᵢ = Teacher logit</button><button type="button" onMouseEnter={() => onHover('zero-mean-condition')}>Σ logits = 0</button><span>N = {student.length} 类</span></div>
+    <p className="kd-caption"><b>读法：</b>式 (2) 是训练时真正使用的精确梯度；式 (3) 用高温展开 softmax；式 (4) 只有在 Teacher 与 Student logits 分别去均值时成立。它说明高温蒸馏等价于匹配相对 logits，但中等温度往往更实用，因为极负 logits 可能包含噪声。</p>
   </div>
 }
 
