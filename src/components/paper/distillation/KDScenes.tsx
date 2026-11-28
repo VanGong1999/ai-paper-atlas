@@ -35,10 +35,15 @@ function TemperatureScene({ onHover }: { onHover: (id: string) => void }) {
 function FlowScene({ playing, onHover }: SceneProps) {
   const [mode, setMode] = useState<'hard' | 'soft' | 'mix'>('mix')
   return <div className="kd-sandbox kd-flow" onMouseLeave={() => onHover('')}>
-    <div className="kd-sandbox-title"><strong>TEACHER → STUDENT</strong><span>{playing ? '● knowledge flowing' : 'Ⅱ paused'}</span></div>
-    <div className="kd-flow-row"><div className="kd-model teacher" onMouseEnter={() => onHover('teacher')}><b>TEACHER</b><span>大模型 / Ensemble</span><em>soft targets</em></div><div className={`kd-particles ${playing ? 'playing' : ''}`}><i>输入 x</i><b>→</b><i>q<sub>T</sub></i><b>→</b></div><div className="kd-model student" onMouseEnter={() => onHover('student')}><b>STUDENT</b><span>小模型 / 部署</span><em>预测 ŷ</em></div></div>
+    <div className="kd-sandbox-title"><strong>FIG. 1 · TEACHER / STUDENT DISTILLATION FLOW</strong><span>{playing ? '● knowledge flowing' : 'Ⅱ paused'}</span></div>
+    <div className="kd-ref-diagram">
+      <button type="button" className="kd-ref-input" onMouseEnter={() => onHover('input')}>input<br /><b>x</b></button>
+      <div className="kd-ref-branch kd-ref-teacher"><div className="kd-ref-model" onMouseEnter={() => onHover('teacher')}><strong>Teacher model</strong><span>Layer 1 → Layer 2 → … → Layer m</span></div><button type="button" className="kd-ref-node" onMouseEnter={() => onHover('temperature')}>Softmax <b>(T = t)</b></button><button type="button" className="kd-ref-label" onMouseEnter={() => onHover('soft-targets')}>soft labels</button><span className="kd-ref-loss-tag">distillation loss</span></div>
+      <div className="kd-ref-branch kd-ref-student"><div className="kd-ref-model" onMouseEnter={() => onHover('student')}><strong>Student (distilled) model</strong><span>Layer 1 → Layer 2 → … → Layer n</span></div><button type="button" className="kd-ref-node" onMouseEnter={() => onHover('temperature')}>Softmax <b>(T = t)</b></button><button type="button" className="kd-ref-label" onMouseEnter={() => onHover('soft-predictions')}>soft predictions</button><button type="button" className="kd-ref-node hard-node" onMouseEnter={() => onHover('softmax')}>Softmax <b>(T = 1)</b></button><button type="button" className="kd-ref-label" onMouseEnter={() => onHover('hard-loss')}>hard prediction</button></div>
+      <button type="button" className="kd-ref-loss kd-ref-distill-loss" onMouseEnter={() => onHover('distillation-loss')}>Loss Fn<br /><small>distillation</small></button><button type="button" className="kd-ref-loss kd-ref-student-loss" onMouseEnter={() => onHover('student-loss')}>Loss Fn<br /><small>student</small></button><button type="button" className="kd-ref-ground" onMouseEnter={() => onHover('hard-targets')}>hard label y<br /><small>ground truth</small></button>
+    </div>
     <div className="kd-mode-switch">{(['hard', 'soft', 'mix'] as const).map(item => <button type="button" key={item} className={mode === item ? 'active' : ''} onClick={() => setMode(item)}>{item === 'hard' ? '仅 hard' : item === 'soft' ? '仅 soft' : 'soft + hard'}</button>)}</div>
-    <div className="kd-flow-loss"><span>真实标签 y</span><b>＋</b><span className={mode === 'hard' ? 'dim' : ''}>Teacher 分布 q<sub>T</sub></span><b>→</b><strong>{mode === 'hard' ? 'CE(y, q)' : mode === 'soft' ? 'T² · KL(p, q)' : 'α soft + (1−α) hard'}</strong></div>
+    <div className="kd-flow-loss"><span>当前训练模式</span><strong>{mode === 'hard' ? '只优化 student loss' : mode === 'soft' ? '只优化 distillation loss' : '两条 loss 加权合流'}</strong></div>
   </div>
 }
 
